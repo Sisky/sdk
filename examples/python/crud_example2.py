@@ -232,7 +232,7 @@ def worker(api, listener, executor, credentials):
     # Who am I.
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.getMyEmail()))
-    executor.do(api.getAccountDetails, ())
+    executor.do(api.get_account_details, ())
     logging.info('*** done: whoami ***')
 
     # Make a directory.
