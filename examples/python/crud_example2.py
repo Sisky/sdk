@@ -84,9 +84,9 @@ class AppListener(MegaListener):
 
         request_type = request.getType()
         if request_type == MegaRequest.TYPE_LOGIN:
-            api.fetchNodes()
+            api.fetch_nodes()
         elif request_type == MegaRequest.TYPE_FETCH_NODES:
-            self.root_node = api.getRootNode()
+            self.root_node = api.get_root_node()
         elif request_type == MegaRequest.TYPE_ACCOUNT_DETAILS:
             account_details = request.getMegaAccountDetails()
             logging.info('Account details received')
@@ -231,24 +231,24 @@ def worker(api, listener, executor, credentials):
 
     # Who am I.
     logging.info('*** start: whoami ***')
-    logging.info('My email: {}'.format(api.getMyEmail()))
+    logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
     logging.info('*** done: whoami ***')
 
     # Make a directory.
     logging.info('*** start: mkdir ***')
     print '###', cwd.getName()
-    check = api.getNodeByPath('sandbox', cwd)
+    check = api.get_node_by_path('sandbox', cwd)
     if check == None:
-        executor.do(api.createFolder, ('sandbox', cwd))
+        executor.do(api.create_folder, ('sandbox', cwd))
     else:
         logging.info('Path already exists: {}'
-                     .format(api.getNodePath(check)))
+                     .format(api.get_node_path(check)))
     logging.info('*** done: mkdir ***')
 
     # Now go and play in the sandbox.
     logging.info('*** start: cd ***')
-    node = api.getNodeByPath('sandbox', cwd)
+    node = api.get_node_by_path('sandbox', cwd)
     if node == None:
         logging.warn('No such file or directory: sandbox')
     if node.getType() == MegaNode.TYPE_FOLDER:
@@ -259,14 +259,14 @@ def worker(api, listener, executor, credentials):
 
     # Upload a file (create).
     logging.info('*** start: upload ***')
-    executor.do(api.startUpload, ('README.md', cwd))
+    executor.do(api.start_upload, ('README.md', cwd))
     logging.info('*** done: upload ***')
 
     # Download a file (read).
     logging.info('*** start: download ***')
-    node = api.getNodeByPath('README.md', cwd)
+    node = api.get_node_by_path('README.md', cwd)
     if node != None:
-        executor.do(api.startDownload, (node, 'README_returned.md'))
+        executor.do(api.start_download, (node, 'README_returned.md'))
     else:
         logging.warn('Node not found: {}'.format('README.md'))
     logging.info('*** done: download ***')
@@ -275,8 +275,8 @@ def worker(api, listener, executor, credentials):
     # Note: A new upload won't overwrite, but create a new node with same
     #       name!
     logging.info('*** start: update ***')
-    old_node = api.getNodeByPath('README.md', cwd)
-    executor.do(api.startUpload, ('README.md', cwd))
+    old_node = api.get_node_by_path('README.md', cwd)
+    executor.do(api.start_upload, ('README.md', cwd))
     if old_node != None:
         # Remove the old node with the same name.
         executor.do(api.remove, (old_node,))
@@ -286,7 +286,7 @@ def worker(api, listener, executor, credentials):
 
     # Delete a file.
     logging.info('*** start: delete ***')
-    node = api.getNodeByPath('README.md', cwd)
+    node = api.get_node_by_path('README.md', cwd)
     if node != None:
         executor.do(api.remove, (node,))
     else:
@@ -318,7 +318,7 @@ def main():
     executor = AsyncExecutor()
     api = MegaApi(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
-    api.addListener(listener)
+    api.add_listener(listener)
 
     # Run the operations.
     start_time = time.time()
