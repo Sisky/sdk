@@ -27,7 +27,7 @@ import threading
 import json
 import getpass
 
-from mega import (MegaApi, MegaListener, MegaError, MegaRequest, MegaNode)
+from mega import (MegaApi, MegaWrap, MegaListener, MegaError, MegaRequest, MegaNode)
 
 # Mega SDK application key.
 # Generate one for free here: https://mega.nz/#sdk
@@ -233,6 +233,13 @@ def worker(api, listener, executor, credentials):
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
+    number = []
+    if api.get_contacts() > 1:
+        print 'There are contacts'
+    elif api.get_contacts() == 0:
+        print 'There are no contacts'
+    for num in number:
+        print num
     logging.info('*** done: whoami ***')
 
     # Make a directory.
@@ -316,13 +323,14 @@ def main():
     
     # Create the required Mega API objects.
     executor = AsyncExecutor()
-    api = MegaApi(APP_KEY, None, None, 'Python CRUD example')
+    #api = MegaApi(APP_KEY, None, None, 'Python CRUD example')
+    wrapApi = MegaWrap(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
-    api.add_listener(listener)
+    wrapApi.add_listener(listener)
 
     # Run the operations.
     start_time = time.time()
-    worker(api, listener, executor, credentials)
+    worker(wrapApi, listener, executor, credentials)
     logging.info('Total time taken: {} s'.format(time.time() - start_time))
 
 
@@ -334,3 +342,5 @@ if __name__ == '__main__':
 
     # Do the work.
     main()
+    
+

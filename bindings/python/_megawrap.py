@@ -1,4 +1,19 @@
 from mega import *
+
+class MegaWrap(MegaApi):
+    def __init__(self, appKey, processor, basePath, userAgent):
+        super(MegaWrap, self).__init__(appKey, processor, basePath, userAgent)
+        
+    def get_contacts(self):
+        def user_list_to_array(self, userList):
+            if userList is None:
+                return None
+            result = []
+            for i in userList.size():
+                result.append(userList.get(i).copy())
+            return result
+        return user_list_to_array
+    
 #MegaGfxProcessor.read_bitmap = MegaGfxProcessor.readBitmap
 #MegaGfxProcessor.get_width = MegaGfxProcessor.getWidth
 #MegaGfxProcessor.get_height = MegaGfxProcessor.getHeight
@@ -191,7 +206,7 @@ MegaApi.set_avatar = MegaApi.setAvatar
 MegaApi.set_user_attribute = MegaApi.setUserAttribute
 MegaApi.export_node = MegaApi.exportNode
 MegaApi.disable_export = MegaApi.disableExport
-MegaApi.fetch_nodes = MegaApi.fetchNodes
+MegaApi.fetch_nodes = MegaApi.fetchNodes    
 MegaApi.get_account_details = MegaApi.getAccountDetails
 MegaApi.get_extended_account_details = MegaApi.getExtendedAccountDetails
 MegaApi.get_pricing = MegaApi.getPricing
@@ -672,4 +687,18 @@ del MegaApi.loadBalancing
 #del MegaPricing.getDescription
 #del MegaPricing.getIosID
 #del MegaPricing.getAndroidID
-            
+
+
+    
+    
+#class DelegateMegaGlobalListener(MegaGlobalListener):
+
+#    def __init__(self, MegaApi megaApi, MegaGlobalListener listener):
+ #       self.megaApi = megaApi
+  #      self.listener = listener
+        
+   # def get_user_listener(self):
+    #    return listener
+        
+
+                    
