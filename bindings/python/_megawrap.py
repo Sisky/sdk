@@ -3,16 +3,18 @@ from mega import *
 class MegaWrap(MegaApi):
     def __init__(self, appKey, processor, basePath, userAgent):
         super(MegaWrap, self).__init__(appKey, processor, basePath, userAgent)
-        
+               
     def get_contacts(self):
-        def user_list_to_array(self, userList):
-            if userList is None:
+        def user_list_to_array(self): 
+            if super(MegaWrap, self).getContacts() is None:
                 return None
             result = []
-            for i in userList.size():
-                result.append(userList.get(i).copy())
+            for user in super(MegaWrap, self).getContacts():
+                result.append(super(MegaWrap, self).get(user).copy())
             return result
         return user_list_to_array
+   
+        
     
 #MegaGfxProcessor.read_bitmap = MegaGfxProcessor.readBitmap
 #MegaGfxProcessor.get_width = MegaGfxProcessor.getWidth
@@ -262,7 +264,7 @@ MegaApi.get_node_path = MegaApi.getNodePath
 MegaApi.get_node_by_path = MegaApi.getNodeByPath
 MegaApi.get_node_by_handle = MegaApi.getNodeByHandle
 MegaApi.get_contact_request_by_handle = MegaApi.getContactRequestByHandle
-MegaApi.get_contacts = MegaApi.getContacts
+#MegaApi.get_contacts = MegaApi.getContacts
 MegaApi.get_contact = MegaApi.getContact
 MegaApi.get_in_shares = MegaApi.getInShares
 MegaApi.is_shared = MegaApi.isShared
@@ -599,7 +601,7 @@ del MegaApi.getNodePath
 del MegaApi.getNodeByPath
 del MegaApi.getNodeByHandle
 del MegaApi.getContactRequestByHandle
-del MegaApi.getContacts
+#del MegaApi.getContacts
 del MegaApi.getContact
 del MegaApi.getInShares
 del MegaApi.isShared
