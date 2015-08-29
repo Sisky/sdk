@@ -1,4 +1,5 @@
 from mega import *
+from copy import copy
 
 class MegaWrap(MegaApi):
     def __init__(self, appKey, processor, basePath, userAgent):
@@ -9,8 +10,8 @@ class MegaWrap(MegaApi):
             if super(MegaWrap, self).getContacts() is None:
                 return None
             result = []
-            for user in super(MegaWrap, self).getContacts():
-                result.append(super(MegaWrap, self).get(user).copy())
+            for user in xrange(super(MegaWrap, self).getContacts().size()):
+                result.append(copy(super(MegaWrap, self).getContacts().get(user)))
             return result
         return user_list_to_array
    

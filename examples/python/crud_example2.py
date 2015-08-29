@@ -233,13 +233,15 @@ def worker(api, listener, executor, credentials):
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
-    logging.info('My contacts are: {}'.format(api.get_contacts()))
     contacts = api.get_contacts()
-    if len(contacts(api)) > 0:
-        for contact in contacts:
-            print str(contact)
-    else:
-        print 'There are no contacts'
+    print len(contacts(api))
+    print id(contacts(api)[1])
+    
+    #if len(contacts(api)) > 0:
+        #for contact in contacts(api):
+         #   print contact.getEmail()
+    #else:
+     #   print 'There are no contacts'
     logging.info('*** done: whoami ***')
 
     # Make a directory.
