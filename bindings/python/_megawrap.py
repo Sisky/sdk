@@ -14,6 +14,26 @@ class MegaWrap(MegaApi):
                 result.append(copy(super(MegaWrap, self).getContacts().get(user)))
             return result
         return user_list_to_array
+        
+    def get_in_shares(self, user):
+        def node_list_to_array(self):
+            if super(MegaWrap, self).getInShares(user) is None:
+                return None
+            result = []
+            for node in xrange(super(MegaWrap, self).getInShares(user).size()):
+                result.append(copy(super(MegaWrap, self).getInShares(user).get(node)))
+            return result
+        return node_list_to_array
+        
+    def get_children(self, parent, order):
+        def node_list_to_array(self):
+            if super(MegaWrap, self).getChildren(parent, order) is None:
+                return None
+            result = []
+            for node in xrange(super(MegaWrap, self).getChildren(parent, order).size()):
+                result.append(copy(super(MegaWrap, self).getChildren(parent, order).get(node)))
+            return result
+        return node_list_to_array
    
         
     
@@ -257,7 +277,7 @@ MegaApi.update_stats = MegaApi. updateStats
 MegaApi.get_num_children = MegaApi.getNumChildren
 MegaApi.get_num_child_files = MegaApi.getNumChildFiles
 MegaApi.get_num_child_folders = MegaApi.getNumChildFolders
-MegaApi.get_children = MegaApi.getChildren
+#MegaApi.get_children = MegaApi.getChildren
 MegaApi.get_index = MegaApi.getIndex
 MegaApi.get_child_node = MegaApi.getChildNode
 MegaApi.get_parent_node = MegaApi.getParentNode
@@ -267,7 +287,7 @@ MegaApi.get_node_by_handle = MegaApi.getNodeByHandle
 MegaApi.get_contact_request_by_handle = MegaApi.getContactRequestByHandle
 #MegaApi.get_contacts = MegaApi.getContacts
 MegaApi.get_contact = MegaApi.getContact
-MegaApi.get_in_shares = MegaApi.getInShares
+#MegaApi.get_in_shares = MegaApi.getInShares
 MegaApi.is_shared = MegaApi.isShared
 MegaApi.get_out_shares = MegaApi.getOutShares
 MegaApi.get_pending_out_shares = MegaApi.getPendingOutShares
@@ -594,7 +614,7 @@ del MegaApi. updateStats
 del MegaApi.getNumChildren
 del MegaApi.getNumChildFiles
 del MegaApi.getNumChildFolders
-del MegaApi.getChildren
+#del MegaApi.getChildren
 del MegaApi.getIndex
 del MegaApi.getChildNode
 del MegaApi.getParentNode
@@ -604,7 +624,7 @@ del MegaApi.getNodeByHandle
 del MegaApi.getContactRequestByHandle
 #del MegaApi.getContacts
 del MegaApi.getContact
-del MegaApi.getInShares
+#del MegaApi.getInShares
 del MegaApi.isShared
 del MegaApi.getOutShares
 del MegaApi.getPendingOutShares

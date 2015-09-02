@@ -234,12 +234,13 @@ def worker(api, listener, executor, credentials):
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
     contacts = api.get_contacts()
+    #result = api.get_in_shares()
+    #print len(result(api))
     print len(contacts(api))
-    print id(contacts(api)[1])
     
-    #if len(contacts(api)) > 0:
-        #for contact in contacts(api):
-         #   print contact.getEmail()
+    if len(contacts(api)) > 0:
+        for contact in contacts(api):
+            print contact
     #else:
      #   print 'There are no contacts'
     logging.info('*** done: whoami ***')
