@@ -1149,4 +1149,406 @@ This is a time consuming operation (specially for low-end mobile devices). Since
     def create_preview(self, *args):
     	'''need clarification''' 
         return mega.MegaApi.createPreview(self.api, *args)
+#MegaGfxProcessor.read_bitmap = MegaGfxProcessor.readBitmap
+#MegaGfxProcessor.get_width = MegaGfxProcessor.getWidth
+#MegaGfxProcessor.get_height = MegaGfxProcessor.getHeight
+#MegaGfxProcessor.get_bitmap_data_size = MegaGfxProcessor.getBitmapDataSize
+#MegaGfxProcessor.get_bitmap_data = MegaGfxProcessor.getBitmapData 
+#MegaGfxProcessor.free_bitmap = MegaGfxProcessor.freeBitmap
+
+#MegaProxy.set_proxy_type = MegaProxy.setProxyType
+#MegaProxy.set_proxy_url = MegaProxy.setProxyURL
+#MegaProxy.set_credentials = MegaProxy.setCredentials
+#MegaProxy.get_proxy_type = MegaProxy.getProxyType
+#MegaProxy.get_proxy_url = MegaProxy.getProxyURL
+#MegaProxy.credentials_needed = MegaProxy.credentialsNeeded
+#MegaProxy.get_username = MegaProxy.getUsername
+#MegaProxy.get_password = MegaProxy.getPassword
+
+#MegaNode.get_type = MegaNode.getType
+#MegaNode.get_name = MegaNode.getName
+#MegaNode.get_base64_handle = MegaNode.getBase64Handle
+#MegaNode.get_size = MegaNode.getSize
+#MegaNode.get_creation_time = MegaNode.getCreationTime
+#MegaNode.get_modification_time = MegaNode.getModificationTime
+#MegaNode.get_handle = MegaNode.getHandle
+#MegaNode.get_parent_handle = MegaNode.getParentHandle
+#MegaNode.get_base64_key = MegaNode.getBase64Key
+#MegaNode.get_tag = MegaNode.getTag
+#MegaNode.is_file = MegaNode.isFile
+#MegaNode.is_folder = MegaNode.isFolder
+#MegaNode.is_removed = MegaNode.isRemoved
+#MegaNode.has_changed = MegaNode.hasChanged
+#MegaNode.get_changes = MegaNode.getChanges
+#MegaNode.has_thumbnail = MegaNode.hasThumbnail
+#MegaNode.has_preview = MegaNode.hasPreview
+#MegaNode.is_public = MegaNode.isPublic
+
+#MegaUser.get_email = MegaUser.getEmail
+#MegaUser.get_visibility = MegaUser.getVisibility
+#MegaUser.get_timestamp = MegaUser.getTimesamp
+
+#MegaShare.get_user = MegaShare.getUser
+#MegaShare.get_node_handle = MegaShare.getNodeHandle
+#MegaShare.get_access = MegaShare.getAccess
+#MegaShare.get_timestamp = MegaShare.getTimestamp
+
+#MegaRequest.get_type = MegaRequest.getType
+#MegaRequest.get_request_string = MegaRequest.getRequestString
+#MegaRequest.to_string = MegaRequest.toString
+#MegaRequest.get_node_handle = MegaRequest.getNodeHandle
+#MegaRequest.get_link = MegaRequest.getLink
+#MegaRequest.get_parent_handle = MegaRequest.getParentHandle
+#MegaRequest.get_session_key = MegaRequest.getSessionKey
+#MegaRequest.get_name = MegaRequest.getName
+#MegaRequest.get_email = MegaRequest.getEmail
+#MegaRequest.get_password = MegaRequest.getPassword
+#MegaRequest.get_new_password = MegaRequest.getNewPassword
+#MegaRequest.get_private_key = MegaRequest.getPrivateKey
+#MegaRequest.get_access = MegaRequest.getAccess
+#MegaRequest.get_file = MegaRequest.getFile
+#MegaRequest.get_num_retry = MegaRequest.getNumRetry
+#MegaRequest.get_public_node = MegaRequest.getPublicNode
+#MegaRequest.get_param_type = MegaRequest.getParamType
+#MegaRequest.get_text = MegaRequest.getText
+#MegaRequest.get_number = MegaRequest.getNumber
+#MegaRequest.get_flag = MegaRequest.getFlag
+#MegaRequest.get_transferred_bytes = MegaRequest.getTransferredBytes
+#MegaRequest.get_total_bytes = MegaRequest.getTotalBytes
+#MegaRequest.get_mega_account_details = MegaRequest.getMegaAccountDetails
+#MegaRequest.get_pricing = MegaRequest.getPricing
+#MegaRequest.get_transfer_tag = MegaRequest.getTransferTag
+#MegaRequest.get_num_details = MegaRequest.getNumDetails
+
+#MegaTransfer.get_type = MegaTransfer.getType
+#MegaTransfer.get_transfer_string = MegaTransfer.getTransferString
+#MegaTransfer.to_string = MegaTransfer.toString
+#MegaTransfer.get_start_time = MegaTransfer.getStartTime
+#MegaTransfer.get_transferred_bytes = MegaTransfer.getTransferredBytes
+#MegaTransfer.get_total_bytes = MegaTransfer.getTotalBytes
+#MegaTransfer.get_path = MegaTransfer.getPath
+#MegaTransfer.get_parent_handle = MegaTransfer.getParentHandle
+#MegaTransfer.get_node_handle = MegaTransfer.getNodeHandle
+#MegaTransfer.get_parent_path = MegaTransfer.getParentPath
+#MegaTransfer.get_start_pos = MegaTransfer.getStartPos
+#MegaTransfer.get_end_pos = MegaTransfer.getEndPos
+#MegaTransfer.get_file_name = MegaTransfer.getFileName
+#MegaTransfer.get_num_retry = MegaTransfer.getNumRetry
+#MegaTransfer.get_max_retries = MegaTransfer.getMaxRetries
+#MegaTransfer.get_tag = MegaTransfer.getTag
+#MegaTransfer.get_speed = MegaTransfer.getSpeed
+#MegaTransfer.get_#delta_size = MegaTransfer.get#deltaSize
+#MegaTransfer.get_update_time = MegaTransfer.getUpdateTime
+#MegaTransfer.get_public_mega_node = MegaTransfer.getPublicMegaNode
+#MegaTransfer.is_sync_transfer = MegaTransfer.isSyncTransfer
+#MegaTransfer.is_streaming_transfer = MegaTransfer.isStreamingTransfer
+#MegaTransfer.get_last_bytes = MegaTransfer.getLastBytes
+
+#MegaContactRequest.get_handle = MegaContactRequest.getHandle
+#MegaContactRequest.get_source_email = MegaContactRequest.getSourceEmail
+#MegaContactRequest.get_source_message = MegaContactRequest.getSourceMessage
+#MegaContactRequest.get_target_email = MegaContactRequest.getTargetEmail
+#MegaContactRequest.get_creation_time = MegaContactRequest.getCreationTime
+#MegaContactRequest.get_modification_time = MegaContactRequest.getModificationTime
+#MegaContactRequest.get_status = MegaContactRequest.getStatus
+#MegaContactRequest.is_outgoing = MegaContactRequest.isOutgoing
+
+#MegaError.get_error_code = MegaError.getErrorCode
+#MegaError.to_string = MegaError.toString
+
+#MegaTreeProcessor.process_mega_node = MegaTreeProcessor.processMegaNode
+
+#MegaRequestListener.on_request_start = MegaRequestListener.onRequestStart
+#MegaRequestListener.on_request_finish = MegaRequestListener.onRequestFinish
+#MegaRequestListener.on_request_update = MegaRequestListener.onRequestUpdate
+#MegaRequestListener.on_request_temporary_error = MegaRequestListener.onRequestTemporaryError
+
+#MegaTransferListener.on_transfer_start = MegaTransferListener.onTransferStart
+#MegaTransferListener.on_transfer_finish = MegaTransferListener.onTransferFinish
+#MegaTransferListener.on_transfer_update = MegaTransferListener.onTransferUpdate
+#MegaTransferListener.on_transfer_temporary_error = MegaTransferListener.onTransferTemporaryError
+#MegaTransferListener.on_transfer_data = MegaTransferListener.onTransferData
+
+#MegaGlobalListener.on_users_update = MegaGlobalListener.onUsersUpdate
+#MegaGlobalListener.on_nodes_update = MegaGlobalListener.onNodesUpdate
+#MegaGlobalListener.on_account_update = MegaGlobalListener.onAccountUpdate
+#MegaGlobalListener.on_contact_requests_update = MegaGlobalListener.onContactRequestsUpdate
+#MegaGlobalListener.on_reload_needed = MegaGlobalListener.onReloadNeeded
+
+#MegaListener.on_request_start = MegaListener.onRequestStart
+#MegaListener.on_request_finish = MegaListener.onRequestFinish
+#MegaListener.on_request_update = MegaListener.onRequestUpdate
+#MegaListener.on_request_temporary_error = MegaListener.onRequestTemporaryError
+#MegaListener.on_transfer_start = MegaListener.onTransferStart
+#MegaListener.on_transfer_finish = MegaListener.onTransferFinish
+#MegaListener.on_transfer_update = MegaListener.onTransferUpdate
+#MegaListener.on_transfer_temporary_error = MegaListener.onTransferTemporaryError
+#MegaListener.on_users_update = MegaListener.onUsersUpdate
+#MegaListener.on_nodes_update = MegaListener.onNodesUpdate
+#MegaListener.on_account_update = MegaListener.onAccountUpdate
+#MegaListener.on_contact_requests_update = MegaListener.onContactRequestsUpdate
+#MegaListener.on_reload_needed = MegaListener.onReloadNeeded
+#MegaAccountBalance.get_amount = MegaAccountBalance.getAmount
+#MegaAccountBalance.get_currency = MegaAccountBalance.getCurrency
+
+#MegaAccountSession.get_creation_timestamp = MegaAccountSession.getCreationTimestamp
+#MegaAccountSession.get_most_recent_usage = MegaAccountSession.getMostRecentUsage
+#MegaAccountSession.get_user_agent = MegaAccountSession.getUserAgent
+#MegaAccountSession.get_ip = MegaAccountSession.getIP
+#MegaAccountSession.get_country = MegaAccountSession.getCountry
+#MegaAccountSession.is_current = MegaAccountSession.isCurrent
+#MegaAccountSession.is_alive = MegaAccountSession.isAlive
+#MegaAccountSession.get_handle = MegaAccountSession.getHandle
+
+#MegaAccountPurchase.get_timestamp = MegaAccountPurchase.getTimestamp
+#MegaAccountPurchase.get_handle = MegaAccountPurchase.getHandle
+#MegaAccountPurchase.get_currency = MegaAccountPurchase.getCurrency
+#MegaAccountPurchase.get_amount = MegaAccountPurchase.getAmount
+#MegaAccountPurchase.get_method = MegaAccountPurchase.getMethod
+
+#MegaAccountTransaction.get_timestamp = MegaAccountTransaction.getTimestamp
+#MegaAccountTransaction.get_handle = MegaAccountTransaction.getHandle
+#MegaAccountTransaction.get_currency = MegaAccountTransaction.getCurrency
+#MegaAccountTransaction.get_amount = MegaAccountTransaction.getAmount
+
+#MegaAccountDetails.get_pro_level = MegaAccountDetails.getProLevel
+#MegaAccountDetails.get_pro_expiration = MegaAccountDetails.getProExpiration
+#MegaAccountDetails.get_subscription_status = MegaAccountDetails.getSubscriptionStatus
+#MegaAccountDetails.get_subscription_renew_time = MegaAccountDetails.getSubscriptionRenewTime
+#MegaAccountDetails.get_subscription_method = MegaAccountDetails.getSubscriptionMethod
+#MegaAccountDetails.get_subscription_cycle = MegaAccountDetails.getSubscriptionCycle
+#MegaAccountDetails.get_storage_max = MegaAccountDetails.getStorageMax
+#MegaAccountDetails.get_transfer_max = MegaAccountDetails.getTransferMax
+#MegaAccountDetails.get_transfer_own_used = MegaAccountDetails.getTransferOwnUsed
+#MegaAccountDetails.get_num_usage_items = MegaAccountDetails.getNumUsageItems
+#MegaAccountDetails.get_storage_used = MegaAccountDetails.getStorageUsed
+#MegaAccountDetails.get_num_files = MegaAccountDetails.getNumFiles
+#MegaAccountDetails.get_num_folders = MegaAccountDetails.getNumFolders
+#MegaAccountDetails.get_num_balances = MegaAccountDetails.getNumBalances
+#MegaAccountDetails.get_balance = MegaAccountDetails.getBalance
+#MegaAccountDetails.get_num_sessions = MegaAccountDetails.getNumSessions
+#MegaAccountDetails.get_session = MegaAccountDetails.getSession
+#MegaAccountDetails.get_num_purchases = MegaAccountDetails.getNumPurchases
+#MegaAccountDetails.get_purchase = MegaAccountDetails.getPurchase
+#MegaAccountDetails.get_num_transactions = MegaAccountDetails.getNumTransactions
+#MegaAccountDetails.get_transaction = MegaAccountDetails.getTransaction
+
+#MegaPricing.get_num_products = MegaPricing.getNumProducts
+#MegaPricing.get_handle = MegaPricing.getHandle
+#MegaPricing.get_pro_level = MegaPricing.getProLevel
+#MegaPricing.get_gb_storage = MegaPricing.getGBStorage
+#MegaPricing.get_gb_transfer = MegaPricing.getGBTransfer
+#MegaPricing.get_months = MegaPricing.getMonths
+#MegaPricing.get_amount = MegaPricing.getAmount
+#MegaPricing.get_currency = MegaPricing.getCurrency
+#MegaPricing.get_description = MegaPricing.getDescription
+#MegaPricing.get_ios_id = MegaPricing.getIosID
+#MegaPricing.get_android_id = MegaPricing.getAndroidID
+
+#del MegaGfxProcessor.readBitmap
+#del MegaGfxProcessor.getWidth
+#del MegaGfxProcessor.getHeight
+#del MegaGfxProcessor.getBitmapDataSize
+#del MegaGfxProcessor.getBitmapData
+#del MegaGfxProcessor.freeBitmap 
+
+#del MegaProxy.setProxyType
+#del MegaProxy.setProxyURL
+#del MegaProxy.setCredentials
+#del MegaProxy.getProxyType
+#del MegaProxy.getProxyURL
+#del MegaProxy.credentialsNeeded
+#del MegaProxy.getUsername
+#del MegaProxy.getPassword
+
+#del MegaNode.getType
+#del MegaNode.getName
+#del MegaNode.getBase64Handle
+#del MegaNode.getSize
+#del MegaNode.getCreationTime
+#del MegaNode.getModificationTime
+#del MegaNode.getHandle
+#del MegaNode.getParentHandle
+#del MegaNode.getBase64Key
+#del MegaNode.getTag
+#del MegaNode.isFile
+#del MegaNode.isFolder
+#del MegaNode.isRemoved
+#del MegaNode.hasChanged
+#del MegaNode.getChanges
+#del MegaNode.hasThumbnail
+#del MegaNode.hasPreview
+#del MegaNode.isPublic
+
+#del MegaUser.getEmail
+#del MegaUser.getVisibility
+#del MegaUser.getTimesamp
+
+#del MegaShare.getUser
+#del MegaShare.getNodeHandle
+#del MegaShare.getAccess
+#del MegaShare.getTimestamp
+
+#del MegaRequest.getType
+#del MegaRequest.getRequestString
+#del MegaRequest.toString
+#del MegaRequest.getNodeHandle
+#del MegaRequest.getLink
+#del MegaRequest.getParentHandle
+#del MegaRequest.getSessionKey
+#del MegaRequest.getName
+#del MegaRequest.getEmail
+#del MegaRequest.getPassword
+#del MegaRequest.getNewPassword
+#del MegaRequest.getPrivateKey
+#del MegaRequest.getAccess
+#del MegaRequest.getFile
+#del MegaRequest.getNumRetry
+#del MegaRequest.getPublicNode
+#del MegaRequest.getParamType
+#del MegaRequest.getText
+#del MegaRequest.getNumber
+#del MegaRequest.getFlag
+#del MegaRequest.getTransferredBytes
+#del MegaRequest.getTotalBytes
+#del MegaRequest.getMegaAccountDetails
+#del MegaRequest.getPricing
+#del MegaRequest.getTransferTag
+#del MegaRequest.getNumDetails
+
+#del MegaTransfer.getType
+#del MegaTransfer.getTransferString
+#del MegaTransfer.toString
+#del MegaTransfer.getStartTime
+#del MegaTransfer.getTransferredBytes
+#del MegaTransfer.getTotalBytes
+#del MegaTransfer.getPath
+#del MegaTransfer.getParentHandle
+#del MegaTransfer.getNodeHandle
+#del MegaTransfer.getParentPath
+#del MegaTransfer.getStartPos
+#del MegaTransfer.getEndPos
+#del MegaTransfer.getFileName
+#del MegaTransfer.getNumRetry
+#del MegaTransfer.getMaxRetries
+#del MegaTransfer.getTag
+#del MegaTransfer.getSpeed
+#del MegaTransfer.get#deltaSize
+#del MegaTransfer.getUpdateTime
+#del MegaTransfer.getPublicMegaNode
+#del MegaTransfer.isSyncTransfer
+#del MegaTransfer.isStreamingTransfer
+#del MegaTransfer.getLastBytes
+
+#del MegaContactRequest.getHandle
+#del MegaContactRequest.getSourceEmail
+#del MegaContactRequest.getSourceMessage
+#del MegaContactRequest.getTargetEmail
+#del MegaContactRequest.getCreationTime
+#del MegaContactRequest.getModificationTime
+#del MegaContactRequest.getStatus
+#del MegaContactRequest.isOutgoing
+
+#del MegaError.getErrorCode
+#del MegaError.toString
+
+#del MegaTreeProcessor.processMegaNode
+
+#del MegaRequestListener.onRequestStart
+#del MegaRequestListener.onRequestFinish
+#del MegaRequestListener.onRequestUpdate
+#del MegaRequestListener.onRequestTemporaryError
+
+#del MegaTransferListener.onTransferStart
+#del MegaTransferListener.onTransferFinish
+#del MegaTransferListener.onTransferUpdate
+#del MegaTransferListener.onTransferTemporaryError
+#del MegaTransferListener.onTransferData
+
+#del MegaGlobalListener.onUsersUpdate
+#del MegaGlobalListener.onNodesUpdate
+#del MegaGlobalListener.onAccountUpdate
+#del MegaGlobalListener.onContactRequestsUpdate
+#del MegaGlobalListener.onReloadNeeded
+
+#del MegaListener.onRequestStart
+#del MegaListener.onRequestFinish
+#del MegaListener.onRequestUpdate
+#del MegaListener.onRequestTemporaryError
+#del MegaListener.onTransferStart
+#del MegaListener.onTransferFinish
+#del MegaListener.onTransferUpdate
+#del MegaListener.onTransferTemporaryError
+#del MegaListener.onUsersUpdate
+#del MegaListener.onNodesUpdate
+#del MegaListener.onAccountUpdate
+#del MegaListener.onContactRequestsUpdate
+#del MegaListener.onReloadNeeded
+#del MegaAccountBalance.getAmount
+#del MegaAccountBalance.getCurrency
+
+#del MegaAccountSession.getCreationTimestamp
+#del MegaAccountSession.getMostRecentUsage
+#del MegaAccountSession.getUserAgent
+#del MegaAccountSession.getIP
+#del MegaAccountSession.getCountry
+#del MegaAccountSession.isCurrent
+#del MegaAccountSession.isAlive
+#del MegaAccountSession.getHandle
+
+#del MegaAccountPurchase.getTimestamp
+#del MegaAccountPurchase.getHandle
+#del MegaAccountPurchase.getCurrency
+#del MegaAccountPurchase.getAmount
+#del MegaAccountPurchase.getMethod
+
+#del MegaAccountTransaction.getTimestamp
+#del MegaAccountTransaction.getHandle
+#del MegaAccountTransaction.getCurrency
+#del MegaAccountTransaction.getAmount
+
+#del MegaAccountDetails.getProLevel
+#del MegaAccountDetails.getProExpiration
+#del MegaAccountDetails.getSubscriptionStatus
+#del MegaAccountDetails.getSubscriptionRenewTime
+#del MegaAccountDetails.getSubscriptionMethod
+#del MegaAccountDetails.getSubscriptionCycle
+#del MegaAccountDetails.getStorageMax
+#del MegaAccountDetails.getTransferMax
+#del MegaAccountDetails.getTransferOwnUsed
+#del MegaAccountDetails.getNumUsageItems
+#del MegaAccountDetails.getStorageUsed
+#del MegaAccountDetails.getNumFiles
+#del MegaAccountDetails.getNumFolders
+#del MegaAccountDetails.getNumBalances
+#del MegaAccountDetails.getBalance
+#del MegaAccountDetails.getNumSessions
+#del MegaAccountDetails.getSession
+#del MegaAccountDetails.getNumPurchases
+#del MegaAccountDetails.getPurchase
+#del MegaAccountDetails.getNumTransactions
+#del MegaAccountDetails.getTransaction
+
+#del MegaPricing.getNumProducts
+#del MegaPricing.getHandle
+#del MegaPricing.getProLevel
+#del MegaPricing.getGBStorage
+#del MegaPricing.getGBTransfer
+#del MegaPricing.getMonths
+#del MegaPricing.getAmount
+#del MegaPricing.getCurrency
+#del MegaPricing.getDescription
+#del MegaPricing.getIosID
+#del MegaPricing.getAndroidID
+
+
     
+    
+#class DelegateMegaGlobalListener(MegaGlobalListener):
+
+#    def __init__(self, MegaApi megaApi, MegaGlobalListener listener):
+ #       self.megaApi = megaApi
+  #      self.listener = listener
+        
+   # def get_user_listener(self):
+    #    return listener  

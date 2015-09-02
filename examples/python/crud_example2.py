@@ -233,16 +233,14 @@ def worker(api, listener, executor, credentials):
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
-    contacts = api.get_contacts()
-    #result = api.get_in_shares()
-    #print len(result(api))
-    print len(contacts(api))
+    contacts = api.get_contacts() #get the list of contacts
+    print len(contacts(api)) #print length of list
     
     if len(contacts(api)) > 0:
         for contact in contacts(api):
-            print contact
-    #else:
-     #   print 'There are no contacts'
+            print contact # prints object and its address
+            # The commented out line below results in segmentation fault
+            #print contact.getEmail() 
     logging.info('*** done: whoami ***')
 
     # Make a directory.
