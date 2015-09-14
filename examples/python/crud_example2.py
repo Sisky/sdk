@@ -234,10 +234,10 @@ def worker(api, listener, executor, credentials):
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
     contacts = api.get_contacts() #get the list of contacts
-    print len(contacts(api)) #print length of list
+    print len(contacts) #print length of list
     
-    if len(contacts(api)) > 0:
-        for contact in contacts(api):
+    if len(contacts) > 0:
+        for contact in contacts:
             print contact # prints object and its address
             # The commented out line below results in segmentation fault
             #print contact.getEmail() 

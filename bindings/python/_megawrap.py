@@ -4,40 +4,42 @@ from copy import copy
 class MegaWrap(MegaApi):
     def __init__(self, appKey, processor, basePath, userAgent):
         super(MegaWrap, self).__init__(appKey, processor, basePath, userAgent)
-               
-    def get_contacts(self):
-        def user_list_to_array(self): 
-            if super(MegaWrap, self).getContacts() is None:
-                return None
-            result = []
-            for user in xrange(super(MegaWrap, self).getContacts().size()):
-                result.append(copy(super(MegaWrap, self).getContacts().get(user)))
-            return result
-        return user_list_to_array
-        
-    def get_in_shares(self, user):
-        def node_list_to_array(self):
-            if super(MegaWrap, self).getInShares(user) is None:
-                return None
-            result = []
-            for node in xrange(super(MegaWrap, self).getInShares(user).size()):
-                result.append(copy(super(MegaWrap, self).getInShares(user).get(node)))
-            return result
-        return node_list_to_array
-        
-    def get_children(self, parent, order):
-        def node_list_to_array(self):
-            if super(MegaWrap, self).getChildren(parent, order) is None:
-                return None
-            result = []
-            for node in xrange(super(MegaWrap, self).getChildren(parent, order).size()):
-                result.append(copy(super(MegaWrap, self).getChildren(parent, order).get(node)))
-            return result
-        return node_list_to_array
-   
-        
-    
 
+    def contact_list_to_array(self):
+        temp = super(MegaWrap, self).getContacts()
+        if temp is None:
+            return None
+        result = []
+        for user in xrange(super(MegaWrap, self).getContacts().size()):
+            result.append(copy(super(MegaWrap, self).getContacts().get(user)))
+        return result
+
+    def in_shares_to_array(self):
+        temp = super(MegaWrap, self).getInShares(user)
+        if temp is None:
+            return None
+        result = []
+        for share in xrange(super(MegaWrap, self).getInShares(user).size()):
+            result.append(copy(super(MegaWrap, self).getInShares(user).get(share)))
+        return result
+
+    def children_to_array(self, parent, order):
+        temp = super(MegaWrap, self).getChildren(parent, order)
+        if temp is None:
+            return None
+        result = []
+        for child in xrange(super(MegaWrap, self).getChildren(parent, order).size()):
+            result.append(copy(super(MegaWrap, self).getChildren(parent, order).get(child)))
+        return result
+
+    def get_contacts(self):
+        return self.contact_list_to_array()
+
+    def get_in_shares(self, user):
+        return self.in_shares_to_array(user)
+
+    def get_children(self, parent, order):
+        return self.children_to_array(parent, order)
 
 MegaApi.add_listener = MegaApi.addListener
 MegaApi.add_request_listener = MegaApi.addRequestListener
@@ -68,7 +70,7 @@ MegaApi.query_signup_link = MegaApi.querySignupLink
 MegaApi.confirm_account = MegaApi.confirmAccount
 MegaApi.fast_confirm_account = MegaApi.fastConfirmAccount
 MegaApi.set_proxy_settings = MegaApi.setProxySettings
-MegaApi.get_auto_proxy_settings = MegaApi.getAutoProxySettings 
+MegaApi.get_auto_proxy_settings = MegaApi.getAutoProxySettings
 MegaApi.is_logged_in = MegaApi.isLoggedIn
 MegaApi.get_my_email = MegaApi.getMyEmail
 MegaApi.get_my_user_handle = MegaApi.getMyUserHandle
@@ -91,7 +93,7 @@ MegaApi.set_avatar = MegaApi.setAvatar
 MegaApi.set_user_attribute = MegaApi.setUserAttribute
 MegaApi.export_node = MegaApi.exportNode
 MegaApi.disable_export = MegaApi.disableExport
-MegaApi.fetch_nodes = MegaApi.fetchNodes    
+MegaApi.fetch_nodes = MegaApi.fetchNodes
 MegaApi.get_account_details = MegaApi.getAccountDetails
 MegaApi.get_extended_account_details = MegaApi.getExtendedAccountDetails
 MegaApi.get_pricing = MegaApi.getPricing
@@ -118,7 +120,7 @@ MegaApi.cancel_transfer = MegaApi.cancelTransfer
 MegaApi.cancel_transfer_by_tag = MegaApi.cancelTransferByTag
 MegaApi.cancel_transfers = MegaApi.cancelTransfers
 MegaApi.pause_transfers = MegaApi.pauseTransfers
-MegaApi.are_transfers_paused = MegaApi.areTansfersPaused
+MegaApi.are_transfers_paused = MegaApi.areTransfersPaused
 MegaApi.set_upload_limit = MegaApi.setUploadLimit
 MegaApi.set_download_method = MegaApi.setDownloadMethod
 MegaApi.set_upload_method = MegaApi.setUploadMethod
@@ -211,7 +213,7 @@ del MegaApi.querySignupLink
 del MegaApi.confirmAccount
 del MegaApi.fastConfirmAccount
 del MegaApi.setProxySettings
-del MegaApi.getAutoProxySettings 
+del MegaApi.getAutoProxySettings
 del MegaApi.isLoggedIn
 del MegaApi.getMyUserHandle
 del MegaApi.createFolder
@@ -259,7 +261,7 @@ del MegaApi.cancelTransfer
 del MegaApi.cancelTransferByTag
 del MegaApi.cancelTransfers
 del MegaApi.pauseTransfers
-del MegaApi.areTansfersPaused
+del MegaApi.areTransfersPaused
 del MegaApi.setUploadLimit
 del MegaApi.setDownloadMethod
 del MegaApi.setUploadMethod
@@ -319,8 +321,3 @@ del MegaApi.unescapeFsIncompatible
 del MegaApi.createThumbnail
 del MegaApi.createPreview
 del MegaApi.loadBalancing
-
-
-        
-
-                    
