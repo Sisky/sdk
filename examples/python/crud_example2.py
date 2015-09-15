@@ -233,18 +233,24 @@ def worker(api, listener, executor, credentials):
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
-    contacts = api.get_contacts() #get the list of contacts
-    #print len(contacts) #print length of list
-
-    #if len(contacts) > 0:
-    for contact in contacts:
-        print contact # prints object and its address
-            # The commented out line below results in segmentation fault
-        print contact.getEmail()
-        print contact.getTimestamp()
-        print contact.getVisibility()
+    contacts = api.get_contacts()
+    shares = api.get_in_shares()
+    children = api.get_children(shares[0], 1)
+    for child in children:
+        print "The child node type is: " + str(child.getType())
+    if len(shares) > 0:
+        for share in shares:
+            print "The share object's and its address is: " + str(share)
+            print "The type of the object is: " + str(share.getType())
+    else:
+        print 'There are no shares'
+    if len(contacts) > 0:
+        for contact in contacts:
+            print "The user object and its address is: " + str(contact)
+            print "The contact's email is: " + str(contact.getEmail())
+            print "The contact's timestamp is " + str(contact.getTimestamp())
+            print "The contact's visibility code is: " + str(contact.getVisibility())
     logging.info('*** done: whoami ***')
-
     # Make a directory.
     logging.info('*** start: mkdir ***')
     print '###', cwd.getName()

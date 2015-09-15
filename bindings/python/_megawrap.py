@@ -14,7 +14,7 @@ class Mega_wrap(MegaApi):
         return result
 
     def in_shares_to_array(self):
-        share_list = super(Mega_wrap, self).getInShares(user)
+        share_list = super(Mega_wrap, self).getInShares()
         if share_list is None:
             return None
         result = []
@@ -34,8 +34,8 @@ class Mega_wrap(MegaApi):
     def get_contacts(self):
         return self.contact_list_to_array()
 
-    def get_in_shares(self, user):
-        return self.in_shares_to_array(user)
+    def get_in_shares(self):
+        return self.in_shares_to_array()
 
     def get_children(self, parent, order):
         return self.children_to_array(parent, order)
