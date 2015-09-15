@@ -1,35 +1,34 @@
 from mega import *
-from copy import copy
 
-class MegaWrap(MegaApi):
+class Mega_wrap(MegaApi):
     def __init__(self, appKey, processor, basePath, userAgent):
-        super(MegaWrap, self).__init__(appKey, processor, basePath, userAgent)
+        super(Mega_wrap, self).__init__(appKey, processor, basePath, userAgent)
 
     def contact_list_to_array(self):
-        temp = super(MegaWrap, self).getContacts()
-        if temp is None:
+        user_list = super(Mega_wrap, self).getContacts()
+        if user_list is None:
             return None
         result = []
-        for user in xrange(super(MegaWrap, self).getContacts().size()):
-            result.append(copy(super(MegaWrap, self).getContacts().get(user)))
+        for user in range(user_list.size()):
+            result.append(user_list.get(user).copy())
         return result
 
     def in_shares_to_array(self):
-        temp = super(MegaWrap, self).getInShares(user)
-        if temp is None:
+        share_list = super(Mega_wrap, self).getInShares(user)
+        if share_list is None:
             return None
         result = []
-        for share in xrange(super(MegaWrap, self).getInShares(user).size()):
-            result.append(copy(super(MegaWrap, self).getInShares(user).get(share)))
+        for share in range(share_list.size()):
+            result.append(share_list.get(share).copy())
         return result
 
     def children_to_array(self, parent, order):
-        temp = super(MegaWrap, self).getChildren(parent, order)
-        if temp is None:
+        child_list = super(Mega_wrap, self).getChildren(parent, order)
+        if child_list is None:
             return None
         result = []
-        for child in xrange(super(MegaWrap, self).getChildren(parent, order).size()):
-            result.append(copy(super(MegaWrap, self).getChildren(parent, order).get(child)))
+        for child in range(child_list.size()):
+            result.append(child_list.get(child).copy())
         return result
 
     def get_contacts(self):
@@ -40,6 +39,9 @@ class MegaWrap(MegaApi):
 
     def get_children(self, parent, order):
         return self.children_to_array(parent, order)
+
+
+
 
 MegaApi.add_listener = MegaApi.addListener
 MegaApi.add_request_listener = MegaApi.addRequestListener

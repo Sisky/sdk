@@ -27,7 +27,7 @@ import threading
 import json
 import getpass
 
-from mega import (MegaApi, MegaWrap, MegaListener, MegaError, MegaRequest, MegaNode)
+from mega import (MegaApi, Mega_wrap, MegaListener, MegaError, MegaRequest, MegaNode)
 
 # Mega SDK application key.
 # Generate one for free here: https://mega.nz/#sdk
@@ -43,7 +43,7 @@ class AppListener(MegaListener):
     from the asyncrhonous API. Only a certain number of usefuul
     callbacks are implemented.
     """
-    
+
     # Inhibit sending an event on callbacks from these requests.
     _NO_EVENT_ON = (MegaRequest.TYPE_LOGIN,
                     MegaRequest.TYPE_FETCH_NODES)
@@ -189,7 +189,7 @@ class AsyncExecutor(object):
     This executor is "simple", it is not suitable for overlapping executions,
     but only for a sequential chaining of API calls.
     """
-    
+
     def __init__(self):
         """
         Constructor that creates an event used for notification from the
@@ -234,13 +234,15 @@ def worker(api, listener, executor, credentials):
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
     contacts = api.get_contacts() #get the list of contacts
-    print len(contacts) #print length of list
-    
-    if len(contacts) > 0:
-        for contact in contacts:
-            print contact # prints object and its address
+    #print len(contacts) #print length of list
+
+    #if len(contacts) > 0:
+    for contact in contacts:
+        print contact # prints object and its address
             # The commented out line below results in segmentation fault
-            #print contact.getEmail() 
+        print contact.getEmail()
+        print contact.getTimestamp()
+        print contact.getVisibility()
     logging.info('*** done: whoami ***')
 
     # Make a directory.
@@ -321,11 +323,11 @@ def main():
     else:
         credentials['user'] = raw_input('User: ')
         credentials['password'] = getpass.getpass()
-    
+
     # Create the required Mega API objects.
     executor = AsyncExecutor()
     #api = MegaApi(APP_KEY, None, None, 'Python CRUD example')
-    wrapApi = MegaWrap(APP_KEY, None, None, 'Python CRUD example')
+    wrapApi = Mega_wrap(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
     wrapApi.add_listener(listener)
 
@@ -343,5 +345,3 @@ if __name__ == '__main__':
 
     # Do the work.
     main()
-    
-
