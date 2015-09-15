@@ -234,8 +234,8 @@ def worker(api, listener, executor, credentials):
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
     contacts = api.get_contacts()
-    shares = api.get_in_shares()
-    children = api.get_children(shares[0], 1)
+    shares = api.get_in_shares(contacts[0])
+    children = api.get_children(api.get_node_by_path("sandbox", cwd), 1)
     for child in children:
         print "The child node type is: " + str(child.getType())
     if len(shares) > 0:
