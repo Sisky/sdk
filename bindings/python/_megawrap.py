@@ -1,11 +1,131 @@
 from mega import *
 
-class Mega_wrap(MegaApi):
-    def __init__(self, appKey, processor, basePath, userAgent):
-        super(Mega_wrap, self).__init__(appKey, processor, basePath, userAgent)
+class Mega_Api_Python(MegaApi):
 
-    def contact_list_to_array(self):
-        user_list = super(Mega_wrap, self).getContacts()
+    def __init__(self, appKey, processor, basePath, userAgent):
+        super(Mega_Api_Python, self).__init__(appKey, processor, basePath, userAgent)
+
+    # Api methods
+
+    def get_contacts(self):
+    	'''Get all contacts of this MEGA account.
+        You take the ownership of the returned value
+        :Returns List of MegaUser object with all contacts of this account
+        '''
+        return self.get_contact_list()
+
+    def get_in_shares(self, user):
+    	'''Get a list with all inbound sharings from one MegaUser.
+        You take the ownership of the returned value
+        :param user - MegaUser sharing folders with this account
+        :Returns List of MegaNode objects that this user is sharing with this account
+        '''
+        return self.get_in_shares_list(user)
+
+    def get_children(self, parent, order):
+    	'''Get all children of a MegaNode.
+        If the parent node doesn't exist or it isn't a folder, this function returns None
+        You take the ownership of the returned value
+        :param parent - parent node
+        :param order Order of the returned list. Valid values are:
+            MegaApi::ORDER_NONE = 0 Undefined order
+            MegaApi::ORDER_DEFAULT_ASC = 1 Folders first in alphabetical order, then files in the same order
+            MegaApi::ORDER_DEFAULT_DESC = 2 Files first in reverse alphabetical order, then folders in the same order
+            MegaApi::ORDER_SIZE_ASC = 3 Sort by size, ascending
+            MegaApi::ORDER_SIZE_DESC = 4 Sort by size, descending
+            MegaApi::ORDER_CREATION_ASC = 5 Sort by creation time in MEGA, ascending
+            MegaApi::ORDER_CREATION_DESC = 6 Sort by creation time in MEGA, descending
+            MegaApi::ORDER_MODIFICATION_ASC = 7 Sort by modification time of the original file, ascending
+            MegaApi::ORDER_MODIFICATION_DESC = 8 Sort by modification time of the original file, descending
+            MegaApi::ORDER_ALPHABETICAL_ASC = 9 Sort in alphabetical order, ascending
+            MegaApi::ORDER_ALPHABETICAL_DESC = 10 Sort in alphabetical order, descending
+        :Returns list of MegaNode object that are children of the given parent object
+        '''
+        return self.get_children_list(parent, order)
+
+    def get_out_shares(self, node):
+    	'''Get a list with the active outbound sharings for a MegaNode.
+        If the node doesn't exist in the account, this function returns an empty list.
+        You take the ownership of the returned value
+        :param node - MegaNode to check
+        :Returns List of MegaShare objects
+        '''
+        return self.get_node_out_share_list(node)
+
+    def get_all_out_shares(self):
+    	'''Get a list with the active outbound sharings for the current account.
+        If the node doesn't exist in the account, this function returns an empty list.
+        You take the ownership of the returned value
+        :Returns List of MegaShare objects
+        '''
+        return self.get_all_out_share_list()
+
+    def get_pending_out_shares(self, node):
+    	'''Get a list with the pending outbound sharings for a MegaNode.
+        If the node doesn't exist in the account, this function returns an empty list.
+        You take the ownership of the returned value
+        :param node - MegaNode to check
+        :Returns List of MegaShare objects
+        '''
+        return self.get_node_pending_out_share_list(node)
+
+    def get_all_pending_out_shares(self):
+    	'''Get a list with the pending outbound sharings for the current account.
+        If the node doesn't exist in the account, this function returns an empty list.
+        You take the ownership of the returned value
+        :Returns List of MegaShare objects
+        '''
+        return self.get_all_pending_out_share_list()
+
+    def get_incoming_contact_requests(self):
+        '''Get a list with all incoming contact requests
+        :Returns list of MegaContactRequest objects
+        '''
+        return self.get_incoming_contact_request_list()
+
+    def get_outgoing_contact_requests(self):
+        '''Get a list with all outgoing contact requests
+        :Returns list of MegaContactRequest objects
+        '''
+        return self.get_outgoing_contact_request_list()
+
+    def search(self, parent, searchString):
+    	'''Search nodes containing a search string in their name.
+		The search is case-insensitive.
+    	:param node	The parent node of the tree to explore
+    	:param searchString	Search string. The search is case-insensitive
+		:Returns list of nodes that contain the desired string in their name
+    	'''
+        return self.get_search_list(parent, searchString)
+
+    def search_recursively(self, parent, searchString, recursive):
+    	'''Search nodes containing a search string in their name.
+		The search is case-insensitive.
+    	:param node	The parent node of the tree to explore
+    	:param searchString	Search string. The search is case-insensitive
+    	:param recursive	True if you want to seach recursively in the node tree. False if you want to seach in the children of the node only
+		:Returns list of nodes that contain the desired string in their name
+    	'''
+        return self.get_search_list_recursively(parent, searchString, recursive)
+
+    def get_transfers(self):
+    	'''Get all active transfers.
+		You take the ownership of the returned value
+		:Returns list with all active downloads or uploads
+		'''
+        return self.get_list_of_transfers()
+
+    def get_transfers_based_on_type(self, type):
+    	'''Get all active transfers based on type.
+		You take the ownership of the returned value
+		:Returns list with all active downloads or uploads
+		'''
+        return self.get_list_of_transfers_based_on_type(type)
+
+    # Internal methods
+
+    def get_contact_list(self):
+        user_list = super(Mega_Api_Python, self).getContacts()
         if user_list is None:
             return None
         result = []
@@ -13,8 +133,8 @@ class Mega_wrap(MegaApi):
             result.append(user_list.get(user).copy())
         return result
 
-    def in_shares_to_array(self, user):
-        share_list = super(Mega_wrap, self).getInShares(user)
+    def get_in_shares_list(self, user):
+        share_list = super(Mega_Api_Python, self).getInShares(user)
         if share_list is None:
             return None
         result = []
@@ -22,8 +142,8 @@ class Mega_wrap(MegaApi):
             result.append(share_list.get(share).copy())
         return result
 
-    def children_to_array(self, parent, order):
-        child_list = super(Mega_wrap, self).getChildren(parent, order)
+    def get_children_list(self, parent, order):
+        child_list = super(Mega_Api_Python, self).getChildren(parent, order)
         if child_list is None:
             return None
         result = []
@@ -31,14 +151,99 @@ class Mega_wrap(MegaApi):
             result.append(child_list.get(child).copy())
         return result
 
-    def get_contacts(self):
-        return self.contact_list_to_array()
+    def get_node_out_share_list(self, node):
+        share_list = super(Mega_Api_Python, self).getOutShares(node)
+        if share_list is None:
+            return None
+        result = []
+        for share in range(share_list.size()):
+            result.append(share_list.get(share).copy())
+        return result
 
-    def get_in_shares(self, user):
-        return self.in_shares_to_array(user)
+    def get_all_out_share_list(self):
+        share_list = super(Mega_Api_Python, self).getOutShares()
+        if share_list is None:
+            return None
+        result = []
+        for share in range(share_list.size()):
+            result.append(share_list.get(share).copy())
+        return result
 
-    def get_children(self, parent, order):
-        return self.children_to_array(parent, order)
+    def get_node_pending_out_share_list(self, node):
+        share_list = super(Mega_Api_Python, self).getPendingOutShares(node)
+        if share_list is None:
+            return None
+        result = []
+        for share in range(share_list.size()):
+            result.append(share_list.get(share).copy())
+        return result
+
+    def get_all_pending_out_share_list(self):
+        share_list = super(Mega_Api_Python, self).getPendingOutShares()
+        if share_list is None:
+            return None
+        result = []
+        for share in range(share_list.size()):
+            result.append(share_list.get(share).copy())
+        return result
+
+    def get_incoming_contact_request_list(self):
+        contact_list = super(Mega_Api_Python, self).getIncomingContactRequests()
+        if contact_list is None:
+            return None
+        result = []
+        for contact in range(contact_list.size()):
+            result.append(contact_list.get(contact).copy())
+        return result
+
+    def get_outgoing_contact_request_list(self):
+        contact_list = super(Mega_Api_Python, self).getOutgoingContactRequests()
+        if contact_list is None:
+            return None
+        result = []
+        for contact in range(contact_list.size()):
+            result.append(contact_list.get(contact).copy())
+        return result
+
+    def get_search_list(self, parent, searchString):
+        search_list = super(Mega_Api_Python, self).search(parent, searchString)
+        if search_list is None:
+            return None
+        result = []
+        for node in range(search_list.size()):
+            result.append(search_list.get(node).copy())
+        return result
+
+    def get_search_list_recursively(self, parent, searchString, recursive):
+        search_list = super(Mega_Api_Python, self).search(parent, searchString, recursive)
+        if search_list is None:
+            return None
+        result = []
+        for node in range(search_list.size()):
+            result.append(search_list.get(node).copy())
+        return result
+
+    def get_list_of_transfers(self):
+        transfers_list = super(Mega_Api_Python, self).getTransfers()
+        if transfers_list is None:
+            return None
+        result = []
+        for transfer in range(transfers_list.size()):
+            result.append(transfers_list.get(transfer).copy())
+        return result
+
+    def get_list_of_transfers_based_on_type(self, type):
+        transfers_list = super(Mega_Api_Python, self).getTransfers(type)
+        if transfers_list is None:
+            return None
+        result = []
+        for transfer in range(transfers_list.size()):
+            result.append(transfers_list.get(transfer).copy())
+        return result
+
+
+
+
 
 
 
@@ -129,7 +334,7 @@ MegaApi.set_upload_method = MegaApi.setUploadMethod
 MegaApi.get_download_method = MegaApi.getDownloadMethod
 MegaApi.get_upload_method = MegaApi.getUploadMethod
 MegaApi.get_transfer_by_tag = MegaApi.getTransferByTag
-MegaApi.get_transfers = MegaApi.getTransfers
+#MegaApi.get_transfers = MegaApi.getTransfers
 MegaApi.is_waiting = MegaApi.isWaiting
 MegaApi.get_num_pending_uploads = MegaApi.getNumPendingUploads
 MegaApi.get_num_pending_downloads = MegaApi.getNumPendingDownloads
@@ -155,10 +360,10 @@ MegaApi.get_contact_request_by_handle = MegaApi.getContactRequestByHandle
 MegaApi.get_contact = MegaApi.getContact
 #MegaApi.get_in_shares = MegaApi.getInShares
 MegaApi.is_shared = MegaApi.isShared
-MegaApi.get_out_shares = MegaApi.getOutShares
-MegaApi.get_pending_out_shares = MegaApi.getPendingOutShares
-MegaApi.get_incoming_contact_requests = MegaApi.getIncomingContactRequests
-MegaApi.get_outgoing_contact_requests = MegaApi.getOutgoingContactRequests
+#MegaApi.get_out_shares = MegaApi.getOutShares
+#MegaApi.get_pending_out_shares = MegaApi.getPendingOutShares
+#MegaApi.get_incoming_contact_requests = MegaApi.getIncomingContactRequests
+#MegaApi.get_outgoing_contact_requests = MegaApi.getOutgoingContactRequests
 MegaApi.get_access = MegaApi.getAccess
 MegaApi.get_size = MegaApi.getSize
 MegaApi.get_fingerprint = MegaApi.getFingerprint
@@ -270,7 +475,7 @@ del MegaApi.setUploadMethod
 del MegaApi.getDownloadMethod
 del MegaApi.getUploadMethod
 del MegaApi.getTransferByTag
-del MegaApi.getTransfers
+#del MegaApi.getTransfers
 del MegaApi.isWaiting
 del MegaApi.getNumPendingUploads
 del MegaApi.getNumPendingDownloads
@@ -296,10 +501,10 @@ del MegaApi.getContactRequestByHandle
 del MegaApi.getContact
 #del MegaApi.getInShares
 del MegaApi.isShared
-del MegaApi.getOutShares
-del MegaApi.getPendingOutShares
-del MegaApi.getIncomingContactRequests
-del MegaApi.getOutgoingContactRequests
+#del MegaApi.getOutShares
+#del MegaApi.getPendingOutShares
+#del MegaApi.getIncomingContactRequests
+#del MegaApi.getOutgoingContactRequests
 del MegaApi.getAccess
 del MegaApi.getSize
 del MegaApi.getFingerprint

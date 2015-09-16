@@ -27,7 +27,7 @@ import threading
 import json
 import getpass
 
-from mega import (MegaApi, Mega_wrap, MegaListener, MegaError, MegaRequest, MegaNode)
+from mega import (MegaApi, Mega_Api_Python, MegaListener, MegaError, MegaRequest, MegaNode)
 
 # Mega SDK application key.
 # Generate one for free here: https://mega.nz/#sdk
@@ -236,6 +236,27 @@ def worker(api, listener, executor, credentials):
     contacts = api.get_contacts()
     shares = api.get_in_shares(contacts[0])
     children = api.get_children(api.get_node_by_path("sandbox", cwd), 1)
+    search_list = api.search(api.get_node_by_path("Test", cwd), "AHCI")
+    recursive_search_list = api.search_recursively(api.get_node_by_path("Test, cwd"),"AHCI", True)
+    incoming_contacts = api.get_incoming_contact_requests()
+    outgoing_contacts = api.get_outgoing_contact_requests()
+    out_share_list = api.get_all_out_shares()
+    transfers_list = api.get_transfers_based_on_type(1)
+    if len(transfers_list) == 0:
+        print "There are no current transfers active"
+    else:
+        for transfer in transfers_list:
+            print "The current transfer is: " + str(transfers)
+    for item in out_share_list:
+        print "The outgoing share is: " + str(item)
+    for item in incoming_contacts:
+        print "The incoming contact is: " + str(item)
+    for item in outgoing_contacts:
+        print "The outgoing contact is: " + str(item)
+    for search_item in search_list:
+        print "The found item is: " + str(search_item.getType())
+    for item in recursive_search_list:
+        print "The recursively found item is: " + str(item.getType())
     for child in children:
         print "The child node type is: " + str(child.getType())
     if len(shares) > 0:
@@ -333,7 +354,7 @@ def main():
     # Create the required Mega API objects.
     executor = AsyncExecutor()
     #api = MegaApi(APP_KEY, None, None, 'Python CRUD example')
-    wrapApi = Mega_wrap(APP_KEY, None, None, 'Python CRUD example')
+    wrapApi = Mega_Api_Python(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
     wrapApi.add_listener(listener)
 
