@@ -3,14 +3,15 @@ import threading
 
 
 class Mega_Api_Python(MegaApi):
-    active_mega_listeners = []
-    active_global_mega_listeners = []
-    active_request_listeners = []
-    active_transfer_listeners = []
+
 
     def __init__(self, appKey, processor, basePath, userAgent):
         super(Mega_Api_Python, self).__init__(appKey, processor, basePath, userAgent)
-
+        self.active_mega_listeners = []
+        self.active_global_mega_listeners = []
+        self.active_request_listeners = []
+        self.active_transfer_listeners = []
+        self.listener = None
 
     # Api methods
 
@@ -20,13 +21,13 @@ class Mega_Api_Python(MegaApi):
         self.addListener(self.create_delegate_mega_listener(listener))
 
     def add_global_listener(self, listener):
-        self.addGlobalListener(create_delegate_mega_global_listener(listener))
+        self.addGlobalListener(self.create_delegate_mega_global_listener(listener))
 
     def add_request_listener(self, listener):
-        self.addRequestListener(create_delegate_request_listener(listener))
+        self.addRequestListener(self.create_delegate_request_listener(listener))
 
     def add_transfer_listener(self, listener):
-        self.addTransferListener(create_delegate_transfer_listener(listener))
+        self.addTransferListener(self.create_delegate_transfer_listener(listener))
 
     def remove_listener(self, listener):
         pass
@@ -161,23 +162,23 @@ class Mega_Api_Python(MegaApi):
 
     # Listener creation
 
-    def create_delegate_mega_listener(self):
-        delegate_listener = Delegate_Mega_Listener(self)
+    def create_delegate_mega_listener(self, listener):
+        delegate_listener = Delegate_Mega_Listener(listener)
         self.active_mega_listeners.append(delegate_listener)
         return delegate_listener
 
     def create_delegate_mega_global_listener(self):
-        delegate_global_listener = Delegate_Mega_Global_Listener(self)
+        delegate_global_listener = Delegate_Mega_Global_Listener(self, listener)
         self.active_global_mega_listeners.append(delegate_global_listener)
         return delegate_global_listener
 
-    def create_delegate_request_listener(self, single):
-        delegate_request_listener = Delegate_Mega_Request_Listener(self, single)
+    def create_delegate_request_listener(self, listener ,single):
+        delegate_request_listener = Delegate_Mega_Request_Listener(self, listener, single)
         self.active_request_listeners.append(delegate_request_listener)
         return delegate_request_listener
 
-    def create_delegate_transfer_listener(self, single):
-        delegate_transfer_listener = Delegate_Mega_Transfer_Listener(self, single)
+    def create_delegate_transfer_listener(self, listener, single):
+        delegate_transfer_listener = Delegate_Mega_Transfer_Listener(self, listener, single)
         self.active_transfer_listeners.append(delegate_transfer_listener)
         return delegate_transfer_listener
 
@@ -310,7 +311,7 @@ class Mega_Api_Python(MegaApi):
 class Delegate_Mega_Logger_Listener(MegaLogger):
 
     def __init__(self):
-        self.listener = listener
+        self.listener = None
 
     def log(self, time, log_level, source, message):
         if listener is not None:
@@ -319,9 +320,9 @@ class Delegate_Mega_Logger_Listener(MegaLogger):
 
 class Delegate_Mega_Request_Listener(MegaRequestListener):
 
-    def __init__(self, mega_api):
+    def __init__(self, mega_api, single_listener):
         self.mega_api = mega_api
-        self.listener = listener
+        self.listener = None
         self.single_listener = single_listener
         super(Delegate_Mega_Request_Listener, self).__init()
 
@@ -361,9 +362,9 @@ class Delegate_Mega_Request_Listener(MegaRequestListener):
 
 class Delegate_Mega_Transfer_Listener(MegaTransferListener):
 
-    def __init__(self, mega_api):
+    def __init__(self, mega_api, single_listener):
         self.mega_api = mega_api
-        self.listener = listener
+        self.listener = None
         self.single_listener = single_listener
 
     def get_user_listener(self):
@@ -409,7 +410,7 @@ class Delegate_Mega_Listener(MegaListener):
 
     def __init__(self, mega_api):
         self.mega_api = mega_api
-        self.listener = listener
+        self.listener = None
         super(Delegate_Mega_Listener, self).__init__()
 
     def get_listener(self):
@@ -494,9 +495,9 @@ class Delegate_Mega_Listener(MegaListener):
 
 class Delegate_Mega_Global_Listener(MegaGlobalListener):
 
-    def __init__(self, mega_api, listener):
+    def __init__(self, mega_api):
         self.mega_api = mega_api
-        self.listener = listener
+        self.listener = None
         super(Delegate_Mega_Global_Listener, self).__init()
 
 
