@@ -234,6 +234,7 @@ def worker(api, listener, executor, credentials):
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
     contacts = api.get_contacts()
+    print api.get_account_details(api.create_delegate_mega_listener())
     shares = api.get_in_shares(contacts[0])
     children = api.get_children(api.get_node_by_path("sandbox", cwd), 1)
     search_list = api.search(api.get_node_by_path("Test", cwd), "AHCI")
@@ -241,12 +242,6 @@ def worker(api, listener, executor, credentials):
     incoming_contacts = api.get_incoming_contact_requests()
     outgoing_contacts = api.get_outgoing_contact_requests()
     out_share_list = api.get_all_out_shares()
-    transfers_list = api.get_transfers_based_on_type(1)
-    if len(transfers_list) == 0:
-        print "There are no current transfers active"
-    else:
-        for transfer in transfers_list:
-            print "The current transfer is: " + str(transfers)
     for item in out_share_list:
         print "The outgoing share is: " + str(item)
     for item in incoming_contacts:
@@ -357,7 +352,6 @@ def main():
     wrapApi = Mega_Api_Python(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
     wrapApi.add_listener(listener)
-
     # Run the operations.
     start_time = time.time()
     worker(wrapApi, listener, executor, credentials)
