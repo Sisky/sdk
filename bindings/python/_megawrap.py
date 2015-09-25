@@ -17,17 +17,17 @@ class Mega_Api_Python(MegaApi):
 
     # Listener management
 
-    def add_listener(self, listener):
+    def add_listener_test(self, listener):
         self.addListener(self.create_delegate_mega_listener(listener))
 
     def add_global_listener(self, listener):
         self.addGlobalListener(self.create_delegate_mega_global_listener(listener))
 
     def add_request_listener(self, listener):
-        self.addRequestListener(self.create_delegate_request_listener(listener))
+        self.addRequestListener(self.create_delegate_request_listener(listener, False))
 
     def add_transfer_listener(self, listener):
-        self.addTransferListener(self.create_delegate_transfer_listener(listener))
+        self.addTransferListener(self.create_delegate_transfer_listener(listener, False))
 
     def remove_listener(self, listener):
         pass
@@ -48,7 +48,7 @@ class Mega_Api_Python(MegaApi):
         You take the ownership of the returned value
         :Returns List of MegaUser object with all contacts of this account
         '''
-        return self.get_contact_list()
+        return self.user_list_to_array(self.getContacts())
 
     def get_in_shares(self, user):
     	'''Get a list with all inbound sharings from one MegaUser.
@@ -56,7 +56,14 @@ class Mega_Api_Python(MegaApi):
         :param user - MegaUser sharing folders with this account
         :Returns List of MegaNode objects that this user is sharing with this account
         '''
-        return self.get_in_shares_list(user)
+        return self.node_list_to_array(self.getInShares(user))
+
+    def get_all_in_shares(self):
+    	'''Get a list with all inbound sharings.
+        You take the ownership of the returned value
+        :Returns List of MegaNode objects that this user is sharing with this account
+        '''
+        return self.node_list_to_array(self.getInShares())
 
     def get_children(self, parent, order):
     	'''Get all children of a MegaNode.
@@ -77,7 +84,7 @@ class Mega_Api_Python(MegaApi):
             MegaApi::ORDER_ALPHABETICAL_DESC = 10 Sort in alphabetical order, descending
         :Returns list of MegaNode object that are children of the given parent object
         '''
-        return self.get_children_list(parent, order)
+        return self.node_list_to_array(self.getChildren(parent, order))
 
     def get_out_shares(self, node):
     	'''Get a list with the active outbound sharings for a MegaNode.
@@ -86,7 +93,7 @@ class Mega_Api_Python(MegaApi):
         :param node - MegaNode to check
         :Returns List of MegaShare objects
         '''
-        return self.get_node_out_share_list(node)
+        return self.share_list_to_array(self.getOutShares(node))
 
     def get_all_out_shares(self):
     	'''Get a list with the active outbound sharings for the current account.
@@ -94,7 +101,7 @@ class Mega_Api_Python(MegaApi):
         You take the ownership of the returned value
         :Returns List of MegaShare objects
         '''
-        return self.get_all_out_share_list()
+        return self.share_list_to_array(self.getOutShares())
 
     def get_pending_out_shares(self, node):
     	'''Get a list with the pending outbound sharings for a MegaNode.
@@ -103,7 +110,7 @@ class Mega_Api_Python(MegaApi):
         :param node - MegaNode to check
         :Returns List of MegaShare objects
         '''
-        return self.get_node_pending_out_share_list(node)
+        return self.share_list_to_array(self.getPendingOutShares(node))
 
     def get_all_pending_out_shares(self):
     	'''Get a list with the pending outbound sharings for the current account.
@@ -111,30 +118,30 @@ class Mega_Api_Python(MegaApi):
         You take the ownership of the returned value
         :Returns List of MegaShare objects
         '''
-        return self.get_all_pending_out_share_list()
+        return self.share_list_to_array(self.getPendingOutShares())
 
     def get_incoming_contact_requests(self):
         '''Get a list with all incoming contact requests
         :Returns list of MegaContactRequest objects
         '''
-        return self.get_incoming_contact_request_list()
+        return self.contact_request_list_to_array(self.getIncomingContactRequests())
 
     def get_outgoing_contact_requests(self):
         '''Get a list with all outgoing contact requests
         :Returns list of MegaContactRequest objects
         '''
-        return self.get_outgoing_contact_request_list()
+        return self.contact_request_list_to_array(self.getOutgoingContactRequests())
 
-    def search(self, parent, searchString):
+    def search(self, parent, search_string):
     	'''Search nodes containing a search string in their name.
 		The search is case-insensitive.
     	:param node	The parent node of the tree to explore
     	:param searchString	Search string. The search is case-insensitive
 		:Returns list of nodes that contain the desired string in their name
     	'''
-        return self.get_search_list(parent, searchString)
+        return self.node_list_to_array(super(Mega_Api_Python, self).search(parent, search_string))
 
-    def search_recursively(self, parent, searchString, recursive):
+    def search_recursively(self, parent, search_string, recursive):
     	'''Search nodes containing a search string in their name.
 		The search is case-insensitive.
     	:param node	The parent node of the tree to explore
@@ -142,21 +149,21 @@ class Mega_Api_Python(MegaApi):
     	:param recursive	True if you want to seach recursively in the node tree. False if you want to seach in the children of the node only
 		:Returns list of nodes that contain the desired string in their name
     	'''
-        return self.get_search_list_recursively(parent, searchString, recursive)
+        return self.node_list_to_array(super(Mega_Api_Python, self).search(parent, search_string, recursive))
 
     def get_transfers(self):
     	'''Get all active transfers.
 		You take the ownership of the returned value
 		:Returns list with all active downloads or uploads
 		'''
-        return self.get_list_of_transfers()
+        return self.transfer_list_to_array(self.getTransfers())
 
     def get_transfers_based_on_type(self, type):
     	'''Get all active transfers based on type.
 		You take the ownership of the returned value
 		:Returns list with all active downloads or uploads
 		'''
-        return self.get_list_of_transfers_based_on_type(type)
+        return self.transfer_list_to_array(self.getTransfers(type))
 
     # Internal methods
 
@@ -167,7 +174,7 @@ class Mega_Api_Python(MegaApi):
         self.active_mega_listeners.append(delegate_listener)
         return delegate_listener
 
-    def create_delegate_mega_global_listener(self):
+    def create_delegate_mega_global_listener(self, listener):
         delegate_global_listener = Delegate_Mega_Global_Listener(self, listener)
         self.active_global_mega_listeners.append(delegate_global_listener)
         return delegate_global_listener
@@ -182,16 +189,15 @@ class Mega_Api_Python(MegaApi):
         self.active_transfer_listeners.append(delegate_transfer_listener)
         return delegate_transfer_listener
 
-    def private_free_request_listener(self, listener):
+    def free_request_listener(self, listener):
         self.active_transfer_listeners.remove(listener)
 
-    def private_free_transfer_listener(self, listener):
+    def free_transfer_listener(self, listener):
         self.active_transfer_listeners.remove(listener)
 
     # List management
 
-    def get_contact_list(self):
-        user_list = super(Mega_Api_Python, self).getContacts()
+    def user_list_to_array(self, user_list):
         if user_list is None:
             return None
         result = []
@@ -199,8 +205,23 @@ class Mega_Api_Python(MegaApi):
             result.append(user_list.get(user).copy())
         return result
 
-    def get_in_shares_list(self, user):
-        share_list = super(Mega_Api_Python, self).getInShares(user)
+    def transfer_list_to_array(self, transfer_list):
+        if transfer_list is None:
+            return None
+        result = []
+        for transfer in range(transfer_list.size()):
+            result.append(transfer_list.get(transfer).copy())
+        return result
+
+    def contact_request_list_to_array(self, request_list):
+        if request_list is None:
+            return None
+        result = []
+        for request in range(request_list.size()):
+            result.append(request_list.get(request).copy())
+        return result
+
+    def share_list_to_array(self, share_list):
         if share_list is None:
             return None
         result = []
@@ -208,103 +229,12 @@ class Mega_Api_Python(MegaApi):
             result.append(share_list.get(share).copy())
         return result
 
-    def get_children_list(self, parent, order):
-        child_list = super(Mega_Api_Python, self).getChildren(parent, order)
-        if child_list is None:
+    def node_list_to_array(self, node_list):
+        if node_list is None:
             return None
         result = []
-        for child in range(child_list.size()):
-            result.append(child_list.get(child).copy())
-        return result
-
-    def get_node_out_share_list(self, node):
-        share_list = super(Mega_Api_Python, self).getOutShares(node)
-        if share_list is None:
-            return None
-        result = []
-        for share in range(share_list.size()):
-            result.append(share_list.get(share).copy())
-        return result
-
-    def get_all_out_share_list(self):
-        share_list = super(Mega_Api_Python, self).getOutShares()
-        if share_list is None:
-            return None
-        result = []
-        for share in range(share_list.size()):
-            result.append(share_list.get(share).copy())
-        return result
-
-    def get_node_pending_out_share_list(self, node):
-        share_list = super(Mega_Api_Python, self).getPendingOutShares(node)
-        if share_list is None:
-            return None
-        result = []
-        for share in range(share_list.size()):
-            result.append(share_list.get(share).copy())
-        return result
-
-    def get_all_pending_out_share_list(self):
-        share_list = super(Mega_Api_Python, self).getPendingOutShares()
-        if share_list is None:
-            return None
-        result = []
-        for share in range(share_list.size()):
-            result.append(share_list.get(share).copy())
-        return result
-
-    def get_incoming_contact_request_list(self):
-        contact_list = super(Mega_Api_Python, self).getIncomingContactRequests()
-        if contact_list is None:
-            return None
-        result = []
-        for contact in range(contact_list.size()):
-            result.append(contact_list.get(contact).copy())
-        return result
-
-    def get_outgoing_contact_request_list(self):
-        contact_list = super(Mega_Api_Python, self).getOutgoingContactRequests()
-        if contact_list is None:
-            return None
-        result = []
-        for contact in range(contact_list.size()):
-            result.append(contact_list.get(contact).copy())
-        return result
-
-    def get_search_list(self, parent, searchString):
-        search_list = super(Mega_Api_Python, self).search(parent, searchString)
-        if search_list is None:
-            return None
-        result = []
-        for node in range(search_list.size()):
-            result.append(search_list.get(node).copy())
-        return result
-
-    def get_search_list_recursively(self, parent, searchString, recursive):
-        search_list = super(Mega_Api_Python, self).search(parent, searchString, recursive)
-        if search_list is None:
-            return None
-        result = []
-        for node in range(search_list.size()):
-            result.append(search_list.get(node).copy())
-        return result
-
-    def get_list_of_transfers(self):
-        transfers_list = super(Mega_Api_Python, self).getTransfers()
-        if transfers_list is None:
-            return None
-        result = []
-        for transfer in range(transfers_list.size()):
-            result.append(transfers_list.get(transfer).copy())
-        return result
-
-    def get_list_of_transfers_based_on_type(self, type):
-        transfers_list = super(Mega_Api_Python, self).getTransfers(type)
-        if transfers_list is None:
-            return None
-        result = []
-        for transfer in range(transfers_list.size()):
-            result.append(transfers_list.get(transfer).copy())
+        for node in range(node_list.size()):
+            result.append(node_list.get(node).copy())
         return result
 
 
@@ -342,15 +272,16 @@ class Delegate_Mega_Request_Listener(MegaRequestListener):
             t = threading.Thread(target = listener.onRequestFinish(mega_api, mega_request,
             mega_error))
             t.start()
-            #TODO
-        #if single_listener:
-            #mega_api.private_free_request_listener(self)
+
+        if single_listener:
+            mega_api.free_request_listener()
 
     def on_request_update(self, mega_api, request):
         if listener is not None:
             mega_request = request.copy()
             t = threading.Thread(target = listener.onRequestUpdate(mega_api, mega_request))
             t.start()
+
 
     def on_request_temporary_error(self, mega_api, request, error):
         if listener is not None:
@@ -359,6 +290,7 @@ class Delegate_Mega_Request_Listener(MegaRequestListener):
             t = threading.Thread(target = listener.onRequestTemporaryError(mega_api, mega_request,
             mega_error))
             t.start()
+
 
 class Delegate_Mega_Transfer_Listener(MegaTransferListener):
 
@@ -403,7 +335,7 @@ class Delegate_Mega_Transfer_Listener(MegaTransferListener):
         if listener is not None:
             mega_transfer = transfer.copy()
             return listener.onTransferData(mega_api, mega_transfer, buffer)
-        return False
+
 
 
 class Delegate_Mega_Listener(MegaListener):
@@ -422,6 +354,7 @@ class Delegate_Mega_Listener(MegaListener):
             t = threading.Thread(target = listener.onRequestStart(mega_api, mega_request))
             t.start()
 
+
     def on_request_finish(self, mega_api, request, error):
         if listener is not None:
             mega_request = request.copy()
@@ -429,6 +362,7 @@ class Delegate_Mega_Listener(MegaListener):
             t = threading.Thread(target = listener.onRequestFinish(mega_api, mega_request,
             mega_error))
             t.start()
+
 
     def on_request_temporary_error(self, mega_api, request, error):
         if listener is not None:
@@ -438,11 +372,13 @@ class Delegate_Mega_Listener(MegaListener):
             mega_error))
             t.start()
 
+
     def on_transfer_start(self, mega_api, transfer):
         if listener is not None:
             mega_transfer = transfer.copy()
             t = threading.Thread(target = listener.onTransferStart(mega_api, mega_transfer))
             t.start()
+
 
     def on_transfer_finish(self, mega_api, transfer, error):
         if listener is not None:
@@ -452,11 +388,13 @@ class Delegate_Mega_Listener(MegaListener):
             mega_error))
             t.start()
 
+
     def on_transfer_update(self, mega_api, transfer):
         if listener is not None:
             mega_transfer = transfer.copy()
             t = threading.Thread(target = listener.onTransferUpdate(mega_api, mega_transfer))
             t.start()
+
 
     def on_transfer_temporary_error(self, mega_api, transfer, error):
         if listener is not None:
@@ -467,30 +405,39 @@ class Delegate_Mega_Listener(MegaListener):
             t.start()
 
 
+
     def on_users_update(self, mega_api, user_list):
         if listener is not None:
-            updated_user_list =  mega_api.get_contact_list()
+            updated_user_list =  mega_api.user_list_to_array(user_list)
             t = threading.Thread(target = listener.onUsersUpdate(mega_api, updated_user_list))
             t.start()
 
-    def on_nodes_update(self, mega_api, node_list):
-        pass # TODO
 
-    def on_reload_needed(self, api):
+    def on_nodes_update(self, mega_api, node_list):
+        if listener is not None:
+            updated_node_list = mega_api.node_list_to_array(node_list)
+            t = threading.Thread(target = listener.onNodesUpdate(mega_api, updated_node_list))
+            t.start()
+
+
+    def on_reload_needed(self, mega_api):
         if listener is not None:
             t = threading.Thread(target = listener.onReloadNeeded(mega_api))
             t.start()
+
 
     def on_account_update(self, mega_api):
         if listener is not None:
             t = threading.Thread(target = listener.onAccountUpdate(mega_api))
             t.start()
 
+
     def on_contact_requests_update(self, mega_api, contact_request_list):
         if listener is not None:
-            contact_list = mega_api.get_incoming_contact_requests()
+            contact_list = mega_api.contact_request_list_to_array(contact_list)
             t = threading.Thread(target = listener.onContactRequestsUpdate(mega_api, contact_list))
             t.start()
+
 
 
 class Delegate_Mega_Global_Listener(MegaGlobalListener):
@@ -507,25 +454,33 @@ class Delegate_Mega_Global_Listener(MegaGlobalListener):
 
     def on_users_update(self, mega_api, user_list):
         if listener is not None:
-            updated_user_list =  mega_api.get_contact_list()
+            updated_user_list =  mega_api.user_list_to_array(user_list)
             t = threading.Thread(target = listener.onUsersUpdate(mega_api, updated_user_list))
             t.start()
-    def on_nodes_update(self, mega_api, node_list):
-        pass #TODO
 
-    def on_reload_needed(self, api):
+
+    def on_nodes_update(self, mega_api, node_list):
+        if listener is not None:
+            updated_node_list = mega_api.node_list_to_array(node_list)
+            t = threading.Thread(target = listener.onNodesUpdate(mega_api, updated_node_list))
+            t.start()
+
+
+    def on_reload_needed(self, mega_api):
         if listener is not None:
             t = threading.Thread(target = listener.onReloadNeeded(mega_api))
             t.start()
+
 
     def on_account_update(self, mega_api):
         if listener is not None:
             t = threading.Thread(target = listener.onAccountUpdate(mega_api))
             t.start()
 
+
     def on_contact_requests_update(self, mega_api, contact_request_list):
         if listener is not None:
-            contact_list = mega_api.get_incoming_contact_requests()
+            contact_list = mega_api.contact_request_list_to_array(contact_list)
             t = threading.Thread(target = listener.onContactRequestsUpdate(mega_api, contact_list))
             t.start()
 
@@ -536,7 +491,8 @@ class Delegate_Mega_Global_Listener(MegaGlobalListener):
 
 
 
-#MegaApi.add_listener = MegaApi.addListener
+
+MegaApi.add_listener = MegaApi.addListener
 #MegaApi.add_request_listener = MegaApi.addRequestListener
 #MegaApi.add_transfer_listener = MegaApi.addTransferListener
 #MegaApi.add_global_listener = MegaApi.addGlobalListener
@@ -677,7 +633,7 @@ MegaApi.create_preview = MegaApi.createPreview
 MegaApi.load_balancing = MegaApi.loadBalancing
 
 
-#del MegaApi.addListener
+del MegaApi.addListener
 #del MegaApi.addRequestListener
 #del MegaApi.addTransferListener
 #del MegaApi.addGlobalListener

@@ -234,7 +234,6 @@ def worker(api, listener, executor, credentials):
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
     contacts = api.get_contacts()
-    print api.get_account_details(api.create_delegate_mega_listener())
     shares = api.get_in_shares(contacts[0])
     children = api.get_children(api.get_node_by_path("sandbox", cwd), 1)
     search_list = api.search(api.get_node_by_path("Test", cwd), "AHCI")
