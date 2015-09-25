@@ -27,7 +27,7 @@ import threading
 import json
 import getpass
 
-from mega import (MegaApi, Mega_Api_Python, MegaListener, MegaError, MegaRequest, MegaNode)
+from mega import (MegaApi, Mega_Api_Python, Delegate_Mega_Listener, MegaListener, MegaError, MegaRequest, MegaNode)
 
 # Mega SDK application key.
 # Generate one for free here: https://mega.nz/#sdk
@@ -350,10 +350,12 @@ def main():
     #api = MegaApi(APP_KEY, None, None, 'Python CRUD example')
     wrapApi = Mega_Api_Python(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
-    wrapApi.add_listener(listener)
+    wrapApi.addListener(listener)
+    new_listener = wrapApi.add_listener_test(listener)
     # Run the operations.
     start_time = time.time()
     worker(wrapApi, listener, executor, credentials)
+    wrapApi.remove_listener(new_listener)
     logging.info('Total time taken: {} s'.format(time.time() - start_time))
 
 
