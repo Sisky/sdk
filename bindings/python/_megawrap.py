@@ -30,19 +30,18 @@ class Mega_Api_Python(MegaApi):
         self.active_global_mega_listeners = []
         self.active_request_listeners = []
         self.active_transfer_listeners = []
-        self.listener = None
         self.lock = threading.Lock()
 
     # API METHODS
 
     # Listener management
 
-    def add_listener_test(self, listener):
+    def add_listener_test(self):
         '''Register a listener to receive all events (requests, transfers, global, synchronization).
         You can use Mega_Api_Python.remove_listener() to stop receiving events.
         :param listener Listener that will receive all events (requests, transfers, global, synchronization).
         '''
-        self.addListener(self.create_delegate_mega_listener(listener))
+        self.addListener(self.create_delegate_mega_listener())
 
     def add_global_listener(self, listener):
         '''Register a listener to receive global events.
@@ -245,10 +244,10 @@ class Mega_Api_Python(MegaApi):
 
     # Listener creation
 
-    def create_delegate_mega_listener(self, listener):
-        if listener is None:
-            return None
-        delegate_listener = Delegate_Mega_Listener(self, listener)
+    def create_delegate_mega_listener(self):
+        #if listener is None:
+            #return None
+        delegate_listener = Delegate_Mega_Listener(self)
         self.lock.acquire()
         try:
             self.active_mega_listeners.append(delegate_listener)
@@ -307,6 +306,11 @@ class Mega_Api_Python(MegaApi):
     # List management
 
     def user_list_to_array(self, user_list):
+        '''This function is used to convert an SDK list of MegaUser objects which is not iterable
+        in Python to an iterable Python list which can then be properly used.
+        :param user_list List of MegaUser objects to convert
+        :Returns an iterable list of MegaUser objects
+        '''
         if user_list is None:
             return None
         result = []
@@ -315,6 +319,11 @@ class Mega_Api_Python(MegaApi):
         return result
 
     def transfer_list_to_array(self, transfer_list):
+        '''This function is used to convert an SDK list of MegaTransfer objects which is not iterable
+        in Python to an iterable Python list which can then be properly used.
+        :param transfer_list List of MegaTransfer objects to convert
+        :Returns an iterable list of MegaTransfer objects
+        '''
         if transfer_list is None:
             return None
         result = []
@@ -323,6 +332,11 @@ class Mega_Api_Python(MegaApi):
         return result
 
     def contact_request_list_to_array(self, request_list):
+        '''This function is used to convert an SDK list of MegaContactRequest objects which is not iterable
+        in Python to an iterable Python list which can then be properly used.
+        :param request_list List of MegaContactRequest objects to convert
+        :Returns an iterable list of MegaContactRequest objects
+        '''
         if request_list is None:
             return None
         result = []
@@ -331,6 +345,11 @@ class Mega_Api_Python(MegaApi):
         return result
 
     def share_list_to_array(self, share_list):
+        '''This function is used to convert an SDK list of MegaShare objects which is not iterable
+        in Python to an iterable Python list which can then be properly used.
+        :param share_list List of MegaShare objects to convert
+        :Returns an iterable list of MegaShare objects
+        '''
         if share_list is None:
             return None
         result = []
@@ -339,6 +358,11 @@ class Mega_Api_Python(MegaApi):
         return result
 
     def node_list_to_array(self, node_list):
+        '''This function is used to convert an SDK list of MegaNode objects which is not iterable
+        in Python to an iterable Python list which can then be properly used.
+        :param node_list List of MegaNode objects to convert
+        :Returns an iterable list of MegaNode objects
+        '''
         if node_list is None:
             return None
         result = []
@@ -410,7 +434,7 @@ class Delegate_Mega_Request_Listener(MegaRequestListener):
             t = threading.Thread(target = listener.onRequestStart(mega_api, mega_request))
             t.setDaemon(True)
             t.start()
-            t.join()
+
 
     def on_request_finish(self, mega_api, request, error):
         '''This function is called when a request has finished.
@@ -429,7 +453,7 @@ class Delegate_Mega_Request_Listener(MegaRequestListener):
             mega_error))
             t.setDaemon(True)
             t.start()
-            t.join()
+
         if single_listener:
             mega_api.free_request_listener()
 
@@ -446,7 +470,7 @@ class Delegate_Mega_Request_Listener(MegaRequestListener):
             t = threading.Thread(target = listener.onRequestUpdate(mega_api, mega_request))
             t.setDaemon(True)
             t.start()
-            t.join()
+
 
     def on_request_temporary_error(self, mega_api, request, error):
         '''This function is called when there is a temporary error processing a request.
@@ -466,7 +490,7 @@ class Delegate_Mega_Request_Listener(MegaRequestListener):
             mega_error))
             t.setDaemon(True)
             t.start()
-            t.join()
+
 
 class Delegate_Mega_Transfer_Listener(MegaTransferListener):
 
@@ -498,7 +522,7 @@ class Delegate_Mega_Transfer_Listener(MegaTransferListener):
             t = threading.Thread(target = listener.onTransferStart(mega_api, mega_transfer))
             t.setDaemon(True)
             t.start()
-            t.join()
+
 
     def on_transfer_finish(self, mega_api, transfer, error):
         '''This function is called when a transfer has finished.
@@ -517,7 +541,7 @@ class Delegate_Mega_Transfer_Listener(MegaTransferListener):
             mega_error))
             t.setDaemon(True)
             t.start()
-            t.join()
+
 
     def on_transfer_update(self, mega_api, transfer):
         '''This function is called to get details about the progress of a transfer.
@@ -531,7 +555,7 @@ class Delegate_Mega_Transfer_Listener(MegaTransferListener):
             t = threading.Thread(target = listener.onTransferUpdate(mega_api, mega_transfer))
             t.setDaemon(True)
             t.start()
-            t.join()
+
 
     def on_transfer_temporary_error(self, mega_api, transfer, error):
         '''This function is called when there is a temporary error processing a transfer.
@@ -550,7 +574,7 @@ class Delegate_Mega_Transfer_Listener(MegaTransferListener):
             mega_error))
             t.setDaemon(True)
             t.start()
-            t.join()
+
 
     def on_transfer_data(self, mega_api, transfer, buffer):
         '''This function is called to provide the last read bytes of streaming downloads.
@@ -574,9 +598,9 @@ class Delegate_Mega_Listener(MegaListener):
     '''Listener to receive and send events to the app
     '''
 
-    def __init__(self, mega_api, listener):
+    def __init__(self, mega_api):
         self.mega_api = mega_api
-        self.listener = listener
+        self.listener = MegaListener()
         super(Delegate_Mega_Listener, self).__init__()
 
     def get_listener(self):
@@ -591,12 +615,12 @@ class Delegate_Mega_Listener(MegaListener):
         :param mega_api API that started the request
         :param request Information about the request.
         '''
-        if listener is not None:
-            mega_request = request.copy()
-            t = threading.Thread(target = listener.onRequestStart(mega_api, mega_request))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        mega_request = request.copy()
+        t = threading.Thread(target = listener.onRequestStart(mega_api, mega_request))
+        t.setDaemon(True)
+        t.start()
+
 
 
     def on_request_finish(self, mega_api, request, error):
@@ -609,14 +633,14 @@ class Delegate_Mega_Listener(MegaListener):
         :param request Information about the request
         :param error Information about error.
         '''
-        if listener is not None:
-            mega_request = request.copy()
-            mega_error = error.copy()
-            t = threading.Thread(target = listener.onRequestFinish(mega_api, mega_request,
-            mega_error))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        mega_request = request.copy()
+        mega_error = error.copy()
+        t = threading.Thread(target = listener.onRequestFinish(mega_api, mega_request,
+        mega_error))
+        t.setDaemon(True)
+        t.start()
+
 
 
     def on_request_temporary_error(self, mega_api, request, error):
@@ -630,14 +654,14 @@ class Delegate_Mega_Listener(MegaListener):
         :param request Information about the request
         :param error Information about error.
         '''
-        if listener is not None:
-            mega_request = request.copy()
-            mega_error = error.copy()
-            t = threading.Thread(target = listener.onRequestTemporaryError(mega_api, mega_request,
-            mega_error))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        mega_request = request.copy()
+        mega_error = error.copy()
+        t = threading.Thread(target = listener.onRequestTemporaryError(mega_api, mega_request,
+        mega_error))
+        t.setDaemon(True)
+        t.start()
+
 
 
     def on_transfer_start(self, mega_api, transfer):
@@ -647,12 +671,12 @@ class Delegate_Mega_Listener(MegaListener):
         :param mega_api API that started the transfer
         :param transfer Information about the transfer.
         '''
-        if listener is not None:
-            mega_transfer = transfer.copy()
-            t = threading.Thread(target = listener.onTransferStart(mega_api, mega_transfer))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        mega_transfer = transfer.copy()
+        t = threading.Thread(target = listener.onTransferStart(mega_api, mega_transfer))
+        t.setDaemon(True)
+        t.start()
+
 
     def on_transfer_finish(self, mega_api, transfer, error):
         '''This function is called when a transfer has finished.
@@ -664,14 +688,14 @@ class Delegate_Mega_Listener(MegaListener):
         :param transfer Information about the transfer
         :param error Information about error.
         '''
-        if listener is not None:
-            mega_transfer = transfer.copy()
-            mega_error = error.copy()
-            t = threading.Thread(target = listener.onTransferFinish(mega_api, mega_transfer,
-            mega_error))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        mega_transfer = transfer.copy()
+        mega_error = error.copy()
+        t = threading.Thread(target = listener.onTransferFinish(mega_api, mega_transfer,
+        mega_error))
+        t.setDaemon(True)
+        t.start()
+
 
     def on_transfer_update(self, mega_api, transfer):
         '''This function is called to get details about the progress of a transfer.
@@ -680,12 +704,12 @@ class Delegate_Mega_Listener(MegaListener):
         :param mega_api API that started the transfer
         :param transfer Information about the transfer
         '''
-        if listener is not None:
-            mega_transfer = transfer.copy()
-            t = threading.Thread(target = listener.onTransferUpdate(mega_api, mega_transfer))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        mega_transfer = transfer.copy()
+        t = threading.Thread(target = listener.onTransferUpdate(mega_api, mega_transfer))
+        t.setDaemon(True)
+        t.start()
+
 
     def on_transfer_temporary_error(self, mega_api, transfer, error):
         '''This function is called when there is a temporary error processing a transfer.
@@ -697,14 +721,14 @@ class Delegate_Mega_Listener(MegaListener):
         :param rtransfer Information about the transfer
         :param error Information about error.
         '''
-        if listener is not None:
-            mega_transfer = transfer.copy()
-            mega_error = error.copy()
-            t = threading.Thread(target = listener.onTransferTemporaryError(mega_api, mega_transfer,
-            mega_error))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        mega_transfer = transfer.copy()
+        mega_error = error.copy()
+        t = threading.Thread(target = listener.onTransferTemporaryError(mega_api, mega_transfer,
+        mega_error))
+        t.setDaemon(True)
+        t.start()
+
 
     def on_users_update(self, mega_api, user_list):
         '''This function is called when there are new or updated contacts in the account.
@@ -715,12 +739,12 @@ class Delegate_Mega_Listener(MegaListener):
         :param mega_api API object connected to account.
         :param user_list List that contains the new or updated contacts.
         '''
-        if listener is not None:
-            updated_user_list =  mega_api.user_list_to_array(user_list)
-            t = threading.Thread(target = listener.onUsersUpdate(mega_api, updated_user_list))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        updated_user_list =  mega_api.user_list_to_array(user_list)
+        t = threading.Thread(target = listener.onUsersUpdate(mega_api, updated_user_list))
+        t.setDaemon(True)
+        t.start()
+
 
     def on_nodes_update(self, mega_api, node_list):
         '''This function is called when there are new or updated nodes in the account.
@@ -733,30 +757,30 @@ class Delegate_Mega_Listener(MegaListener):
         :param mega_api API object connected to account.
         :param node_list List that contains the new or updated nodes.
         '''
-        if listener is not None:
-            updated_node_list = mega_api.node_list_to_array(node_list)
-            t = threading.Thread(target = listener.onNodesUpdate(mega_api, updated_node_list))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        updated_node_list = mega_api.node_list_to_array(node_list)
+        t = threading.Thread(target = listener.onNodesUpdate(mega_api, updated_node_list))
+        t.setDaemon(True)
+        t.start()
+
 
     def on_reload_needed(self, mega_api):
         '''This function is called when an inconsistency is detected in the local cache.
         You should call Mega_Api_Python.fetch_nodes() when this callback is received.
         :param mega_api API object connected to account.
         '''
-        if listener is not None:
-            t = threading.Thread(target = listener.onReloadNeeded(mega_api))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        t = threading.Thread(target = listener.onReloadNeeded(mega_api))
+        t.setDaemon(True)
+        t.start()
+
 
     def on_account_update(self, mega_api):
-        if listener is not None:
-            t = threading.Thread(target = listener.onAccountUpdate(mega_api))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        t = threading.Thread(target = listener.onAccountUpdate(mega_api))
+        t.setDaemon(True)
+        t.start()
+
 
     def on_contact_requests_update(self, mega_api, contact_request_list):
         '''This function is called when there are new contact requests in the account.
@@ -765,12 +789,12 @@ class Delegate_Mega_Listener(MegaListener):
         :param mega_api API object connected to the account
         :param contact_request_list List that contains new contact requests
         '''
-        if listener is not None:
-            contact_list = mega_api.contact_request_list_to_array(contact_list)
-            t = threading.Thread(target = listener.onContactRequestsUpdate(mega_api, contact_list))
-            t.setDaemon(True)
-            t.start()
-            t.join()
+        #if listener is not None:
+        contact_list = mega_api.contact_request_list_to_array(contact_list)
+        t = threading.Thread(target = listener.onContactRequestsUpdate(mega_api, contact_list))
+        t.setDaemon(True)
+        t.start()
+
 
 
 class Delegate_Mega_Global_Listener(MegaGlobalListener):
@@ -802,7 +826,7 @@ class Delegate_Mega_Global_Listener(MegaGlobalListener):
             t = threading.Thread(target = listener.onUsersUpdate(mega_api, updated_user_list))
             t.setDaemon(True)
             t.start()
-            t.join()
+
 
     def on_nodes_update(self, mega_api, node_list):
         '''This function is called when there are new or updated nodes in the account.
@@ -820,7 +844,6 @@ class Delegate_Mega_Global_Listener(MegaGlobalListener):
             t = threading.Thread(target = listener.onNodesUpdate(mega_api, updated_node_list))
             t.setDaemon(True)
             t.start()
-            t.join()
 
     def on_reload_needed(self, mega_api):
         '''This function is called when an inconsistency is detected in the local cache.
@@ -831,14 +854,12 @@ class Delegate_Mega_Global_Listener(MegaGlobalListener):
             t = threading.Thread(target = listener.onReloadNeeded(mega_api))
             t.setDaemon(True)
             t.start()
-            t.join()
 
     def on_account_update(self, mega_api):
         if listener is not None:
             t = threading.Thread(target = listener.onAccountUpdate(mega_api))
             t.setDaemon(True)
             t.start()
-            t.join()
 
     def on_contact_requests_update(self, mega_api, contact_request_list):
         '''This function is called when there are new contact requests in the account.
@@ -852,23 +873,8 @@ class Delegate_Mega_Global_Listener(MegaGlobalListener):
             t = threading.Thread(target = listener.onContactRequestsUpdate(mega_api, contact_list))
             t.setDaemon(True)
             t.start()
-            t.join()
 
-
-
-
-
-
-
-
-#MegaApi.add_listener = MegaApi.addListener
-#MegaApi.add_request_listener = MegaApi.addRequestListener
-#MegaApi.add_transfer_listener = MegaApi.addTransferListener
-#MegaApi.add_global_listener = MegaApi.addGlobalListener
-#MegaApi.remove_listener = MegaApi.removeListener
-#MegaApi.remove_request_listener = MegaApi.removeRequestListener
-#MegaApi.remove_transfer_listener = MegaApi.removeTransferListener
-#MegaApi.remove_global_listener = MegaApi.removeGlobalListener
+# Mirroring, WILL BE MOVED TO Mega_Api_Python class later
 MegaApi.get_current_request = MegaApi.getCurrentRequest
 MegaApi.get_current_transfer = MegaApi.getCurrentTransfer
 MegaApi.get_current_error = MegaApi.getCurrentError
@@ -947,7 +953,6 @@ MegaApi.set_upload_method = MegaApi.setUploadMethod
 MegaApi.get_download_method = MegaApi.getDownloadMethod
 MegaApi.get_upload_method = MegaApi.getUploadMethod
 MegaApi.get_transfer_by_tag = MegaApi.getTransferByTag
-#MegaApi.get_transfers = MegaApi.getTransfers
 MegaApi.is_waiting = MegaApi.isWaiting
 MegaApi.get_num_pending_uploads = MegaApi.getNumPendingUploads
 MegaApi.get_num_pending_downloads = MegaApi.getNumPendingDownloads
@@ -961,7 +966,6 @@ MegaApi.update_stats = MegaApi. updateStats
 MegaApi.get_num_children = MegaApi.getNumChildren
 MegaApi.get_num_child_files = MegaApi.getNumChildFiles
 MegaApi.get_num_child_folders = MegaApi.getNumChildFolders
-#MegaApi.get_children = MegaApi.getChildren
 MegaApi.get_index = MegaApi.getIndex
 MegaApi.get_child_node = MegaApi.getChildNode
 MegaApi.get_parent_node = MegaApi.getParentNode
@@ -969,14 +973,8 @@ MegaApi.get_node_path = MegaApi.getNodePath
 MegaApi.get_node_by_path = MegaApi.getNodeByPath
 MegaApi.get_node_by_handle = MegaApi.getNodeByHandle
 MegaApi.get_contact_request_by_handle = MegaApi.getContactRequestByHandle
-#MegaApi.get_contacts = MegaApi.getContacts
 MegaApi.get_contact = MegaApi.getContact
-#MegaApi.get_in_shares = MegaApi.getInShares
 MegaApi.is_shared = MegaApi.isShared
-#MegaApi.get_out_shares = MegaApi.getOutShares
-#MegaApi.get_pending_out_shares = MegaApi.getPendingOutShares
-#MegaApi.get_incoming_contact_requests = MegaApi.getIncomingContactRequests
-#MegaApi.get_outgoing_contact_requests = MegaApi.getOutgoingContactRequests
 MegaApi.get_access = MegaApi.getAccess
 MegaApi.get_size = MegaApi.getSize
 MegaApi.get_fingerprint = MegaApi.getFingerprint
@@ -1001,15 +999,6 @@ MegaApi.create_thumbnail = MegaApi.createThumbnail
 MegaApi.create_preview = MegaApi.createPreview
 MegaApi.load_balancing = MegaApi.loadBalancing
 
-
-#del MegaApi.addListener
-#del MegaApi.addRequestListener
-#del MegaApi.addTransferListener
-#del MegaApi.addGlobalListener
-#del MegaApi.removeListener
-#del MegaApi.removeRequestListener
-#del MegaApi.removeTransferListener
-#del MegaApi.removeGlobalListener
 del MegaApi.getCurrentRequest
 del MegaApi.getCurrentTransfer
 del MegaApi.getCurrentError
@@ -1088,7 +1077,6 @@ del MegaApi.setUploadMethod
 del MegaApi.getDownloadMethod
 del MegaApi.getUploadMethod
 del MegaApi.getTransferByTag
-#del MegaApi.getTransfers
 del MegaApi.isWaiting
 del MegaApi.getNumPendingUploads
 del MegaApi.getNumPendingDownloads
@@ -1102,7 +1090,6 @@ del MegaApi. updateStats
 del MegaApi.getNumChildren
 del MegaApi.getNumChildFiles
 del MegaApi.getNumChildFolders
-#del MegaApi.getChildren
 del MegaApi.getIndex
 del MegaApi.getChildNode
 del MegaApi.getParentNode
@@ -1110,14 +1097,8 @@ del MegaApi.getNodePath
 del MegaApi.getNodeByPath
 del MegaApi.getNodeByHandle
 del MegaApi.getContactRequestByHandle
-#del MegaApi.getContacts
 del MegaApi.getContact
-#del MegaApi.getInShares
 del MegaApi.isShared
-#del MegaApi.getOutShares
-#del MegaApi.getPendingOutShares
-#del MegaApi.getIncomingContactRequests
-#del MegaApi.getOutgoingContactRequests
 del MegaApi.getAccess
 del MegaApi.getSize
 del MegaApi.getFingerprint
