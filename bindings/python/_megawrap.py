@@ -79,7 +79,7 @@ class MegaApiPython(MegaApi):
         self.lock.acquire()
         try:
             for item in self.active_mega_listeners:
-                if item.get_user_listener() == listener:
+                if item.get_user_listener() == listener.get_user_listener():
                     self.active_mega_listeners.remove(item)
         finally:
             self.lock.release()
@@ -105,7 +105,7 @@ class MegaApiPython(MegaApi):
         self.lock.acquire()
         try:
             for item in self.active_transfer_listeners:
-                if item.get_user_listener() == listener:
+                if item.get_user_listener() == listener.get_user_listener():
                     self.active_transfer_listeners.remove(item)
         finally:
             self.lock.release()
@@ -118,7 +118,7 @@ class MegaApiPython(MegaApi):
         self.lock.acquire()
         try:
             for item in self.active_global_mega_listeners:
-                if item.get_user_listener() == listener:
+                if item.get_user_listener() == listener.get_user_listener():
                     self.active_global_mega_listeners.remove(item)
         finally:
             self.lock.release()
