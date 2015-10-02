@@ -667,7 +667,7 @@ class DelegateMegaListener(MegaListener):
             mega_error = error.copy()
             print "requiest copied!" + str(mega_request)
             print "error is: " + str(mega_error)
-            self.listener.onRequestFinish(listener, mega_request, mega_error)
+            self.listener.onRequestFinish(mega_request, mega_error)
             print "Fail :("
 
     def onRequestTemporaryError(self, mega_api, request, error):
@@ -684,7 +684,7 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             mega_request = request.copy()
             mega_error = error.copy()
-            self.listener.onRequestTemporaryError(listener, mega_api, mega_request, mega_error)
+            self.listener.onRequestTemporaryError(mega_api, mega_request, mega_error)
 
 
 
