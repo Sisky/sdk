@@ -36,6 +36,7 @@ class MegaApiPython(MegaApi):
     # API METHODS
 
     def run_callback(self, listener, function):
+        # TODO, will use threading for callback
         t = threading.Thread(target = listener.function(*args))
         t.setDaemon(True)
         t.start()
@@ -252,6 +253,12 @@ class MegaApiPython(MegaApi):
     # Listener creation
 
     def create_delegate_mega_listener(self, listener):
+        '''Create a new delegate listener object of type DelegateMegaListener
+        and attempts to add it to the corresponding list. If the listener object is none,
+        returns None
+        :param listener Listener object associated with the new delegate
+        :Returns the newly created delegate listener object
+        '''
         if listener is None:
             return None
         delegate_listener = DelegateMegaListener(self, listener)
@@ -263,6 +270,12 @@ class MegaApiPython(MegaApi):
         return delegate_listener
 
     def create_delegate_mega_global_listener(self, listener):
+        '''Create a new delegate listener object of type DelegateMegaGlobalListener
+        and attempts to add it to the corresponding list.If the listener object is none,
+        returns None
+        :param listener Listener object associated with the new delegate
+        :Returns the newly created delegate global listener object
+        '''
         if listener is None:
             return None
         delegate_global_listener = DelegateMegaGlobalListener(self, listener)
@@ -274,8 +287,14 @@ class MegaApiPython(MegaApi):
         return delegate_global_listener
 
     def create_delegate_request_listener(self, listener ,single):
-        #if listener is None:
-            #return None
+        '''Create a new delegate listener object of type DelegateMegaRequestListener
+        and attempts to add it to the corresponding list. If the listener object is none,
+        returns None
+        :param listener Listener object associated with the new delegate
+        :Returns the newly created delegate request listener object
+        '''
+        if listener is None:
+            return None
         delegate_request_listener = DelegateMegaRequestListener(self, listener, single)
         self.lock.acquire()
         try:
@@ -285,6 +304,12 @@ class MegaApiPython(MegaApi):
         return delegate_request_listener
 
     def create_delegate_transfer_listener(self, listener, single):
+        '''Create a new delegate listener object of type DelegateMegaTransferListener
+        and attempts to add it to the corresponding list. If the listener object is none,
+        returns None
+        :param listener Listener object associated with the new delegate
+        :Returns the newly created delegate transfer listener object
+        '''
         if listener is None:
             return None
         delegate_transfer_listener = DelegateMegaTransferListener(self, listener, single)
@@ -296,6 +321,9 @@ class MegaApiPython(MegaApi):
         return delegate_transfer_listener
 
     def free_request_listener(self, delegate):
+        '''Attempts to remove the delegate object of type DelegateMegaRequestListener
+         from the corresponding list.
+        '''
         self.lock.acquire()
         try:
             self.active_request_listeners.remove(delegate)
@@ -303,6 +331,9 @@ class MegaApiPython(MegaApi):
             self.lock.release()
 
     def free_transfer_listener(self, delegate):
+        '''Attempts to remove the delegate object of type DelegateMegaTransferListener
+         from the corresponding list.
+        '''
         self.lock.acquire()
         try:
             self.active_transfer_listeners.remove(delegate)
@@ -387,7 +418,7 @@ class DelegateMegaLoggerListener(MegaLogger):
     '''
     def __init__(self, listener):
         self.listener = listener
-        super(Delegate_Mega_Logger_Listener, self).__init__()
+        super(DelegateMegaLoggerListener, self).__init__()
 
     def log(self, time, log_level, source, message):
         '''This function will be called with all logs with level smaller or equal to selected level of logging.
@@ -431,7 +462,7 @@ class DelegateMegaRequestListener(MegaRequestListener):
         '''
         return self.listener
 
-    def on_request_start(self, mega_api, request):
+    def onRequestStart(self, mega_api, request):
         '''This function is called when a request is about to start being processed.
         The SDK retains the ownership of the request parameter. Do not it use after this function returns.
         The mega_api object is the one created by the application, it will be valid until the application deletes it.
@@ -444,7 +475,7 @@ class DelegateMegaRequestListener(MegaRequestListener):
 
 
 
-    def on_request_finish(self, mega_api, request, error):
+    def onRequestFinish(self, mega_api, request, error):
         '''This function is called when a request has finished.
         There will be no further callbacks related to this request.
         If the request completed without problems, the error code will be API_OK.
@@ -461,7 +492,7 @@ class DelegateMegaRequestListener(MegaRequestListener):
         if single_listener:
             mega_api.free_request_listener()
 
-    def on_request_update(self, mega_api, request):
+    def onRequestUpdate(self, mega_api, request):
         '''This function is called to get details about the progress of a request.
         Currently, this callback is only used for fetchNodes requests (MegaRequest.TYPE_FETCH_NODES).
         The SDK retains the ownership of the request parameter. Do not use it after this function returns.
@@ -475,7 +506,7 @@ class DelegateMegaRequestListener(MegaRequestListener):
 
 
 
-    def on_request_temporary_error(self, mega_api, request, error):
+    def onRequestTemporaryError(self, mega_api, request, error):
         '''This function is called when there is a temporary error processing a request.
         The request continues after this callback, so expect more MegaRequestListener.onRequestTemporaryError or
         a MegaRequestListener.onRequestFinish callback.
@@ -513,7 +544,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
         return self.listener
 
 
-    def on_transfer_start(self, mega_api, transfer):
+    def onTransferStart(self, mega_api, transfer):
         '''This function is called when a transfer is about to start being processed.
         The SDK retains the ownership of the transfer parameter. Do not it use after this function returns.
         The mega_api object is the one created by the application, it will be valid until the application deletes it.
@@ -526,7 +557,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
 
 
 
-    def on_transfer_finish(self, mega_api, transfer, error):
+    def onTransferFinish(self, mega_api, transfer, error):
         '''This function is called when a transfer has finished.
         There will be no further callbacks related to this transfer. The last parameter provides the result of the transfer.
         If the transfer completed without problems, the error code will be API_OK.
@@ -542,7 +573,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
             self.listener.onTransferFinish(mega_api, mega_transfer, mega_error)
 
 
-    def on_transfer_update(self, mega_api, transfer):
+    def onTransferUpdate(self, mega_api, transfer):
         '''This function is called to get details about the progress of a transfer.
         The SDK retains the ownership of the transfer parameter. Do not use it after this function returns.
         The mega_api object is the one created by the application, it will be valid until the application deletes it.
@@ -555,7 +586,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
 
 
 
-    def on_transfer_temporary_error(self, mega_api, transfer, error):
+    def onTransferTemporaryError(self, mega_api, transfer, error):
         '''This function is called when there is a temporary error processing a transfer.
         The transfer continues after this callback, so expect more MegaRequestListener.onTransferTemporaryError or
         a MegaRequestListener.onTransfertFinish callback.
@@ -572,7 +603,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
 
 
 
-    def on_transfer_data(self, mega_api, transfer, buffer):
+    def onTransferData(self, mega_api, transfer, buffer):
         '''This function is called to provide the last read bytes of streaming downloads.
         This function will not be called for non streaming downloads. You can get the same buffer provided
         by this function in MegaTransferListener.onTransferUpdate(), using MegaTransfer.getLastBytes() and
@@ -606,7 +637,7 @@ class DelegateMegaListener(MegaListener):
         '''
         return self.listener
 
-    def on_request_start(self, mega_api, request):
+    def onRequestStart(self, mega_api, request):
         '''This function is called when a request is about to start being processed.
         The SDK retains the ownership of the request parameter. Do not it use after this function returns.
         The mega_api object is the one created by the application, it will be valid until the application deletes it.
@@ -614,11 +645,13 @@ class DelegateMegaListener(MegaListener):
         :param request Information about the request.
         '''
         if self.listener is not None:
+            print "Starting request"
             mega_request = request.copy()
+            print "requiest copied!" + str(mega_request)
             self.listener.onRequestStart(mega_api, mega_request)
+            print "Success!"
 
-
-    def on_request_finish(self, mega_api, request, error):
+    def onRequestFinish(self, mega_api, request, error):
         '''This function is called when a request has finished.
         There will be no further callbacks related to this request.
         If the request completed without problems, the error code will be API_OK.
@@ -629,11 +662,15 @@ class DelegateMegaListener(MegaListener):
         :param error Information about error.
         '''
         if self.listener is not None:
+            print "Starting request"
             mega_request = request.copy()
             mega_error = error.copy()
-            self.listener.onRequestFinish(mega_api, mega_request, mega_error)
+            print "requiest copied!" + str(mega_request)
+            print "error is: " + str(mega_error)
+            self.listener.onRequestFinish(listener, mega_request, mega_error)
+            print "Fail :("
 
-    def on_request_temporary_error(self, mega_api, request, error):
+    def onRequestTemporaryError(self, mega_api, request, error):
         '''This function is called when there is a temporary error processing a request.
         The request continues after this callback, so expect more MegaRequestListener.onRequestTemporaryError or
         a MegaRequestListener.onRequestFinish callback.
@@ -647,11 +684,11 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             mega_request = request.copy()
             mega_error = error.copy()
-            self.listener.onRequestTemporaryError(mega_api, mega_request, mega_error)
+            self.listener.onRequestTemporaryError(listener, mega_api, mega_request, mega_error)
 
 
 
-    def on_transfer_start(self, mega_api, transfer):
+    def onTransferStart(self, mega_api, transfer):
         '''This function is called when a transfer is about to start being processed.
         The SDK retains the ownership of the transfer parameter. Do not it use after this function returns.
         The mega_api object is the one created by the application, it will be valid until the application deletes it.
@@ -664,7 +701,7 @@ class DelegateMegaListener(MegaListener):
 
 
 
-    def on_transfer_finish(self, mega_api, transfer, error):
+    def onTransferFinish(self, mega_api, transfer, error):
         '''This function is called when a transfer has finished.
         There will be no further callbacks related to this transfer. The last parameter provides the result of the transfer.
         If the transfer completed without problems, the error code will be API_OK.
@@ -680,7 +717,7 @@ class DelegateMegaListener(MegaListener):
             self.listener.onTransferFinish(mega_api, mega_transfer, mega_error)
 
 
-    def on_transfer_update(self, mega_api, transfer):
+    def onTransferUpdate(self, mega_api, transfer):
         '''This function is called to get details about the progress of a transfer.
         The SDK retains the ownership of the transfer parameter. Do not use it after this function returns.
         The mega_api object is the one created by the application, it will be valid until the application deletes it.
@@ -692,7 +729,7 @@ class DelegateMegaListener(MegaListener):
             self.listener.onTransferUpdate(mega_api, mega_transfer)  # DONT DELETE THIS LINE
 
 
-    def on_transfer_temporary_error(self, mega_api, transfer, error):
+    def onTransferTemporaryError(self, mega_api, transfer, error):
         '''This function is called when there is a temporary error processing a transfer.
         The transfer continues after this callback, so expect more MegaRequestListener.onTransferTemporaryError or
         a MegaRequestListener.onTransfertFinish callback.
@@ -709,7 +746,7 @@ class DelegateMegaListener(MegaListener):
 
 
 
-    def on_users_update(self, mega_api, user_list):
+    def onUsersUpdate(self, mega_api, user_list):
         '''This function is called when there are new or updated contacts in the account.
         The SDK retains the ownership of the user_list in the second parameter.
         The list and all the MegaUser objects that it contains will be valid until this function returns.
@@ -724,7 +761,7 @@ class DelegateMegaListener(MegaListener):
 
 
 
-    def on_nodes_update(self, mega_api, node_list):
+    def onNodesUpdate(self, mega_api, node_list):
         '''This function is called when there are new or updated nodes in the account.
         When the full account is reloaded or a large number of server notifications arrive at once,
         the second parameter will be null.
@@ -741,7 +778,7 @@ class DelegateMegaListener(MegaListener):
 
 
 
-    def on_reload_needed(self, mega_api):
+    def onReloadNeeded(self, mega_api):
         '''This function is called when an inconsistency is detected in the local cache.
         You should call MegaApiPython.fetch_nodes() when this callback is received.
         :param mega_api API object connected to account.
@@ -751,13 +788,13 @@ class DelegateMegaListener(MegaListener):
 
 
 
-    def on_account_update(self, mega_api):
+    def onAccountUpdate(self, mega_api):
         if self.listener is not None:
             self.listener.onAccountUpdate(mega_api)
 
 
 
-    def on_contact_requests_update(self, mega_api, contact_request_list):
+    def onContactRequestsUpdate(self, mega_api, contact_request_list):
         '''This function is called when there are new contact requests in the account.
         If you want to save the list, use contact_request_list.copy().
         If you want to save only some of the MegaContactRequest objects, use MegaContactRequest.copy() for those objects.
@@ -786,7 +823,7 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         return self.listener
 
 
-    def on_users_update(self, mega_api, user_list):
+    def onUsersUpdate(self, mega_api, user_list):
         '''This function is called when there are new or updated contacts in the account.
         The SDK retains the ownership of the user_list in the second parameter.
         The list and all the MegaUser objects that it contains will be valid until this function returns.
@@ -801,7 +838,7 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
 
 
 
-    def on_nodes_update(self, mega_api, node_list):
+    def onNodesUpdate(self, mega_api, node_list):
         '''This function is called when there are new or updated nodes in the account.
         When the full account is reloaded or a large number of server notifications arrive at once,
         the second parameter will be null.
@@ -817,7 +854,7 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
             self.listener.onNodesUpdate(mega_api, updated_node_list)
 
 
-    def on_reload_needed(self, mega_api):
+    def onReloadNeeded(self, mega_api):
         '''This function is called when an inconsistency is detected in the local cache.
         You should call MegaApiPython.fetch_nodes() when this callback is received.
         :param mega_api API object connected to account.
@@ -826,12 +863,12 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
             self.istener.onReloadNeeded(mega_api)
 
 
-    def on_account_update(self, mega_api):
+    def onAccountUpdate(self, mega_api):
         if self.listener is not None:
             self.listener.onAccountUpdate(mega_api)
 
 
-    def on_contact_requests_update(self, mega_api, contact_request_list):
+    def onContactRequestsUpdate(self, mega_api, contact_request_list):
         '''This function is called when there are new contact requests in the account.
         If you want to save the list, use contact_request_list.copy().
         If you want to save only some of the MegaContactRequest objects, use MegaContactRequest.copy() for those objects.
