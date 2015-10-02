@@ -471,7 +471,7 @@ class DelegateMegaRequestListener(MegaRequestListener):
         '''
         if self.listener is not None:
             mega_request = request.copy()
-            self.listener.onRequestStart(mega_api, mega_request)
+            self.listener.onRequestStart(self.mega_api, mega_request)
 
 
 
@@ -488,7 +488,7 @@ class DelegateMegaRequestListener(MegaRequestListener):
         if self.listener is not None:
             mega_request = request.copy()
             mega_error = error.copy()
-            self.listener.onRequestFinish(mega_api, mega_request, mega_error)
+            self.listener.onRequestFinish(self.mega_api, mega_request, mega_error)
         if single_listener:
             mega_api.free_request_listener()
 
@@ -502,7 +502,7 @@ class DelegateMegaRequestListener(MegaRequestListener):
         '''
         if self.listener is not None:
             mega_request = request.copy()
-            self.listener.onRequestUpdate(mega_api, mega_request)
+            self.listener.onRequestUpdate(self.mega_api, mega_request)
 
 
 
@@ -520,7 +520,7 @@ class DelegateMegaRequestListener(MegaRequestListener):
         if self.listener is not None:
             mega_request = request.copy()
             mega_error = error.copy()
-            self.listener.onRequestTemporaryError(mega_api, mega_request, mega_error)
+            self.listener.onRequestTemporaryError(self.mega_api, mega_request, mega_error)
 
 
 
@@ -553,7 +553,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
         '''
         if self.listener is not None:
             mega_transfer = transfer.copy()
-            self.listener.onTransferStart(mega_api, mega_transfer)
+            self.listener.onTransferStart(self.mega_api, mega_transfer)
 
 
 
@@ -570,7 +570,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
         if self.listener is not None:
             mega_transfer = transfer.copy()
             mega_error = error.copy()
-            self.listener.onTransferFinish(mega_api, mega_transfer, mega_error)
+            self.listener.onTransferFinish(self.mega_api, mega_transfer, mega_error)
 
 
     def onTransferUpdate(self, mega_api, transfer):
@@ -582,7 +582,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
         '''
         if self.listener is not None:
             mega_transfer = transfer.copy()
-            self.listener.onTransferUpdate(mega_api, mega_transfer)
+            self.listener.onTransferUpdate(self.mega_api, mega_transfer)
 
 
 
@@ -599,7 +599,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
         if self.listener is not None:
             mega_transfer = transfer.copy()
             mega_error = error.copy()
-            self.listener.onTransferTemporaryError(mega_api, mega_transfer, mega_error)
+            self.listener.onTransferTemporaryError(self.mega_api, mega_transfer, mega_error)
 
 
 
@@ -616,7 +616,7 @@ class DelegateMegaTransferListener(MegaTransferListener):
         '''
         if self.listener is not None:
             mega_transfer = transfer.copy()
-            return self.listener.onTransferData(mega_api, mega_transfer, buffer)
+            self.listener.onTransferData(self.mega_api, mega_transfer, buffer)
 
 
 
@@ -648,7 +648,7 @@ class DelegateMegaListener(MegaListener):
             print "Starting request"
             mega_request = request.copy()
             print "requiest copied!" + str(mega_request)
-            self.listener.onRequestStart(mega_api, mega_request)
+            self.listener.onRequestStart(self.mega_api, mega_request)
             print "Success!"
 
     def onRequestFinish(self, mega_api, request, error):
@@ -667,7 +667,7 @@ class DelegateMegaListener(MegaListener):
             mega_error = error.copy()
             print "requiest copied!" + str(mega_request)
             print "error is: " + str(mega_error)
-            self.listener.onRequestFinish(mega_request, mega_error)
+            self.listener.onRequestFinish(self.mega_api, mega_request, mega_error)
             print "Fail :("
 
     def onRequestTemporaryError(self, mega_api, request, error):
@@ -684,7 +684,7 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             mega_request = request.copy()
             mega_error = error.copy()
-            self.listener.onRequestTemporaryError(mega_api, mega_request, mega_error)
+            self.listener.onRequestTemporaryError(self.mega_api, mega_request, mega_error)
 
 
 
@@ -697,7 +697,7 @@ class DelegateMegaListener(MegaListener):
         '''
         if self.listener is not None:
             mega_transfer = transfer.copy()
-            self.listener.onTransferStart(mega_api, mega_transfer)
+            self.listener.onTransferStart(self.mega_api, mega_transfer)
 
 
 
@@ -714,7 +714,7 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             mega_transfer = transfer.copy()
             mega_error = error.copy()
-            self.listener.onTransferFinish(mega_api, mega_transfer, mega_error)
+            self.listener.onTransferFinish(self.mega_api, mega_transfer, mega_error)
 
 
     def onTransferUpdate(self, mega_api, transfer):
@@ -726,7 +726,7 @@ class DelegateMegaListener(MegaListener):
         '''
         if self.listener is not None:
             mega_transfer = transfer.copy()
-            self.listener.onTransferUpdate(mega_api, mega_transfer)  # DONT DELETE THIS LINE
+            self.listener.onTransferUpdate(self.mega_api, mega_transfer)
 
 
     def onTransferTemporaryError(self, mega_api, transfer, error):
@@ -742,7 +742,7 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             mega_transfer = transfer.copy()
             mega_error = error.copy()
-            self.listener.onTransferTemporaryError(mega_api, mega_transfer, mega_error)
+            self.listener.onTransferTemporaryError(self.mega_api, mega_transfer, mega_error)
 
 
 
@@ -757,7 +757,7 @@ class DelegateMegaListener(MegaListener):
         '''
         if self.listener is not None:
             updated_user_list =  mega_api.user_list_to_array(user_list)
-            self.listener.onUsersUpdate(mega_api, updated_user_list)
+            self.listener.onUsersUpdate(self.mega_api, updated_user_list)
 
 
 
@@ -774,7 +774,7 @@ class DelegateMegaListener(MegaListener):
         '''
         if self.listener is not None:
             updated_node_list = mega_api.node_list_to_array(node_list)
-            self.listener.onNodesUpdate(mega_api, updated_node_list)
+            self.listener.onNodesUpdate(self.mega_api, updated_node_list)
 
 
 
@@ -784,13 +784,13 @@ class DelegateMegaListener(MegaListener):
         :param mega_api API object connected to account.
         '''
         if self.listener is not None:
-            self.listener.onReloadNeeded(mega_api)
+            self.listener.onReloadNeeded(self.mega_api)
 
 
 
     def onAccountUpdate(self, mega_api):
         if self.listener is not None:
-            self.listener.onAccountUpdate(mega_api)
+            self.listener.onAccountUpdate(self.mega_api)
 
 
 
@@ -803,7 +803,7 @@ class DelegateMegaListener(MegaListener):
         '''
         if self.listener is not None:
             contact_list = mega_api.contact_request_list_to_array(contact_list)
-            self.listener.onContactRequestsUpdate(mega_api, contact_list)
+            self.listener.onContactRequestsUpdate(self.mega_api, contact_list)
 
 
 
@@ -834,7 +834,7 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         '''
         if self.listener is not None:
             updated_user_list =  mega_api.user_list_to_array(user_list)
-            self.listener.onUsersUpdate(mega_api, updated_user_list)
+            self.listener.onUsersUpdate(self.mega_api, updated_user_list)
 
 
 
@@ -851,7 +851,7 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         '''
         if self.listener is not None:
             updated_node_list = mega_api.node_list_to_array(node_list)
-            self.listener.onNodesUpdate(mega_api, updated_node_list)
+            self.listener.onNodesUpdate(self.mega_api, updated_node_list)
 
 
     def onReloadNeeded(self, mega_api):
@@ -860,12 +860,12 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         :param mega_api API object connected to account.
         '''
         if self.listener is not None:
-            self.istener.onReloadNeeded(mega_api)
+            self.istener.onReloadNeeded(self.mega_api)
 
 
     def onAccountUpdate(self, mega_api):
         if self.listener is not None:
-            self.listener.onAccountUpdate(mega_api)
+            self.listener.onAccountUpdate(self.mega_api)
 
 
     def onContactRequestsUpdate(self, mega_api, contact_request_list):
@@ -877,7 +877,7 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         '''
         if self.listener is not None:
             contact_list = mega_api.contact_request_list_to_array(contact_list)
-            self.listener.onContactRequestsUpdate(mega_api, contact_list)
+            self.listener.onContactRequestsUpdate(self.mega_api, contact_list)
 
 
 # Mirroring, WILL BE MOVED TO MegaApiPython class later
