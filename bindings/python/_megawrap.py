@@ -1,8 +1,6 @@
 from mega import *
 import threading
 
-
-
 class MegaApiPython(MegaApi):
 
     '''Python Appilcation Programming Interface (API) to access MEGA SDK services on a MEGA account or shared
@@ -35,11 +33,13 @@ class MegaApiPython(MegaApi):
 
     # API METHODS
 
-    def run_callback(self, listener, function):
-        # TODO, will use threading for callbacks
-        t = threading.Thread(target = listener.function(*args))
-        t.setDaemon(True)
-        t.start()
+
+    def add_listener(self, listener):
+        '''Registes a listener.
+        This function is here while the dedicated listener function is being
+        tested.
+        '''
+        self.addListener(listener)
 
 
     # Listener management
@@ -126,38 +126,68 @@ class MegaApiPython(MegaApi):
 
     # UTILS
 
-    def get_current_request(self):
-    	'''need clarification'''
-        return self.getCurrentRequest()
-
-    def get_current_transfer(self):
-    	'''need clarification'''
-        return self.getCurrentTransfer()
-
-    def get_current_error(self):
-    	'''need clarification'''
-        return self.getCurrentError()
-
-    def get_current_nodes(self):
-    	'''need clarification'''
-        return self.getCurrentNodes()
-
-    def get_current_users(self):
-    	'''need clarification'''
-        return self.getCurrentUsers()
-
     def get_base64_pw_key(self, password):
-    	'''Generates a private key based on the access password. This is a time consuming operation (specially for low-end mobile devices).  Since the resulting key is required to log in, this function   allows to do this step in a separate function. You should run this function in a background thread, to prevent UI hangs. The resulting key can be used in MegaApi.fastLogin.
-        You take the ownership of the returned value.
+    	'''Generates a private key based on the access password. This is a time consuming operation
+        (specially for low-end mobile devices).  Since the resulting key is required to log in, this function
+         allows to do this step in a separate function. You should run this function in a background thread, to prevent UI hangs.
+         The resulting key can be used in MegaApi.fastLogin.
+         You take the ownership of the returned value.
         :param password - Access password
         :Returns - Base64-encoded private key
         :Deprecated
         '''
         return self.getBase64PwKey(password)
 
+    def base32_to_handle(self, base32_handle):
+        '''Converts a Base32 - encoded user handle to a MegaHandle.
+        :param base32_handle Base32-encoded handle
+        :Returns Base64-encoded hash.
+        :Deprecated
+        '''
+        return self.base32ToHandle(base32_handle)
+
+    def base64_to_handle(self, base64_handle):
+        '''Converts a Base64-encoded node handle to a MegaHandle.
+        The returned value can be used to recover a MegaNode using
+        MegaApi.get_node_by_handle()
+        You can revert this operation using MegaApi.handle_to_base64()
+        :param base64_handle Base64-encoded node handle.
+        :Returns Node handle.
+        '''
+        return self.base64ToHandle(base64_handle)
+
+    def handle_to_base64(self, handle):
+        '''Converts a MegaHandle to a Base64-encoded string.
+        You can revert this operation using MegaApi.base64_to_handle().
+        :param handle handle to be converted
+        :Returns Base64-encoded node handle.
+        '''
+        return self.handleToBase64(handle)
+
+    def user_handle_to_base64(self, handle):
+        '''Converts a MegaHandle to a Base64-encoded string.
+        You take the ownership of the returned value.
+        You can revert this operation using MegaApi.base64_to_handle()
+        :param handle handle to be converted
+        :Returns Base64-encoded user handle.
+        '''
+        return self.userHandleToBase64(handle)
+
+    def add_entropy(self, data, size):
+        '''Add entropy to internal random number generators.
+        It is recommended to call this function with random data to
+        enhance security.
+        :param data Byte array with random data.
+        :param size Size of the byte array (in bytes)
+        '''
+        self.addEntropy(data, size)
+
     def get_string_hash(self,base_64_pwkey, email):
     	'''Generates a hash based in the provided private key and email.
-This is a time consuming operation (specially for low-end mobile devices). Since the resulting key is required to log in, this function allows to do this step in a separate function. You should run this function in a background thread, to prevent UI hangs. The resulting key can be used in MegaApi.fastLogin
+        This is a time consuming operation (specially for low-end mobile devices).
+        Since the resulting key is required to log in, this function allows to do this step in a separate function.
+        You should run this function in a background thread, to prevent UI hangs.
+        The resulting key can be used in MegaApi.fastLogin
         You take the ownership of the returned value.
         :param base_64_pwkey- Private key returned by MegaApi.get_base64_pw_key()
         :param email - Email to create the hash
@@ -165,6 +195,11 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :Deprecated
         '''
         return self.getStringHash(base_64_pwkey, email)
+
+    def reconnect(self):
+        '''Reconnect and retry all transfers
+        '''
+        self.retryPendingConnections(True, True)
 
     def retry_pending_connections(self):
     	'''Retry all pending requests.
@@ -174,14 +209,16 @@ This is a time consuming operation (specially for low-end mobile devices). Since
        	'''
         self.retryPendingConnections()
 
-    def login(self, email, password):
+    #REQUESTS
+
+    def login_email(self, email, password):
     	'''Log in to a MEGA account.
         :param email -Email of the user
         :param password - Password
         '''
         self.login(email, password)
 
-    def login_with_listener(self, email, password, listener):
+    def login_email_with_listener(self, email, password, listener):
     	'''Log in to a MEGA account.
 		The associated request type with this request is MegaRequest.TYPE_LOGIN. Valid data in the MegaRequest object received on callbacks:
     		MegaRequest.getEmail - Returns the first parameter
@@ -191,7 +228,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param password - Password
         :param listener - MegaRequestListener to track this request
         '''
-        self.login(email, password, self.create_delegate_request_listener(listener))
+        self.login(email, password, self.create_delegate_request_listener(listener, True))
 
     def login_to_folder(self, mega_folder_link):
     	'''Log in to a public folder using a folder link.
@@ -209,7 +246,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
 		:param megaFolderLink - Public link to a folder in MEGA
         :param listener - MegaRequestListener to track this request
         '''
-        self.loginToFolder(mega_folder_link, self.create_delegate_request_listener(listener))
+        self.loginToFolder(mega_folder_link, self.create_delegate_request_listener(listener, True))
 
     def fast_login_with_listener(self, email, string_hash,base_64_pwkey, listener):
     	'''Login to a MEGA account with precomputed keys.
@@ -222,7 +259,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
     	:param base_64_pwkey	- Private key calculated with MegaApi.get_base64_pw_key()
     	:param listener - MegaRequestListener to track this request
         '''
-        self.fastLogin(email, string_hash, base_64_pwkey, self.create_delegate_request_listener(listener))
+        self.fastLogin(email, string_hash, base_64_pwkey, self.create_delegate_request_listener(listener, True))
 
     def fast_login(self, email, string_hash, base_64_pwkey):
     	'''Login to a MEGA account with precomputed keys.
@@ -243,7 +280,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
     	:param session - Session key previously dumped with api.dump_session()
         param listener - MegaRequestListener to track this request
         '''
-        self.fastLogin(session, self.create_delegate_request_listener(listener))
+        self.fastLogin(session, self.create_delegate_request_listener(listener, True))
 
     def kill_session_listener(self, session_handle, listener):
     	'''Close a MEGA session. All clients using this session will be automatically logged out.
@@ -255,7 +292,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param session_handle of the session. Use mega.INVALID_HANDLE to cancel all sessions except the current one
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.killSession(session_handle, self.create_delegate_request_listener(listener))
+        self.killSession(session_handle, self.create_delegate_request_listener(listener, True))
 
     def kill_session(self, session_handle):
     	'''Close a MEGA session. All clients using this session will be automatically logged out.
@@ -278,7 +315,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaRequest.getPrivateKey() - Returns the private RSA key of the account, Base64-encoded
         param:listener MegaRequestListener to track this request
         '''
-        self.getUserData(self.create_delegate_request_listener(listener))
+        self.getUserData(self.create_delegate_request_listener(listener, True))
 
     def get_user_data(self):
         '''Get data about the logged account.
@@ -297,7 +334,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param user  Contact to get the data
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.getUserData(user, self.create_delegate_request_listener(listener))
+        self.getUserData(user, self.create_delegate_request_listener(listener, True))
 
     def get_user_data_with_mega_user(self, user):
         '''Get data about a contact.
@@ -318,7 +355,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param user Email or Base64 handle of the contact
         :param listener MegaRequestListener to track this request
         '''
-        self.getUserData(user, self.create_delegate_request_listener(listener))
+        self.getUserData(user, self.create_delegate_request_listener(listener, True))
 
     def get_user_data_with_user(self, user):
         '''Get data about a contact.
@@ -355,7 +392,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param name - Name of the user
         :param listener - MegaRequestListener to track this request
         '''
-        self.createAccount(email, password, name, self.create_delegate_request_listener(listener))
+        self.createAccount(email, password, name, self.create_delegate_request_listener(listener, True))
 
     def create_account(self, email, password, name):
         '''Initialize a creation of the new MEGA account.
@@ -377,7 +414,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param name - Name of the user
         :param listener - MegaRequestListener to track this request
         '''
-        self.fastCreateAccount(email, base_64_pwkey, name, self.create_delegate_request_listener(listener))
+        self.fastCreateAccount(email, base_64_pwkey, name, self.create_delegate_request_listener(listener, True))
 
     def fast_create_account(self, email, base_64_pwkey, name):
         '''Initialize the creation of a new MEGA account with precomputed keys.
@@ -397,7 +434,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param link - Confirmation link
         :param listener - MegaRequestListener to track this request
         '''
-        self.querySignupLink(link, self.create_delegate_request_listener(listener))
+        self.querySignupLink(link, self.create_delegate_request_listener(listener, True))
 
     def query_signup_link(self, link):
         '''Get information about a confirmation link.
@@ -417,7 +454,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param password - Password of the account
         :param listener - MegaRequestListener to track this request
         '''
-        self.confirmAccount(link, password, self.create_delegate_request_listener(listener))
+        self.confirmAccount(link, password, self.create_delegate_request_listener(listener, True))
 
     def confirm_account(self, link, password):
         '''Confirm a MEGA account using a confirmation link and the user password.
@@ -438,7 +475,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param base_64_pwkey - Private key precomputed with MegaApi.get_base64_pw_key()
         :param listener - MegaRequestListener to track this request
         '''
-        self.fastConfirmAccount(link, base_64_pwkey, self.create_delegate_request_listener(listener))
+        self.fastConfirmAccount(link, base_64_pwkey, self.create_delegate_request_listener(listener, True))
 
     def fast_confirm_account(self, link, base_64_pwkey):
         '''Confirm a MEGA account using a confirmation key and a precomputed key.
@@ -526,7 +563,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param parent - Parent folder
         :param listener - MegaRequestListener to track this request
         '''
-        self.createFolder(name, parent, self.create_delegate_request_listener(listener))
+        self.createFolder(name, parent, self.create_delegate_request_listener(listener, True))
 
     def create_folder(self, name, parent):
         '''Create a folder in the MEGA account.
@@ -544,7 +581,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param new_parent - New parent for the node
         :param listener - MegaRequestListener to track this request
         '''
-        self.moveNode(node, new_parent, self.create_delegate_request_listener(listener))
+        self.moveNode(node, new_parent, self.create_delegate_request_listener(listener, True))
 
     def move_node(self, node, new_parent):
         '''Move a node in the MEGA account.
@@ -565,7 +602,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param new_parent - Parent for the new node
         :param listener - MegaRequestListener to track this request
         '''
-        self.copyNode(node, new_parent, self.create_delegate_request_listener(listener))
+        self.copyNode(node, new_parent, self.create_delegate_request_listener(listener, True))
 
     def copy_node(self, node, new_parent):
         '''Copy a node in the MEGA account.
@@ -587,7 +624,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param new_name - Name for the new node
         :param listener - MegaRequestListener to track this request
         '''
-        self.copyNode(node, new_parent, new_name, self.create_delegate_request_listener(listener))
+        self.copyNode(node, new_parent, new_name, self.create_delegate_request_listener(listener, True))
 
     def copy_node_new_name(self, new_parent, new_name):
         '''Copy a node in the MEGA account
@@ -606,7 +643,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param new_name - New name for the node
         :param listener - MegaRequestListener to track this request
         '''
-        self.renameNode(node, new_name, self.create_delegate_request_listener(listener))
+        self.renameNode(node, new_name, self.create_delegate_request_listener(listener, True))
 
     def rename_node(self, node, new_name):
         '''Rename a node in the MEGA accoutn.
@@ -623,9 +660,9 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param node - Node to remove
         :param listener - MegaRequestListener to track this request
         '''
-        self.remove(node, self.create_delegate_request_listener(listener))
+        self.remove(node, self.create_delegate_request_listener(listener, True))
 
-    def remove(self, node):
+    def remove_node(self, node):
         '''Remove a node from the MEGA account.
         :param node - Node to remove
         '''
@@ -640,7 +677,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param user - User that receives the node
         :param listener - MegaRequestListener to track this request
         '''
-        self.sendFileToUser(node, user, self.create_delegate_request_listener(listener))
+        self.sendFileToUser(node, user, self.create_delegate_request_listener(listener, True))
 
     def send_file_to_user(self, node, user):
         '''Send a node to the inbox of another MEGA user using a Megauser.
@@ -649,7 +686,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         '''
         self.sendFileToUser(node, user)
 
-    def share_with_listener(self, node, user, level, listener):
+    def share_folder_with_listener(self, node, user, level, listener):
     	'''Share or stop sharing a folder in MEGA with another user using a MegaUser.
         To share a folder with an user, set the desired access level in the level parameter. If you want to stop sharing a folder use the access level MegaShare.ACCESS_UNKNOWN
         The associated request type with this request is MegaRequest.TYPE_COPY Valid data in the MegaRequest object received on callbacks:
@@ -666,9 +703,9 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaShare.ACCESS_OWNER = 3
         :param listener - MegaRequestListener to track this request
         '''
-        self.share(node, user, level, self.create_delegate_request_listener(listener))
+        self.share(node, user, level, self.create_delegate_request_listener(listener, True))
 
-    def share(self, node, user, level):
+    def share_folder(self, node, user, level):
         '''Share or stop sharing a folder in MEGA with another user using a MegaUser.
         :param node - The folder to share. It must be a non-root folder
         :param user - User that receives the shared folder
@@ -694,7 +731,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaShare.ACCESS_OWNER = 3
         :param listener MegaRequestListener to track the request
         '''
-        self.share(node, email, level, self.create_delegate_request_listener(listener))
+        self.share(node, email, level, self.create_delegate_request_listener(listener, True))
 
     def share_using_email(self, node, email, level):
         '''Share or stop sharing a folder in MEGA with another user using his/her email.
@@ -721,7 +758,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param parent - Parent folder for the imported file
         :param listener - MegaRequestListener to track this request
         '''
-        self.importFileLink(mega_file_link, parent, self.create_delegate_request_listener(listener))
+        self.importFileLink(mega_file_link, parent, self.create_delegate_request_listener(listener, True))
 
     def import_file_link(self, mega_file_link, parent):
         '''Import a public link to the account.
@@ -740,7 +777,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param mega_file_link - Public link to a file in MEGA
         :param listener - MegaRequestListener to track this request
         '''
-        self.getPublicNode(mega_file_link, self.create_delegate_request_listener(listener))
+        self.getPublicNode(mega_file_link, self.create_delegate_request_listener(listener, True))
 
     def get_public_node(self, mega_file_link):
         '''Get a MegaNode from a public link to a file.
@@ -762,7 +799,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         If the path doesn't finish with one of these characters, the file will be downloaded to a file in that path.
         :param listener - MegaRequestListener to track this request
         '''
-        self.getThumbnail(node, dst_file_path, self.create_delegate_request_listener(listener))
+        self.getThumbnail(node, dst_file_path, self.create_delegate_request_listener(listener, True))
 
     def get_thumbnail(self, node, dst_file_path):
         '''Get the thumbnail of a node.
@@ -788,7 +825,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         characters, the file will be downloaded to a file in that path.
         :param listener - MegaRequestListener to track this request
         '''
-        self.getPreview(node, dst_file_path, self.create_delegate_request_listener(listener))
+        self.getPreview(node, dst_file_path, self.create_delegate_request_listener(listener, True))
 
     def get_preview(self, node, dst_file_path):
     	'''Get the preview of a node.
@@ -813,7 +850,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         the file will be downloaded to a file in that path.
         :param listener - MegaRequestListener to track this request
         '''
-        self.getUserAvatar(user, dst_file_path, self.create_delegate_request_listener(listener))
+        self.getUserAvatar(user, dst_file_path, self.create_delegate_request_listener(listener, True))
 
     def get_user_avatar(self, user, dst_file_path):
         '''Get the avatar of a MegaUser.
@@ -839,7 +876,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaApi.USER_ATTR_LASTNAME = 2 Get the lastname of the user
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.getUserAttribute(user, type, self.create_delegate_request_listener(listener))
+        self.getUserAttribute(user, type, self.create_delegate_request_listener(listener, True))
 
     def get_user_attribute(self, user, type):
         '''Get an attribute of a MegaUser.
@@ -863,7 +900,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaApi.USER_ATTR_LASTNAME = 2 Get the lastname of the user
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.getUserAttribute(type, self.create_delegate_request_listener(listener))
+        self.getUserAttribute(type, self.create_delegate_request_listener(listener, True))
 
     def get_user_attribute_by_type(self, type):
         '''Get an attribute of the current account.
@@ -881,7 +918,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param node - Node to cancel the retrieval of the preview
         :param listener - listener	MegaRequestListener to track this request
         '''
-        self.cancelGetThumbnail(node, self.create_delegate_request_listener(listener))
+        self.cancelGetThumbnail(node, self.create_delegate_request_listener(listener, True))
 
     def cancel_get_thumbnail(self, node):
     	'''Cancel the retrieval of a thumbnail.
@@ -897,7 +934,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param node - Node to cancel the retrieval of the preview
         :param listener - listener	MegaRequestListener to track this request
         '''
-        self.cancelGetPreview(node, self.create_delegate_request_listener(listener))
+        self.cancelGetPreview(node, self.create_delegate_request_listener(listener, True))
 
     def cancel_get_preview(self, node):
     	'''Cancel the retrieval of a preview.
@@ -915,7 +952,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param src_file_path - Source path of the file that will be set as thumbnail
         :param listener - MegaRequestListener to track this request
         '''
-        self.setThumbnail(node, src_file_path, self.create_delegate_request_listener(listener))
+        self.setThumbnail(node, src_file_path, self.create_delegate_request_listener(listener, True))
 
     def set_thumbnail(self, node, src_file_path):
     	'''Set the thumbnail of a MegaNode.
@@ -950,7 +987,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param src_file_path - Source path of the file that will be set as avatar
         :param listener - MegaRequestListener to track this request
         '''
-        self.setAvatar(src_file_path, self.create_delegate_request_listener(listener))
+        self.setAvatar(src_file_path, self.create_delegate_request_listener(listener, True))
 
     def set_avatar(self, src_file_path):
     	'''Set the avatar of the MEGA account.
@@ -972,7 +1009,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param value  New attribute value
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.setUserAttribute(type, value, self.create_delegate_request_listener(listener))
+        self.setUserAttribute(type, value, self.create_delegate_request_listener(listener, True))
 
     def set_user_attribute(self, type, value):
         '''Set an attribute of the current user.
@@ -995,7 +1032,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param node - MegaNode to get the public link
         :param listener - MegaRequestListener to track this request
         '''
-        self.exportNode(node, self.create_delegate_request_listener(listener))
+        self.exportNode(node, self.create_delegate_request_listener(listener, True))
 
     def export_node(self, node):
     	'''Generate a public link of a file/folder in MEGA.
@@ -1011,7 +1048,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param node - MegaNode to stop sharing
         :param listener - MegaRequestListener to track this request
         '''
-        self.disableExport(node, self.create_delegate_request_listener(listener))
+        self.disableExport(node, self.create_delegate_request_listener(listener, True))
 
     def disable_export(self, node):
     	'''Stop sharing a file/folder.
@@ -1025,7 +1062,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         The associated request type with this request is MegaRequest.TYPE_FETCH_NODES
         :param listener - MegaRequestListener to track this request
         '''
-        self.fetchNodes(self.create_delegate_request_listener(listener))
+        self.fetchNodes(self.create_delegate_request_listener(listener, True))
 
     def fetch_nodes(self):
     	'''Fetch the filesystem in MEGA.
@@ -1040,7 +1077,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaRequest.getMegaAccountDetails - Details of the MEGA account
         :param listener - MegaRequestListener to track this request
         '''
-        self.getAccountDetails(self.create_delegate_request_listener(listener))
+        self.getAccountDetails(self.create_delegate_request_listener(listener, True))
 
     def get_account_details(self):
         '''Get details about the MEGA account.
@@ -1059,7 +1096,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param transactions Boolean. Get transactions history if true. Do not get transactions history if false
         :param listener MegaRequestListener to track this request
         '''
-        self.getExtendedAccountDetails(sessions, purchases, transactions, self.create_delegate_request_listener(listener))
+        self.getExtendedAccountDetails(sessions, purchases, transactions, self.create_delegate_request_listener(listener, True))
 
     def get_extended_account_details(self, sessions, purchases, transactions):
         '''Get details about the MEGA account.
@@ -1098,7 +1135,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaRequest.getPricing - MegaPricing object with all pricing plans
         :param listener - MegaRequestListener to track this request
         '''
-        self.getPricing(self.create_delegate_request_listener(listener))
+        self.getPricing(self.create_delegate_request_listener(listener, True))
 
     def get_pricing(self):
     	'''Get the available pricing plans to upgrade a MEGA account.
@@ -1116,7 +1153,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param product_handle Handle of the product (see MegaApi.get_pricing())
         :param listener MegaRequestListener to track this request
         '''
-        self.getPaymentId(product_handle, self.create_delegate_request_listener(listener))
+        self.getPaymentId(product_handle, self.create_delegate_request_listener(listener, True))
 
     def get_payment_id(self, product_handle):
     	'''Get the payment id for an upgrade.
@@ -1141,7 +1178,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         a credit card to your account
         :param listener MegaRequestListener to track this request
         '''
-        self.upgradeAccount(product_handle, payment_method, self.create_delegate_request_listener(listener))
+        self.upgradeAccount(product_handle, payment_method, self.create_delegate_request_listener(listener, True))
 
     def upgrade_account(self, product_handle, payment_method):
     	'''Upgrade an account.
@@ -1162,7 +1199,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param receipt String the complete receipt from Google Play
         :param listener MegaRequestListener to track this request
         '''
-        self.submitPurchaseReceipt(receipt, self.create_delegate_request_listener(listener))
+        self.submitPurchaseReceipt(receipt, self.create_delegate_request_listener(listener, True))
 
     def submit_purchase_receipt(self, receipt):
     	'''Send the Google Play receipt after a correct purchase of subscription.
@@ -1190,7 +1227,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         '''
         self.creditCardStore(address_1, address_2, city, province, country, postal_code,
             first_name, last_name, credit_card, expire_month, expire_year, cv_2,
-            self.create_delegate_request_listener(listener))
+            self.create_delegate_request_listener(listener, True))
 
     def credit_card_store(self, address_1, address_2, city, province, country, postal_code,
         first_name, last_name, credit_card, expire_month, expire_year, cv_2):
@@ -1220,12 +1257,12 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaRequest.getNumber() - Number of credit card subscriptions
         :param listener MegaRequestListener to track this request
         '''
-        self.creditCardQuerySubscriptions(self.create_delegate_request_listener(listener))
+        self.creditCardQuerySubscriptions(self.create_delegate_request_listener(listener, True))
 
     def credit_card_query_subscriptions(self):
     	'''Get the credit card subscriptions of the account.
         '''
-        self.creditCardQuerySubscriptions())
+        self.creditCardQuerySubscriptions()
 
     def credit_card_cancel_subscriptions_with_listener(self, reason,  listener):
     	'''Cancel credit card subscriptions of the account.
@@ -1233,7 +1270,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param reason for cancellation it can be None
         :param listener MegaRequestListener to track this request
         '''
-        self.creditCardCancelSubscriptions(reason, self.create_delegate_request_listener(listener))
+        self.creditCardCancelSubscriptions(reason, self.create_delegate_request_listener(listener, True))
 
     def credit_card_cancel_subscriptions(self, reason):
     	'''Cancel credit card subscriptions of the account.
@@ -1251,7 +1288,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         request.getNumber() & (1 << MegaApi.PAYMENT_METHOD_CREDIT_CARD) != 0)
         :param listener MegaRequestListener to track this request
         '''
-        self.getPaymentMethods(self.create_delegate_request_listener(listener))
+        self.getPaymentMethods(self.create_delegate_request_listener(listener, True))
 
     def get_payment_methods(self):
     	'''Get the available payment methods.
@@ -1277,7 +1314,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param new_pass - new password
         :param listener - MegaRequestListener to track this request
         '''
-        self.changePassword(old_pass, new_pass, self.create_delegate_request_listener(listener))
+        self.changePassword(old_pass, new_pass, self.create_delegate_request_listener(listener, True))
 
     def change_password(self, old_pass, new_pass):
     	'''Change the password of the MEGA account.
@@ -1285,94 +1322,314 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param new_pass - new password
         '''
         self.changePassword(old_pass, new_pass)
-        
-    def add_contact(self, *args):
+
+    def add_contact_with_listener(self, email, listener):
     	'''Add a new contact to the MEGA account.
         The associated request type with this request is MegaRequest.TYPE_ADD_CONTACT Valid data in the MegaRequest object received on callbacks:
             MegaRequest.getEmail - Returns the email of the contact
         :param email - Email of the new contact
         :param listener - MegaRequestListener to track this request
+        :deprecated
         '''
-        return self.addContact(self.api, *args)
+        self.addContact(email, self.create_delegate_request_listener(listener, True))
+    def add_contact(self, email):
+    	'''Add a new contact to the MEGA account.
+        :param email - Email of the new contact
+        :deprecated
+        '''
+        self.addContact(email)
 
-    def invite_contact(self, *args):
-    	'''need clarification'''
-        return self.inviteContact(self.api, *args)
+    def invite_contact_with_listener(self, email, message, action, listener):
+    	'''Invite another person to be your MEGA contact.
+        The user does not need to be registered with MEGA. If the email is not associated with
+        a MEGA account, an invitation email will be sent with the text in the "message" parameter.
+        The associated request type with this request is MegaRequest.TYPE_INVITE_CONTACT.
+        Valid data in the MegaRequest object received on callbacks:
+            MegaRequest.getEmail() - Returns the email of the contact
+            MegaRequest.getText() - Returns the text of the invitation
+        :param email Email of the new contact
+        :param message Message for the user (can be null)
+        :param action Action for this contact request. Valid values are:
+            MegaContactRequest.INVITE_ACTION_ADD = 0
+            MegaContactRequest.INVITE_ACTION_DELETE = 1
+            MegaContactRequest.INVITE_ACTION_REMIND = 2
+        :param listener MegaRequestListenerInterface to track this request
+        '''
+        self.inviteContact(email, message, action, self.create_delegate_request_listener(listener, True))
 
-    def reply_contact_request(self, *args):
-    	'''need clarification'''
-        return self.replyContactRequest(self.api, *args)
+    def invite_contact(self, email, message, action):
+    	'''Invite another person to be your MEGA contact.
+        The user does not need to be registered with MEGA. If the email is not associated with
+        a MEGA account, an invitation email will be sent with the text in the "message" parameter.
+        :param email Email of the new contact
+        :param message Message for the user (can be null)
+        :param action Action for this contact request. Valid values are:
+            MegaContactRequest.INVITE_ACTION_ADD = 0
+            MegaContactRequest.INVITE_ACTION_DELETE = 1
+            MegaContactRequest.INVITE_ACTION_REMIND = 2
+        '''
+        self.inviteContact(email, message, action)
 
-    def remove_contact(self, *args):
+    def reply_contact_request_with_listener(self, request, action, listener):
+    	'''Reply to a contact request.
+        :param request Contact request. You can get your pending contact requests using
+        MegaApi.get_incoming_contact_requests()
+        :param action Action for this contact request. Valid values are:
+            MegaContactRequest.REPLY_ACTION_ACCEPT = 0
+            MegaContactRequest.REPLY_ACTION_DENY = 1
+            MegaContactRequest.REPLY_ACTION_IGNORE = 2
+        The associated request type with this request is MegaRequest.TYPE_REPLY_CONTACT_REQUEST.
+        Valid data in the MegaRequest object received on callbacks:
+            MegaRequest.getNodeHandle() - Returns the handle of the contact request
+            MegaRequest.getNumber() - Returns the action
+        :param listener MegaRequestListenerInterface to track this request
+        '''
+        self.replyContactRequest(request, action, self.create_delegate_request_listener(listener, True))
+
+    def reply_contact_request_(self, request, action):
+        '''Reply to a contact request
+        :param request Contact request. You can get your pending contact requests using
+        MegaApi.get_incoming_contact_requests()
+        :param action Action for this contact request. Valid values are:
+            MegaContactRequest.REPLY_ACTION_ACCEPT = 0
+            MegaContactRequest.REPLY_ACTION_DENY = 1
+            MegaContactRequest.REPLY_ACTION_IGNORE = 2
+        '''
+        self.replyContactRequest(request, action)
+
+    def remove_contact(self, user, listener):
     	'''Remove a contact to the MEGA account.
         The associated request type with this request is MegaRequest.TYPE_REMOVE_CONTACT Valid data in the MegaRequest object received on callbacks:
             MegaRequest.getEmail - Returns the email of the contact
         :param user - 	MegaUser of the contact (see MegaApi.getContact)
         :param listener - MegaRequestListener to track this request
         '''
-        return self.removeContact(self.api, *args)
+        self.removeContact(user, self.create_delegate_request_listener(listener, True))
 
-    def logout(self, listener=None):
+    def logout_from_account_with_listener(self, listener):
     	'''Logout of the MEGA account.
         The associated request type with this request is MegaRequest.TYPE_LOGOUT
         :param listener - MegaRequestListener to track this request
         '''
-        return self.logout(self.api, listener)
+        self.logout(self.create_delegate_request_listener(listener, True))
 
-    def local_logout(self, listener=None):
-    	'''need clarification'''
-        return self.localLogout(self.api, listener)
+    def logout_from_account(self):
+        '''Logout of the MEGA account.
+        '''
+        self.logout()
 
-    def submit_feedback(self, *args):
-    	'''need clarification'''
-        return self.submitFeedback(self.api, *args)
+    def local_logout_with_listener(self, listener):
+    	'''Logout of the MEGA account without invalidating the session.
+        The associated request type with this request is MegaRequest.TYPE_LOGOUT.
+        :param listener MegaRequestListener to track this request
+        '''
+        self.localLogout(self.create_delegate_request_listener(listener, True))
 
-    def report_debug_event(self, *args):
-    	'''need clarification'''
-        return self.reportDebugEvent(self.api, *args)
+    def local_logout():
+        '''Logout of the MEGA account without invalidating the session.
+        '''
+        self.localLogout()
 
-    def start_upload(self, *args):
+    def submit_feedback_with_listener(self, rating, comment, listener):
+    	'''Submit feedback about the app.
+        The user agent is used to identify the app. It can be set in MegaApi.MegaApi()
+        The associated request type with this request if MegaRequest.TYPE_REPORT_EVENT.
+        Valid data in the MegaRequest object received on callbacks:
+            MegaRequest,getParamType() Returns MegaApi.EVENT_FEEDBACK
+            MegaRequest.getText() Returns the comment about app
+            MegaRequest.getNumber() Returns the raiting for the app.
+        :param rating Integer to rate the app. Valid values: from 1 to 5.
+        :param comment Comment about the app.
+        :param listener MegaRequestListener to track this request
+        :Deprecated for internal usage
+        '''
+        self.submitFeedback(rating, comment, self.create_delegate_request_listener(listener, True))
+
+    def submit_feedback(self, rating, comment):
+    	'''Submit feedback about the app.
+        The user agent is used to identify the app. It can be set in MegaApi.MegaApi()
+        :param rating Integer to rate the app. Valid values: from 1 to 5.
+        :param comment Comment about the app.
+        :Deprecated for internal usage
+        '''
+        self.submitFeedback(rating, comment)
+
+    def report_debug_event_with_listener(self, text, listener):
+    	'''Send a debug report.
+        The user agent is used to identify the app. It can be set in MegaApi.MegaApi()
+        The associated request type with this request if MegaRequest.TYPE_REPORT_EVENT.
+        Valid data in the MegaRequest object received on callbacks:
+            MegaRequest,getParamType() Returns MegaApi.EVENT_DEBUG
+            MegaRequest.getText() Returns the debug message
+        :param text Debug message.
+        :param listener MegaRequestListener to track this request
+        :Deprecated for internal usage
+        '''
+        self.reportDebugEvent(text, self.create_delegate_request_listener(listener, True))
+
+    def report_debug_event(self, text):
+    	'''Send a debug report.
+        The user agent is used to identify the app. It can be set in MegaApi.MegaApi()
+        The associated request type with this request if MegaRequest.TYPE_REPORT_EVENT.
+        Valid data in the MegaRequest object received on callbacks:
+            MegaRequest,getParamType() Returns MegaApi.EVENT_DEBUG
+            MegaRequest.getText() Returns the debug message
+        :param text Debug message.
+        :Deprecated for internal usage
+        '''
+        self.reportDebugEvent(text)
+
+    # TRANSFERS
+
+    def start_upload_with_listener(self, local_path, parent, listener):
     	'''Upload a file.
-        :param localPath - Local path of the file
+        :param local_path - Local path of the file
         :param parent - Parent node for the file in the MEGA account
         :param listener - MegaTransferListener to track this transfer
         '''
-        return self.startUpload(self.api, *args)
+        self.startUpload(local_path, parent, self.create_delegate_transfer_listener(listener, True))
 
-    def start_download(self, *args):
-    	'''Download a file from MEGA.
-        :param node - MegaNode that identifies the file
-        :param localPath - Destination path for the file If this path is a local folder, it must end with a '\' or '/' character and the file name in MEGA will be used to store a file inside that folder. If the path doesn't finish with one of these characters, the file will be downloaded to a file in that path.
+    def start_upload(self, local_path, parent):
+    	'''Upload a file.
+        :param local_path - Local path of the file
+        :param parent - Parent node for the file in the MEGA account
+        '''
+        self.startUpload(local_path, parent)
+
+    def start_upload_custom_modification_time_with_listener(self, local_path, parent, mtime, listener):
+    	'''Upload a file with custom modification time.
+        :param local_path - Local path of the file
+        :param parent - Parent node for the file in the MEGA account
+        :param mtime Custom modification time for the file in MEGA (in seconds since the
+        epoch)
         :param listener - MegaTransferListener to track this transfer
         '''
-        return self.startDownload(self.api, *args)
+        self.startUpload(local_path, parent, mtime, self.create_delegate_transfer_listener(listener, True))
 
-    def start_streaming(self, *args):
-    	'''Start an streaming download.
+    def start_upload_custom_modification_time(self, local_path, parent, mtime):
+    	'''Upload a file with custom modification time.
+        :param local_path - Local path of the file
+        :param parent - Parent node for the file in the MEGA account
+        :param mtime Custom modification time for the file in MEGA (in seconds since the
+        epoch)
+        '''
+        self.startUpload(local_path, parent, mtime)
+
+    def start_upload_custom_name_with_listener(self, local_path, parent, name, listener):
+    	'''Upload a file with custom name.
+        :param local_path - Local path of the file
+        :param parent - Parent node for the file in the MEGA account
+        :param name Custom file name for the file in MEGA
+        :param listener MegaTransferListener to track this transfer
+        '''
+        self.startUpload(local_path, parent, name, self.create_delegate_transfer_listener(listener, True))
+
+    def start_upload_custom_name(self, local_path, parent, name):
+    	'''Upload a file with custom name.
+        :param local_path - Local path of the file
+        :param parent - Parent node for the file in the MEGA account
+        :param name Custom file name for the file in MEGA
+        '''
+        self.startUpload(local_path, parent, name)
+
+    def start_upload_custom_name_modification_time_with_listener(self, local_path, parent,
+        name, mtime, listener):
+    	'''Upload a file with custom name and modification time.
+        :param local_path - Local path of the file
+        :param parent - Parent node for the file in the MEGA account
+        :param name Custom file name for the file in MEGA
+        :param mtime Custom modification time for the file in MEGA (in seconds since the
+        epoch)
+        :param listener MegaTransferListener to track this transfer
+        '''
+        self.startUpload(local_path, parent, name, mtime, self.create_delegate_transfer_listener(listener, True))
+
+    def start_upload_custom_name_modification_time(self, local_path, parent,
+        name, mtime):
+    	'''Upload a file with custom name and modification time.
+        :param local_path - Local path of the file
+        :param parent - Parent node for the file in the MEGA account
+        :param name Custom file name for the file in MEGA
+        :param mtime Custom modification time for the file in MEGA (in seconds since the
+        epoch)
+        '''
+        self.startUpload(local_path, parent, name, mtime)
+
+    def start_download_with_listener(self, node, local_path, listener):
+    	'''Download a file from MEGA.
+        :param node - MegaNode that identifies the file
+        :param local_path - Destination path for the file If this path is a local folder,
+        it must end with a '\' or '/' character and the file name in MEGA will be used to
+        store a file inside that folder. If the path doesn't finish with one of these characters,
+        the file will be downloaded to a file in that path.
+        :param listener - MegaTransferListener to track this transfer
+        '''
+        self.startDownload(node, local_path, self.create_delegate_transfer_listener(listener, True))
+
+    def start_download(self, node, local_path):
+    	'''Download a file from MEGA.
+        :param node - MegaNode that identifies the file
+        :param local_path - Destination path for the file If this path is a local folder,
+        it must end with a '\' or '/' character and the file name in MEGA will be used to
+        store a file inside that folder. If the path doesn't finish with one of these characters,
+        the file will be downloaded to a file in that path.
+        '''
+        self.startDownload(node, local_path)
+
+    def start_streaming(self, node, start_pos, size, listener):
+    	'''Start a streaming download.
         Streaming downloads don't save the downloaded data into a local file. It is provided in MegaTransferListener.onTransferUpdate in a byte buffer.
-        Only the MegaTransferListener passed to this function will receive MegaTransferListener.onTransferData callbacks. MegaTransferListener objects registered with MegaApi.addTransferListener won't receive them for performance reasons
+        Only the MegaTransferListener passed to this function will receive MegaTransferListener.onTransferData callbacks.
+        MegaTransferListener objects registered with MegaApi.addTransferListener won't receive them for performance reasons
         :param node - MegaNode that identifies the file (public nodes aren't supported yet)
-        :param startPos - First byte to download from the file
+        :param start_pos - First byte to download from the file
         :param size - Size of the data to download
         :param listener - MegaTransferListener to track this transfer
         '''
-        return self.startStreaming(self.api, *args)
+        self.startStreaming(node, start_pos, size, self.create_delegate_transfer_listener(listener, True))
 
-    def cancel_transfer(self, *args):
+    def cancel_transfer_with_listener(self, transfer, listener):
     	'''Cancel a transfer.
-        When a transfer is cancelled, it will finish and will provide the error code MegaError.API_EINCOMPLETE in MegaTransferListener.onTransferFinish and MegaListener.onTransferFinish
+        When a transfer is cancelled, it will finish and will provide the error code MegaError.API_EINCOMPLETE
+        in MegaTransferListener.onTransferFinish and MegaListener.onTransferFinish
         The associated request type with this request is MegaRequest.TYPE_CANCEL_TRANSFER Valid data in the MegaRequest object received on callbacks:
             MegaRequest.getTransferTag - Returns the tag of the cancelled transfer (MegaTransfer.getTag)
-        :param transfer - MegaTransfer object that identifies the transfer You can get this object in any MegaTransferListener callback or any MegaListener callback related to transfers.
+        :param transfer - MegaTransfer object that identifies the transfer You can get this object
+        in any MegaTransferListener callback or any MegaListener callback related to transfers.
         :param listener - MegaRequestListener to track this request
         '''
-        return self.cancelTransfer(self.api, *args)
+        self.cancelTransfer(transfer, self.create_delegate_request_listener(listener, True))
 
-    def cancel_transfer_by_tag(self, *args):
-    	'''need clarification'''
-        return self.cancelTransferByTag(self.api, *args)
+    def cancel_transfer(self, transfer):
+    	'''Cancel a transfer.
+        :param transfer - MegaTransfer object that identifies the transfer You can get this object
+        in any MegaTransferListener callback or any MegaListener callback related to transfers.
+        '''
+        self.cancelTransfer(transfer)
 
-    def cancel_transfers(self, *args):
+    def cancel_transfer_by_tag_with_listener(self, transfer_tag, listener):
+    	'''Cancel the transfer with a specific tag.
+        When a transfer is cancelled, it will finish and will provide error code
+        MegaError.API_EINCOMPLETE in MegaTransferListener.onTransferFinish() and
+        MegaListener.onTransferFinish().
+        The associated request type with this request is MegaRequest.TYPE_CANCEL_TRANSFER
+        Valid data in the MegaRequest object received on callbacks:
+            MegaRequest.getTransferTag() Returns the tag of the cancelled transfer
+            (MegaTransfer.getTag).
+        :param transfer_tag tag that identifies the transfer. You can get this tag
+        using MegaTransfer.getTag().
+        :param listener MegaRequestListener to track this request
+        '''
+        self.cancelTransferByTag(transfer_tag, self.create_delegate_request_listener(listener, True))
+
+    def cancel_transfer_by_tag(self, transfer_tag):
+        '''Cancel transfer with a specific tag.
+        :param transfer_tag tag that identifies the transfer. You can get this
+        tag using MegaTransfer.getTag()
+        '''
+        self.cancelTransferByTag(transfer_tag)
+
+    def cancel_transfers_with_listener(self, type, listener):
     	'''Cancel all transfers of the same type.
         The associated request type with this request is MegaRequest.TYPE_CANCEL_TRANSFERS Valid data in the MegaRequest object received on callbacks:
             MegaRequest.getParamType - Returns the first parameter
@@ -1381,145 +1638,180 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaTransfer.TYPE_UPLOAD = 1
         :param listener - MegaRequestListener to track this request
         '''
-        return self.cancelTransfers(self.api, *args)
+        self.cancelTransfers(type, self.create_delegate_request_listener(listener, True))
 
-    def pause_transfers(self, *args):
+    def cancel_transfers(self, type):
+        '''Cancel all transfers of the same type.
+        :param type - 	Type of transfers to cancel. Valid values are:
+            MegaTransfer.TYPE_DOWNLOAD = 0
+            MegaTransfer.TYPE_UPLOAD = 1
+        '''
+        self.cancel_transfers(type)
+
+    def pause_transfers_with_listener(self, pause, listener):
     	'''Pause/resume all transfers.
         The associated request type with this request is MegaRequest.TYPE_PAUSE_TRANSFERS Valid data in the MegaRequest object received on callbacks:
             MegaRequest.getFlag - Returns the first parameter
         :param pause - True to pause all transfers or False to resume all transfers
         :param listener - MegaRequestListener to track this request
         '''
-        return self.pauseTransfers(self.api, *args)
+        self.pauseTransfers(pause, self.create_delegate_request_listener(listener, True))
 
-    def are_tansfers_paused(self, *args):
-    	'''need clarification'''
-        return self.areTansfersPaused(self.api, *args)
-
-    def set_upload_limit(self, *args):
-    	'''Set the upload speed limit.
-        The limit will be applied on the server side when starting a transfer. Thus the limit won't be applied for already started uploads and it's applied per storage server.
-        :param bpslimit - -1 to automatically select the limit, 0 for no limit, otherwise the speed limit in bytes per second
+    def pause_transfers(self, pause):
+    	'''Pause/resume all transfers.
+        :param pause - True to pause all transfers or False to resume all transfers
         '''
-        return self.setUploadLimit(self.api, *args)
+        self.pauseTransfers(pause)
 
-    def set_download_method(self, *args):
-    	'''need clarification'''
-        return self.setDownloadMethod(self.api, *args)
+    def set_upload_limit(self, bps_limit):
+    	'''Set the upload speed limit.
+        The limit will be applied on the server side when starting a transfer.
+        Thus the limit won't be applied for already started uploads and it's applied per storage server.
+        :param bps_limit - -1 to automatically select the limit, 0 for no limit,
+        otherwise the speed limit in bytes per second
+        '''
+        self.setUploadLimit(bps_limit)
 
-    def set_upload_method(self, *args):
-    	'''need clarification'''
-        return self.setUploadMethod(self.api, *args)
+    def get_transfer_by_tag(self, transfer_tag):
+    	'''Get the transfer with a transfer tag.
+        MegaTransfer.getTag() can be used to get transfer tag.
+        :param transfer_tag
+        :Returns MegaTransfer object with the tag, or null if there is not any
+        active transfers with it.
+        '''
+        return self.getTransferByTag(self.api, args)
 
-    def get_download_method(self):
-    	'''need clarification'''
-        return self.getDownloadMethod(self.api)
-
-    def get_upload_method(self):
-    	'''need clarification'''
-        return self.getUploadMethod(self.api)
-
-    def get_transfer_by_tag(self, *args):
-    	'''need clarification'''
-        return self.getTransferByTag(self.api, *args)
-
-    def update(self):
-    	'''Force a loop of the SDK thread.'''
-        return self.update(self.api)
+    def do_update(self):
+    	'''Force a loop of the SDK thread.
+        :Deprecated
+        '''
+        self.update()
 
     def is_waiting(self):
     	'''Check if the SDK is waiting for the server.
-		:Returns true if the SDK is waiting for the server to complete a request
+		:Returns True if the SDK is waiting for the server to complete a request
 		'''
-        return self.isWaiting(self.api)
+        return self.isWaiting()
 
     def get_num_pending_uploads(self):
     	'''Get the number of pending uploads.
 		:Returns the number of pending uploads.
+        :Deprecated
 		'''
-        return self.getNumPendingUploads(self.api)
+        return self.getNumPendingUploads()
 
     def get_num_pending_downloads(self):
     	'''Get the number of pending downloads.
 		:Returns the number of pending downloads.
+        :Deprecated
 		'''
-        return self.getNumPendingDownloads(self.api)
+        return self.getNumPendingDownloads()
 
     def get_total_uploads(self):
     	'''Get the number of queued uploads since the last call to MegaApi.resetTotalUploads.
 		:Returns number of queued uploads since the last call to MegaApi.resetTotalUploads
+        :Deprecated
 		'''
-        return self.getTotalUploads(self.api)
+        return self.getTotalUploads()
 
     def get_total_downloads(self):
     	'''Get the number of queued uploads since the last call to MegaApi.resetTotalDownloads.
 		:Returns number of queued uploads since the last call to MegaApi.resetTotalDownloads
+        :Deprecated
 		'''
-        return self.getTotalDownloads(self.api)
+        return self.getTotalDownloads()
 
     def reset_total_downloads(self):
-    	'''Reset the number of total downloads This function resets the number returned by MegaApi.getTotalDownloads.
+    	'''Reset the number of total downloads This function resets the number returned by MegaApi.get_total_downloads().
+        :Deprecated
 		'''
-        return self.resetTotalDownloads(self.api)
+        self.resetTotalDownloads()
 
     def reset_total_uploads(self):
-    	'''Reset the number of total uploads This function resets the number returned by MegaApi.getTotalUploads.
+    	'''Reset the number of total uploads This function resets the number returned by MegaApi.get_total_uploads().
+        :Deprecated
 		'''
-        return self.resetTotalUploads(self.api)
+        self.resetTotalUploads()
 
     def get_total_downloaded_bytes(self):
     	'''Get the total downloaded bytes since the creation of the MegaApi object.
 		:Returns total downloaded bytes since the creation of the MegaApi object
+        :Deprecated
 		'''
-        return self.getTotalDownloadedBytes(self.api)
+        return self.getTotalDownloadedBytes()
 
-    def getTotalUploadedBytes(self):
+    def get_total_uploaded_bytes(self):
     	'''Get the total uploaded bytes since the creation of the MegaApi object.
 		:Returns total uploaded bytes since the creation of the MegaApi object
+        :Deprecated
 		'''
-        return self.getTotalUploadedBytes(self.api)
+        return self.getTotalUploadedBytes()
 
-    def updateStats(self):
+    def update_stats(self):
     	'''Force a loop of the SDK thread. '''
-        return self.updateStats(self.api)
+        self.updateStats()
 
-    def get_num_children(self, *args):
+    def get_transfers(self):
+    	'''Get all active transfers.
+		You take the ownership of the returned value
+		:Returns list with all active downloads or uploads
+		'''
+        return self.transfer_list_to_array(self.getTransfers())
+
+    def get_transfers_based_on_type(self, type):
+    	'''Get all active transfers based on type.
+		You take the ownership of the returned value
+		:Returns list with all active downloads or uploads
+		'''
+        return self.transfer_list_to_array(self.getTransfers(type))
+
+    # FILESYSTEM METHODS
+
+    def get_num_children(parent):
     	'''Get the number of child nodes.
         If the node doesn't exist in MEGA or isn't a folder, this function returns 0
         This function doesn't search recursively, only returns the direct child nodes.
         :param parent - Parent node
         :Returns Number of child nodes
         '''
-        return self.getNumChildren(self.api, *args)
+        return self.getNumChildren(parent)
 
-    def get_num_child_files(self, *args):
+    def get_num_child_files(self, args):
     	'''Get the number of child files of a node.
         If the node doesn't exist in MEGA or isn't a folder, this function returns 0
         This function doesn't search recursively, only returns the direct child files.
         :parent parent - Parent node
         :Returns Number of child files
         '''
-        return self.getNumChildFiles(self.api, *args)
+        return self.getNumChildFiles(self.api, args)
 
-    def get_num_child_folders(self, *args):
+    def get_num_child_folders(self, parent):
     	'''Get the number of child folders of a node.
         If the node doesn't exist in MEGA or isn't a folder, this function returns 0
         This function doesn't search recursively, only returns the direct child folders.
         :param parent - Parent node
         :Returns Number of child folders
         '''
-        return self.getNumChildFolders(self.api, *args)
+        return self.getNumChildFolders(parent)
 
-    def get_index(self, *args):
+    def get_index_with_order(self, node, order):
     	'''Get the current index of the node in the parent folder for a specific sorting order.
         If the node doesn't exist or it doesn't have a parent node (because it's a root node) this function returns -1
         :param node - Node to check
         :param order - Sorting order to use
         :Returns index of the node in its parent folder
         '''
-        return self.getIndex(self.api, *args)
+        return self.getIndex(node, order)
 
-    def get_child_node(self, *args):
+    def get_index(self, node):
+    	'''Get the current index of the node in the parent folder.
+        If the node doesn't exist or it doesn't have a parent node (because it's a root node) this function returns -1
+        :param node - Node to check
+        :Returns index of the node in its parent folder
+        '''
+        return self.getIndex(node)
+
+    def get_child_node(self, parent, name):
     	'''Get the child node with the provided name.
         If the node doesn't exist, this function returns None
         You take the ownership of the returned value
@@ -1527,74 +1819,86 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         :param name - name of the node
         :Returns The MegaNode that has the selected parent and name
         '''
-        return self.getChildNode(self.api, *args)
+        return self.getChildNode(parent, name)
 
-    def get_parent_node(self, *args):
+    def get_parent_node(self, node):
     	'''Get the parent node of a MegaNode.
         If the node doesn't exist in the account or it is a root node, this function returns NULL
         You take the ownership of the returned value.
         :param node - MegaNode to get the parent
         :Returns the parent of the provided node
         '''
-        return self.getParentNode(self, *args)
+        return self.getParentNode(node)
 
-    def get_node_path(self, *args):
+    def get_node_path(self, node):
     	'''Get the path of a MegaNode.
         If the node doesn't exist, this function returns NULL. You can recoved the node later using MegaApi.getNodeByPath except if the path contains names with '/', '\' or ':' characters.
         You take the ownership of the returned value
         :param node - MegaNode for which the path will be returned
         :Returns the path of the node
         '''
-        return self.getNodePath(self.api, *args)
+        return self.getNodePath(node)
 
-    def get_node_by_path(self, *args):
+    def get_node_by_path_base_folder(self, path, base_folder):
     	'''Get the MegaNode in a specific path in the MEGA account.
         The path separator character is '/' The Root node is / The Inbox root node is //in/ The Rubbish root node is //bin/
         Paths with names containing '/', '\' or ':' aren't compatible with this function.
-        It is needed to be logged in and to have successfully completed a fetchNodes request before calling this function. Otherwise, it will return None.
-        You take the ownership of the returned value
         :param path - Path to check
-        :param n - Base node if the path is relative
+        :param base_node Base node if the path is relative
         :Returns The MegaNode object in the path, otherwise None
         '''
-        return self.getNodeByPath(self.api, *args)
+        return self.getNodeByPath(path, base_folder)
 
-    def get_node_by_handle(self, *args):
+    def get_node_by_path(self, path):
+    	'''Get the MegaNode in a specific path in the MEGA account.
+        The path separator character is '/' The Root node is / The Inbox root node is //in/ The Rubbish root node is //bin/
+        Paths with names containing '/', '\' or ':' aren't compatible with this function.
+        :param path - Path to check
+        :Returns The MegaNode object in the path, otherwise None
+        '''
+        return self.getNodeByPath(path)
+
+    def get_node_by_handle(self, handle):
     	'''Get the MegaNode that has a specific handle.
         You can get the handle of a MegaNode using MegaNode.getHandle. The same handle can be got in a Base64-encoded string using MegaNode.getBase64Handle. Conversions between these formats can be done using MegaApi.base64ToHandle and MegaApi.handleToBase64.
         It is needed to be logged in and to have successfully completed a fetchNodes request before calling this function. Otherwise, it will return None.
         You take the ownership of the returned value.
-        :param MegaHandler - Node handle to check
+        :param handle - Node handle to check
         :Returns MegaNode object with the handle, otherwise None
         '''
-        return self.getNodeByHandle(self.api, *args)
+        return self.getNodeByHandle(handle)
 
-    def get_contact_request_by_handle(self, *args):
-    	'''need clarification'''
-        return self.getContactRequestByHandle(self.api, *args)
+    def get_contact_request_by_handle(self, handle):
+    	'''Get the MegaContactRequest that has a specific handle.
+        You can get the handle of a MegaContactRequest using MegaContactRequest.getHandle().
+        You take the ownership of the returned value.
+        :param handle Contact request handle to check.
+        :Returns MegaContactRequest object with handle, otherwise None
+        '''
+        return self.getContactRequestByHandle(handle)
 
 
-    def get_contact(self, *args):
+    def get_contact(self, email):
     	'''Get the MegaUser that has a specific email address.
         You can get the email of a MegaUser using MegaUser.getEmail
         You take the ownership of the returned value
         :param email - Email address to check
         :Returns MegaUser that has the email address, otherwise None
         '''
-        return self.getContact(self.api, *args)
+        return self.getContact(email)
 
 
 
-    def is_shared(self, *args):
+    def is_shared(self, node):
     	'''Check if a MegaNode is being shared.
         For nodes that are being shared, you can get a a list of MegaShare objects using MegaApi.getOutShares
         :param node - Node to check
-        :Returns True if the MegaNode is being shared, otherwise false
+        :Returns True if the MegaNode is being shared, otherwise False
         '''
-        return self.isShared(self.api, *args)
+        return self.isShared(node)
 
 
-    def get_access(self, *args):
+    def get_access(self, node):
     	'''Get the access level of a MegaNode.
         :param node - MegaNode to check
         :Returns Access level of the node Valid values are:
@@ -1604,51 +1908,58 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaShare.ACCESS_READ
             MegaShare.ACCESS_UNKNOWN
         '''
-        return self.getAccess(self.api, *args)
+        return self.getAccess(node)
 
-    def get_size(self, *args):
+    def get_size(self, node):
     	'''Get the size of a node tree.
         If the MegaNode is a file, this function returns the size of the file. If it's a folder, this fuction returns the sum of the sizes of all nodes in the node tree.
         :param node - Parent node
         :Returns size of the node tree
         '''
-        return self.getSize(self.api, *args)
+        return self.getSize(node)
 
-    def get_fingerprint(self, *args):
+    def get_fingerprint(self, node):
     	'''Get a Base64-encoded fingerprint for a node.
         If the node doesn't exist or doesn't have a fingerprint, this function returns None.
         You take the ownership of the returned value
         :param node - Node for which we want to get the fingerprint
         :Returns Base64-encoded fingerprint for the file
         '''
-        return self.getFingerprint(self.api, *args)
+        return self.getFingerprint(node)
 
-    def get_node_by_fingerprint(self, *args):
+    def get_fingerprint(self, file_path):
+    	'''Get a Base64-encoded fingerprint for a local file.
+        The fingerprint is created taking into account the modification time of
+        the file and file contents. This fingerprint can be used to get a
+        corresponding node in MEGA using MegaApi.get_node_by_fingerprint()
+        If the file can't be found or can't be opened, this function returns
+        None.
+        :param file_path - Local file path
+        :Returns Base64-encoded fingerprint for the file
+        '''
+        return self.getFingerprint(node)
+
+    def get_node_by_fingerprint(self, fingerprint):
     	'''Returns a node with the provided fingerprint.
         If there isn't any node in the account with that fingerprint, this function returns None.
         You take the ownership of the returned value.
         :param fingerprint - Fingerprint to check
         :Returns MegaNode object with the provided fingerprint
         '''
-        return self.getNodeByFingerprint(self.api, *args)
+        return self.getNodeByFingerprint(fingerprint)
 
-    def has_fingerprint(self, *args):
+    def get_node_by_fingerprint_preferred_parent(self, fingerprint, preferred_parent):
+        return self.getNodeByFingerprint(fingerprint, preferred_parent)
+
+    def has_fingerprint(self, fingerprint):
     	'''Check if the account already has a node with the provided fingerprint.
         A fingerprint for a local file can be generated using MegaApi.getFingerprint
         :param fingerprint - Fingerprint to check
         :Returns True if the account contains a node with the same fingerprint
         '''
-        return self.hasFingerprint(self.api, *args)
+        return self.hasFingerprint(fingerprint)
 
-    def get_CRC(self, *args):
-    	'''need clarification'''
-        return self.getCRC(self.api, *args)
-
-    def get_node_by_CRC(self, *args):
-    	'''need clarification'''
-        return self.getNodeByCRC(self.api, *args)
-
-    def check_access(self, *args):
+    def check_access(self, node, level):
     	'''Check if a node has an access level.
         :param node - Node to check
         :param level - Access level to check Valid values for this parameter are:
@@ -1656,16 +1967,16 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaShare.ACCESS_FULL
             MegaShare.ACCESS_READWRITE
             MegaShare.ACCESS_READ
-        :Returns MegaError object with the result: Valid values for the error code are:
+        :Returns MegaError object with the result.Valid values for the error code are:
             MegaError.API_OK - The node can be moved to the target
             MegaError.API_EACCESS - The node can't be moved because of permissions problems
             MegaError.API_ECIRCULAR - The node can't be moved because that would create a circular linkage
             MegaError.API_ENOENT - The node or the target doesn't exist in the account
             MegaError.API_EARGS - Invalid parameters
         '''
-        return self.checkAccess(self.api, *args)
+        return self.checkAccess(node, level)
 
-    def check_move(self, *args):
+    def check_move(self, node, target):
     	'''Check if a node can be moved to a target node.
         node - Node to check
         target - Target for the move operation
@@ -1676,76 +1987,118 @@ This is a time consuming operation (specially for low-end mobile devices). Since
             MegaError.API_ENOENT - The node or the target doesn't exist in the account
             MegaError.API_EARGS - Invalid parameters
         '''
-        return self.checkMove(self.api, *args)
+        return self.checkMove(node, target)
 
     def get_root_node(self):
     	'''Returns the root node of the account.
         You take the ownership of the returned value
-        If you haven't successfully called MegaApi.fetchNodes before, this function returns None
+        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
         :Returns Root node of the account
         '''
-        return self.getRootNode(self.api)
+        return self.getRootNode()
 
     def get_inbox_node(self):
     	'''Returns the inbox node of the account.
         You take the ownership of the returned value
-        If you haven't successfully called MegaApi.fetchNodes before, this function returns None
+        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
         :Returns Inbox node of the account
         '''
-        return self.getInboxNode(self.api)
+        return self.getInboxNode()
 
     def get_rubbish_node(self):
     	'''Returns the rubbish node of the account.
         You take the ownership of the returned value
-        If you haven't successfully called MegaApi.fetchNodes before, this function returns None
+        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
         :Returns Rubbish node of the account
         '''
-        return self.getRubbishNode(self.api)
-
-    def process_mega_tree(self, *args):
-    	'''Process a node tree using a MegaTreeProcessor implementation.
-		:param node - The parent node of the tree to explore
-		:param processor - MegaTreeProcessor that will receive callbacks for every node in the tree
-		:param recursive - True if you want to recursively process the whole node tree. False if you want to process the children of the node only
-		:Returns True  if all nodes were processed. False otherwise (the operation can be cancelled by MegaTreeProcessor.processMegaNode())
-        '''
-        return self.processMegaTree(self.api, *args)
-
-    def create_public_file_node(self, *args):
-    	'''need clarification'''
-        return self.createPublicFileNode(self.api, *args)
-
-    def create_public_folder_node(self, *args):
-    	'''need clarification'''
-        return self.createPublicFolderNode(self.api, *args)
+        return self.getRubbishNode()
 
     def get_version(self):
-    	'''need clarification'''
-        return self.getVersion(self.api)
+    	'''Get the SDK version.
+        :Returns the SDK version
+        '''
+        return self.getVersion()
 
     def get_user_agent(self):
-    	'''need clarification'''
-        return self.getUserAgent(self.api)
+    	'''Get the User-Agent header used by the SDK.
+        :Returns User-Agent used by the SDK.
+        '''
+        return self.getUserAgent()
 
-    def change_api_url(self, *args):
-    	'''need clarification'''
-        return self.changeApiUrl(self.api, *args)
+    def change_api_url(self, api_url):
+    	'''Changed the API URL.
+        Please note, this method does not disable public key pinning.
+        :param api_url The API URL to change
+        '''
+        self.changeApiUrl(api_url)
 
-    def escape_fs_incompatible(self, *args):
-    	'''need clarification'''
-        return self.escapeFsIncompatible(self.api, *args)
+    def change_api_url_disable_pkp(self, api_url, disable_pkp):
+    	'''Changed the API URL.
+        Please note, this method does not disable public key pinning.
+        :param api_url The API URL to change
+        :param disable_pkp boolean. Disable public key pinning if True. Do not
+        disable public key binning if False.
+        '''
+        self.changeApiUrl(api_url, disable_pkp)
 
-    def unescape_fs_incompatible(self, *args):
-    	'''need clarification'''
-        return self.unescapeFsIncompatible(self.api, *args)
+    def escape_fs_incompatible(self, name):
+    	'''Make a name suitable for a file name in the local filesystem.
+        This function escapes (%xx) forbidden characters in the local
+        filesystem if needed.You can revert this operation using
+        MegaApi.unescape_fs_incompatible()
+        :param name Name to convert
+        :Returns Converted name
+        '''
+        return self.escapeFsIncompatible(name)
 
-    def create_thumbnail(self, *args):
-    	'''need clarification'''
-        return self.createThumbnail(self.api, *args)
+    def unescape_fs_incompatible(self, local_name):
+    	'''Unescape a file name escaped with MegaApi.unescape_fs_incompatible().
+        :param local_name Escape name to convert
+        :Returns Converted name
+        '''
+        return self.unescapeFsIncompatible(local_name)
 
-    def create_preview(self, *args):
-    	'''need clarification'''
-        return self.createPreview(self.api, *args)
+    def create_thumbnail(self, image_path, dst_path):
+    	'''Create a thumbnail for an image.
+        :param image_path Image path.
+        :param dst_path Destination path for the thumbnail (including the file name).
+        :Returns True if the thumbnail was successfully created, otherwise False.
+        '''
+        return self.createThumbnail(image_path, dst_path)
+
+    def create_preview(self, image_path, dst_path):
+    	'''Create a preview for an image.
+        :param image_path Image path.
+        :param dst_path Destination path for the preview (including the file name).
+        :Returns True if the preview was successfully created, otherwise False.
+        '''
+        return self.createPreview(image_path, dst_path)
+
+    def base64_to_base32(self, base64):
+        '''Convert a Base64 string to Base32.
+        If the input pointer is None, function will return None.
+        If the input character array is not valid base64 string the
+        effect is undefined
+        :param base64 null-terminated base64 character array.
+        :Returns null-terminated base32 character array.
+        '''
+        return self.base64ToBase32(base64)
+
+    def base32_to_base64(base32):
+        '''Convert a Base32 string to Base64.
+        If the input pointer is None, function will return None.
+        If the input character array is not valid base32 string the
+        effect is undefined
+        :param base32 null-terminated base64 character array.
+        :Returns null-terminated base64 character array.
+        '''
+        return self.base32ToBase64(base32)
+
+    def remove_recursively(self, local_path):
+        '''Recursively removes a file
+        :param local_path path to file
+        '''
+        self.removeRecursively(local_path)
 
     def get_contacts(self):
     	'''Get all contacts of this MEGA account.
@@ -1836,14 +2189,14 @@ This is a time consuming operation (specially for low-end mobile devices). Since
         '''
         return self.contact_request_list_to_array(self.getOutgoingContactRequests())
 
-    def search(self, parent, search_string):
+    def search_item(self, parent, search_string):
     	'''Search nodes containing a search string in their name.
 		The search is case-insensitive.
     	:param node	The parent node of the tree to explore
     	:param searchString	Search string. The search is case-insensitive
 		:Returns list of nodes that contain the desired string in their name
     	'''
-        return self.node_list_to_array(super(MegaApiPython, self).search(parent, search_string))
+        return self.node_list_to_array(self.search(parent, search_string))
 
     def search_recursively(self, parent, search_string, recursive):
     	'''Search nodes containing a search string in their name.
@@ -1853,21 +2206,7 @@ This is a time consuming operation (specially for low-end mobile devices). Since
     	:param recursive	True if you want to seach recursively in the node tree. False if you want to seach in the children of the node only
 		:Returns list of nodes that contain the desired string in their name
     	'''
-        return self.node_list_to_array(super(MegaApiPython, self).search(parent, search_string, recursive))
-
-    def get_transfers(self):
-    	'''Get all active transfers.
-		You take the ownership of the returned value
-		:Returns list with all active downloads or uploads
-		'''
-        return self.transfer_list_to_array(self.getTransfers())
-
-    def get_transfers_based_on_type(self, type):
-    	'''Get all active transfers based on type.
-		You take the ownership of the returned value
-		:Returns list with all active downloads or uploads
-		'''
-        return self.transfer_list_to_array(self.getTransfers(type))
+        return self.node_list_to_array(self.search(parent, search_string, recursive))
 
     # PRIVATE METHODS
 
@@ -2083,11 +2422,11 @@ class DelegateMegaRequestListener(MegaRequestListener):
         '''
         return self.listener
 
-    def onRequestStart(self, mega_api, request):
+    def onRequestStart(self, api, request):
         '''This function is called when a request is about to start being processed.
         The SDK retains the ownership of the request parameter. Do not it use after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the request
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the request
         :param request Information about the request.
         '''
         if self.listener is not None:
@@ -2096,13 +2435,13 @@ class DelegateMegaRequestListener(MegaRequestListener):
 
 
 
-    def onRequestFinish(self, mega_api, request, error):
+    def onRequestFinish(self, api, request, error):
         '''This function is called when a request has finished.
         There will be no further callbacks related to this request.
         If the request completed without problems, the error code will be API_OK.
         The SDK retains the ownership of the request parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the request
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the request
         :param request Information about the request
         :param error Information about error.
         '''
@@ -2111,14 +2450,14 @@ class DelegateMegaRequestListener(MegaRequestListener):
             mega_error = error.copy()
             self.listener.onRequestFinish(self.mega_api, mega_request, mega_error)
         if single_listener:
-            mega_api.free_request_listener()
+            self.mega_api.free_request_listener()
 
-    def onRequestUpdate(self, mega_api, request):
+    def onRequestUpdate(self, api, request):
         '''This function is called to get details about the progress of a request.
         Currently, this callback is only used for fetchNodes requests (MegaRequest.TYPE_FETCH_NODES).
         The SDK retains the ownership of the request parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the request
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the request
         :param request Information about the request
         '''
         if self.listener is not None:
@@ -2127,14 +2466,14 @@ class DelegateMegaRequestListener(MegaRequestListener):
 
 
 
-    def onRequestTemporaryError(self, mega_api, request, error):
+    def onRequestTemporaryError(self, api, request, error):
         '''This function is called when there is a temporary error processing a request.
         The request continues after this callback, so expect more MegaRequestListener.onRequestTemporaryError or
         a MegaRequestListener.onRequestFinish callback.
         If the request completed without problems, the error code will be API_OK.
         The SDK retains the ownership of the request parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the request
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the request
         :param request Information about the request
         :param error Information about error.
         '''
@@ -2165,11 +2504,11 @@ class DelegateMegaTransferListener(MegaTransferListener):
         return self.listener
 
 
-    def onTransferStart(self, mega_api, transfer):
+    def onTransferStart(self, api, transfer):
         '''This function is called when a transfer is about to start being processed.
         The SDK retains the ownership of the transfer parameter. Do not it use after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the transfer
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the transfer
         :param transfer Information about the transfer.
         '''
         if self.listener is not None:
@@ -2178,13 +2517,13 @@ class DelegateMegaTransferListener(MegaTransferListener):
 
 
 
-    def onTransferFinish(self, mega_api, transfer, error):
+    def onTransferFinish(self, api, transfer, error):
         '''This function is called when a transfer has finished.
         There will be no further callbacks related to this transfer. The last parameter provides the result of the transfer.
         If the transfer completed without problems, the error code will be API_OK.
         The SDK retains the ownership of the transfer and error parameters. Do not use them after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the transfer
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the transfer
         :param transfer Information about the transfer
         :param error Information about error.
         '''
@@ -2194,11 +2533,11 @@ class DelegateMegaTransferListener(MegaTransferListener):
             self.listener.onTransferFinish(self.mega_api, mega_transfer, mega_error)
 
 
-    def onTransferUpdate(self, mega_api, transfer):
+    def onTransferUpdate(self, api, transfer):
         '''This function is called to get details about the progress of a transfer.
         The SDK retains the ownership of the transfer parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the transfer
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the transfer
         :param transfer Information about the transfer
         '''
         if self.listener is not None:
@@ -2207,13 +2546,13 @@ class DelegateMegaTransferListener(MegaTransferListener):
 
 
 
-    def onTransferTemporaryError(self, mega_api, transfer, error):
+    def onTransferTemporaryError(self, api, transfer, error):
         '''This function is called when there is a temporary error processing a transfer.
         The transfer continues after this callback, so expect more MegaRequestListener.onTransferTemporaryError or
         a MegaRequestListener.onTransfertFinish callback.
         The SDK retains the ownership of the request parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the transfer
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the transfer
         :param transfer Information about the transfer
         :param error Information about error.
         '''
@@ -2224,13 +2563,13 @@ class DelegateMegaTransferListener(MegaTransferListener):
 
 
 
-    def onTransferData(self, mega_api, transfer, buffer):
+    def onTransferData(self, api, transfer, buffer):
         '''This function is called to provide the last read bytes of streaming downloads.
         This function will not be called for non streaming downloads. You can get the same buffer provided
         by this function in MegaTransferListener.onTransferUpdate(), using MegaTransfer.getLastBytes() and
         MegaTransfer.getDeltaSize(). The SDK retains the ownership of this transfer and buffer parameters. Do not
         use them after this function returns.
-        :param mega_api API object that started the transfer.
+        :param api API object that started the transfer.
         :transfer information about the transfer.
         :buffer buffer with the last read bytes.
         :Returns Size of the buffer.
@@ -2258,45 +2597,45 @@ class DelegateMegaListener(MegaListener):
         '''
         return self.listener
 
-    def onRequestStart(self, mega_api, request):
+    def onRequestStart(self, api, request):
         '''This function is called when a request is about to start being processed.
         The SDK retains the ownership of the request parameter. Do not it use after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the request
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the request
         :param request Information about the request.
         '''
         if self.listener is not None:
-            print "Starting request"
+            print "Starting request onRequestStart"
             mega_request = request.copy()
             print "requiest copied!" + str(mega_request)
             self.listener.onRequestStart(self.mega_api, mega_request)
 
-    def onRequestFinish(self, mega_api, request, error):
+    def onRequestFinish(self, api, request, error):
         '''This function is called when a request has finished.
         There will be no further callbacks related to this request.
         If the request completed without problems, the error code will be API_OK.
         The SDK retains the ownership of the request parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the request
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the request
         :param request Information about the request
         :param error Information about error.
         '''
         if self.listener is not None:
-            print "Starting request"
+            print "Starting request onRequestFinish"
             mega_request = request.copy()
             mega_error = error.copy()
             print "requiest copied!" + str(mega_request)
             print "error is: " + str(mega_error)
             self.listener.onRequestFinish(self.mega_api, mega_request, mega_error)
 
-    def onRequestTemporaryError(self, mega_api, request, error):
+    def onRequestTemporaryError(self, api, request, error):
         '''This function is called when there is a temporary error processing a request.
         The request continues after this callback, so expect more MegaRequestListener.onRequestTemporaryError or
         a MegaRequestListener.onRequestFinish callback.
         If the request completed without problems, the error code will be API_OK.
         The SDK retains the ownership of the request parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the request
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the request
         :param request Information about the request
         :param error Information about error.
         '''
@@ -2307,11 +2646,11 @@ class DelegateMegaListener(MegaListener):
 
 
 
-    def onTransferStart(self, mega_api, transfer):
+    def onTransferStart(self, api, transfer):
         '''This function is called when a transfer is about to start being processed.
         The SDK retains the ownership of the transfer parameter. Do not it use after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the transfer
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the transfer
         :param transfer Information about the transfer.
         '''
         if self.listener is not None:
@@ -2320,13 +2659,13 @@ class DelegateMegaListener(MegaListener):
 
 
 
-    def onTransferFinish(self, mega_api, transfer, error):
+    def onTransferFinish(self, api, transfer, error):
         '''This function is called when a transfer has finished.
         There will be no further callbacks related to this transfer. The last parameter provides the result of the transfer.
         If the transfer completed without problems, the error code will be API_OK.
         The SDK retains the ownership of the transfer and error parameters. Do not use them after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the transfer
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the transfer
         :param transfer Information about the transfer
         :param error Information about error.
         '''
@@ -2336,11 +2675,11 @@ class DelegateMegaListener(MegaListener):
             self.listener.onTransferFinish(self.mega_api, mega_transfer, mega_error)
 
 
-    def onTransferUpdate(self, mega_api, transfer):
+    def onTransferUpdate(self, api, transfer):
         '''This function is called to get details about the progress of a transfer.
         The SDK retains the ownership of the transfer parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the transfer
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the transfer
         :param transfer Information about the transfer
         '''
         if self.listener is not None:
@@ -2348,13 +2687,13 @@ class DelegateMegaListener(MegaListener):
             self.listener.onTransferUpdate(self.mega_api, mega_transfer)
 
 
-    def onTransferTemporaryError(self, mega_api, transfer, error):
+    def onTransferTemporaryError(self, api, transfer, error):
         '''This function is called when there is a temporary error processing a transfer.
         The transfer continues after this callback, so expect more MegaRequestListener.onTransferTemporaryError or
         a MegaRequestListener.onTransfertFinish callback.
         The SDK retains the ownership of the request parameter. Do not use it after this function returns.
-        The mega_api object is the one created by the application, it will be valid until the application deletes it.
-        :param mega_api API that started the transfer
+        The api object is the one created by the application, it will be valid until the application deletes it.
+        :param api API that started the transfer
         :param rtransfer Information about the transfer
         :param error Information about error.
         '''
@@ -2365,22 +2704,22 @@ class DelegateMegaListener(MegaListener):
 
 
 
-    def onUsersUpdate(self, mega_api, user_list):
+    def onUsersUpdate(self, api, user_list):
         '''This function is called when there are new or updated contacts in the account.
         The SDK retains the ownership of the user_list in the second parameter.
         The list and all the MegaUser objects that it contains will be valid until this function returns.
         If you want to save the list, use user_list.copy().
         If you want to save only some of the MegaUser objects, use MegaUser.copy() for those objects.
-        :param mega_api API object connected to account.
+        :param api API object connected to account.
         :param user_list List that contains the new or updated contacts.
         '''
         if self.listener is not None:
-            updated_user_list =  mega_api.user_list_to_array(user_list)
+            updated_user_list =  api.user_list_to_array(user_list)
             self.listener.onUsersUpdate(self.mega_api, updated_user_list)
 
 
 
-    def onNodesUpdate(self, mega_api, node_list):
+    def onNodesUpdate(self, api, node_list):
         '''This function is called when there are new or updated nodes in the account.
         When the full account is reloaded or a large number of server notifications arrive at once,
         the second parameter will be null.
@@ -2388,40 +2727,40 @@ class DelegateMegaListener(MegaListener):
         The list and all the MegaNode objects that it contains will be valid until this function returns.
         If you want to save the list, use node_list.copy().
         If you want to save only some of the MegaNode objects, use MegaNode.copy() for those objects.
-        :param mega_api API object connected to account.
+        :param api API object connected to account.
         :param node_list List that contains the new or updated nodes.
         '''
         if self.listener is not None:
-            updated_node_list = mega_api.node_list_to_array(node_list)
+            updated_node_list = api.node_list_to_array(node_list)
             self.listener.onNodesUpdate(self.mega_api, updated_node_list)
 
 
 
-    def onReloadNeeded(self, mega_api):
+    def onReloadNeeded(self, api):
         '''This function is called when an inconsistency is detected in the local cache.
         You should call MegaApiPython.fetch_nodes() when this callback is received.
-        :param mega_api API object connected to account.
+        :param api API object connected to account.
         '''
         if self.listener is not None:
             self.listener.onReloadNeeded(self.mega_api)
 
 
 
-    def onAccountUpdate(self, mega_api):
+    def onAccountUpdate(self, api):
         if self.listener is not None:
             self.listener.onAccountUpdate(self.mega_api)
 
 
 
-    def onContactRequestsUpdate(self, mega_api, contact_request_list):
+    def onContactRequestsUpdate(self, api, contact_request_list):
         '''This function is called when there are new contact requests in the account.
         If you want to save the list, use contact_request_list.copy().
         If you want to save only some of the MegaContactRequest objects, use MegaContactRequest.copy() for those objects.
-        :param mega_api API object connected to the account
+        :param api API object connected to the account
         :param contact_request_list List that contains new contact requests
         '''
         if self.listener is not None:
-            contact_list = mega_api.contact_request_list_to_array(contact_list)
+            contact_list = api.contact_request_list_to_array(contact_list)
             self.listener.onContactRequestsUpdate(self.mega_api, contact_list)
 
 
@@ -2442,22 +2781,22 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         return self.listener
 
 
-    def onUsersUpdate(self, mega_api, user_list):
+    def onUsersUpdate(self, api, user_list):
         '''This function is called when there are new or updated contacts in the account.
         The SDK retains the ownership of the user_list in the second parameter.
         The list and all the MegaUser objects that it contains will be valid until this function returns.
         If you want to save the list, use user_list.copy().
         If you want to save only some of the MegaUser objects, use MegaUser.copy() for those objects.
-        :param mega_api API object connected to account.
+        :param api API object connected to account.
         :param user_list List that contains the new or updated contacts.
         '''
         if self.listener is not None:
-            updated_user_list =  mega_api.user_list_to_array(user_list)
+            updated_user_list =  api.user_list_to_array(user_list)
             self.listener.onUsersUpdate(self.mega_api, updated_user_list)
 
 
 
-    def onNodesUpdate(self, mega_api, node_list):
+    def onNodesUpdate(self, api, node_list):
         '''This function is called when there are new or updated nodes in the account.
         When the full account is reloaded or a large number of server notifications arrive at once,
         the second parameter will be null.
@@ -2465,285 +2804,35 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         The list and all the MegaNode objects that it contains will be valid until this function returns.
         If you want to save the list, use node_list.copy().
         If you want to save only some of the MegaNode objects, use MegaNode.copy() for those objects.
-        :param mega_api API object connected to account.
+        :param api API object connected to account.
         :param node_list List that contains the new or updated nodes.
         '''
         if self.listener is not None:
-            updated_node_list = mega_api.node_list_to_array(node_list)
+            updated_node_list = api.node_list_to_array(node_list)
             self.listener.onNodesUpdate(self.mega_api, updated_node_list)
 
 
-    def onReloadNeeded(self, mega_api):
+    def onReloadNeeded(self, api):
         '''This function is called when an inconsistency is detected in the local cache.
         You should call MegaApiPython.fetch_nodes() when this callback is received.
-        :param mega_api API object connected to account.
+        :param api API object connected to account.
         '''
         if self.listener is not None:
             self.istener.onReloadNeeded(self.mega_api)
 
 
-    def onAccountUpdate(self, mega_api):
+    def onAccountUpdate(self, api):
         if self.listener is not None:
             self.listener.onAccountUpdate(self.mega_api)
 
 
-    def onContactRequestsUpdate(self, mega_api, contact_request_list):
+    def onContactRequestsUpdate(self, api, contact_request_list):
         '''This function is called when there are new contact requests in the account.
         If you want to save the list, use contact_request_list.copy().
         If you want to save only some of the MegaContactRequest objects, use MegaContactRequest.copy() for those objects.
-        :param mega_api API object connected to the account
+        :param api API object connected to the account
         :param contact_request_list List that contains new contact requests
         '''
         if self.listener is not None:
-            contact_list = mega_api.contact_request_list_to_array(contact_list)
+            contact_list = api.contact_request_list_to_array(contact_list)
             self.listener.onContactRequestsUpdate(self.mega_api, contact_list)
-
-
-# Mirroring, WILL BE MOVED TO MegaApiPython class later
-MegaApi.get_current_request = MegaApi.getCurrentRequest
-MegaApi.get_current_transfer = MegaApi.getCurrentTransfer
-MegaApi.get_current_error = MegaApi.getCurrentError
-MegaApi.get_current_nodes = MegaApi.getCurrentNodes
-MegaApi.get_current_users = MegaApi.getCurrentUsers
-MegaApi.get_base64_pw_key = MegaApi.getBase64PwKey
-MegaApi.get_string_hash = MegaApi.getStringHash
-MegaApi.get_session_transfer_URL = MegaApi.getSessionTransferURL
-MegaApi.retry_pending_connections = MegaApi.retryPendingConnections
-MegaApi.login_to_folder = MegaApi.loginToFolder
-MegaApi.fast_login = MegaApi.fastLogin
-MegaApi.kill_session = MegaApi.killSession
-MegaApi.get_user_data = MegaApi.getUserData
-MegaApi.dump_session = MegaApi.dumpSession
-MegaApi.dump_XMPP_session = MegaApi.dumpXMPPSession
-MegaApi.create_account = MegaApi.createAccount
-MegaApi.fast_create_account = MegaApi.fastCreateAccount
-MegaApi.query_signup_link = MegaApi.querySignupLink
-MegaApi.confirm_account = MegaApi.confirmAccount
-MegaApi.fast_confirm_account = MegaApi.fastConfirmAccount
-MegaApi.set_proxy_settings = MegaApi.setProxySettings
-MegaApi.get_auto_proxy_settings = MegaApi.getAutoProxySettings
-MegaApi.is_logged_in = MegaApi.isLoggedIn
-MegaApi.get_my_email = MegaApi.getMyEmail
-MegaApi.get_my_user_handle = MegaApi.getMyUserHandle
-MegaApi.create_folder = MegaApi.createFolder
-MegaApi.move_node = MegaApi.moveNode
-MegaApi.copy_node = MegaApi.copyNode
-MegaApi.rename_node = MegaApi.renameNode
-MegaApi.send_file_to_user = MegaApi.sendFileToUser
-MegaApi.import_file_link = MegaApi.importFileLink
-MegaApi.get_public_node = MegaApi.getPublicNode
-MegaApi.get_thumbnail = MegaApi.getThumbnail
-MegaApi.get_preview = MegaApi.getPreview
-MegaApi.get_user_avatar = MegaApi.getUserAvatar
-MegaApi.get_user_attribute = MegaApi.getUserAttribute
-MegaApi.cancel_get_thumbnail = MegaApi.cancelGetThumbnail
-MegaApi.cancel_get_preview = MegaApi.cancelGetPreview
-MegaApi.set_thumbnail = MegaApi.setThumbnail
-MegaApi.set_preview = MegaApi.setPreview
-MegaApi.set_avatar = MegaApi.setAvatar
-MegaApi.set_user_attribute = MegaApi.setUserAttribute
-MegaApi.export_node = MegaApi.exportNode
-MegaApi.disable_export = MegaApi.disableExport
-MegaApi.fetch_nodes = MegaApi.fetchNodes
-MegaApi.get_account_details = MegaApi.getAccountDetails
-MegaApi.get_extended_account_details = MegaApi.getExtendedAccountDetails
-MegaApi.get_pricing = MegaApi.getPricing
-MegaApi.get_payment_id = MegaApi.getPaymentId
-MegaApi.upgrade_account = MegaApi.upgradeAccount
-MegaApi.submit_purchase_receipt = MegaApi.submitPurchaseReceipt
-MegaApi.credit_card_store = MegaApi.creditCardStore
-MegaApi.credit_card_query_subscriptions = MegaApi.creditCardQuerySubscriptions
-MegaApi.credit_card_cancel_subscriptions = MegaApi.creditCardCancelSubscriptions
-MegaApi.get_payment_methods = MegaApi.getPaymentMethods
-MegaApi.export_master_key = MegaApi.exportMasterKey
-MegaApi.change_password = MegaApi.changePassword
-MegaApi.add_contact = MegaApi.addContact
-MegaApi.invite_contact = MegaApi.inviteContact
-MegaApi.reply_contact_request = MegaApi.replyContactRequest
-MegaApi.remove_contact = MegaApi.removeContact
-MegaApi.local_logout = MegaApi.localLogout
-MegaApi.submit_feedback = MegaApi.submitFeedback
-MegaApi.report_debug_event = MegaApi.reportDebugEvent
-MegaApi.start_upload = MegaApi.startUpload
-MegaApi.start_download = MegaApi.startDownload
-MegaApi.start_streaming = MegaApi.startStreaming
-MegaApi.cancel_transfer = MegaApi.cancelTransfer
-MegaApi.cancel_transfer_by_tag = MegaApi.cancelTransferByTag
-MegaApi.cancel_transfers = MegaApi.cancelTransfers
-MegaApi.pause_transfers = MegaApi.pauseTransfers
-MegaApi.are_transfers_paused = MegaApi.areTransfersPaused
-MegaApi.set_upload_limit = MegaApi.setUploadLimit
-MegaApi.set_download_method = MegaApi.setDownloadMethod
-MegaApi.set_upload_method = MegaApi.setUploadMethod
-MegaApi.get_download_method = MegaApi.getDownloadMethod
-MegaApi.get_upload_method = MegaApi.getUploadMethod
-MegaApi.get_transfer_by_tag = MegaApi.getTransferByTag
-MegaApi.is_waiting = MegaApi.isWaiting
-MegaApi.get_num_pending_uploads = MegaApi.getNumPendingUploads
-MegaApi.get_num_pending_downloads = MegaApi.getNumPendingDownloads
-MegaApi.get_total_uploads = MegaApi.getTotalUploads
-MegaApi.get_total_downloads = MegaApi.getTotalDownloads
-MegaApi.reset_total_downloads = MegaApi.resetTotalDownloads
-MegaApi.reset_total_uploads = MegaApi.resetTotalUploads
-MegaApi.get_total_downloaded_bytes = MegaApi.getTotalDownloadedBytes
-MegaApi.get_total_uploaded_bytes = MegaApi.getTotalUploadedBytes
-MegaApi.update_stats = MegaApi. updateStats
-MegaApi.get_num_children = MegaApi.getNumChildren
-MegaApi.get_num_child_files = MegaApi.getNumChildFiles
-MegaApi.get_num_child_folders = MegaApi.getNumChildFolders
-MegaApi.get_index = MegaApi.getIndex
-MegaApi.get_child_node = MegaApi.getChildNode
-MegaApi.get_parent_node = MegaApi.getParentNode
-MegaApi.get_node_path = MegaApi.getNodePath
-MegaApi.get_node_by_path = MegaApi.getNodeByPath
-MegaApi.get_node_by_handle = MegaApi.getNodeByHandle
-MegaApi.get_contact_request_by_handle = MegaApi.getContactRequestByHandle
-MegaApi.get_contact = MegaApi.getContact
-MegaApi.is_shared = MegaApi.isShared
-MegaApi.get_access = MegaApi.getAccess
-MegaApi.get_size = MegaApi.getSize
-MegaApi.get_fingerprint = MegaApi.getFingerprint
-MegaApi.get_node_by_fingerprint = MegaApi.getNodeByFingerprint
-MegaApi.has_fingerprint = MegaApi.hasFingerprint
-MegaApi.get_CRC = MegaApi.getCRC
-MegaApi.get_node_by_CRC = MegaApi.getNodeByCRC
-MegaApi.check_access = MegaApi.checkAccess
-MegaApi.check_move = MegaApi.checkMove
-MegaApi.get_root_node = MegaApi.getRootNode
-MegaApi.get_inbox_node = MegaApi.getInboxNode
-MegaApi.get_rubbish_node = MegaApi.getRubbishNode
-MegaApi.process_mega_tree = MegaApi.processMegaTree
-MegaApi.create_public_file_node = MegaApi.createPublicFileNode
-MegaApi.create_public_folder_node = MegaApi.createPublicFolderNode
-MegaApi.get_version = MegaApi.getVersion
-MegaApi.get_user_agent = MegaApi.getUserAgent
-MegaApi.change_api_url = MegaApi.changeApiUrl
-MegaApi.escape_fs_incompatible = MegaApi.escapeFsIncompatible
-MegaApi.unescape_fs_incompatible = MegaApi.unescapeFsIncompatible
-MegaApi.create_thumbnail = MegaApi.createThumbnail
-MegaApi.create_preview = MegaApi.createPreview
-MegaApi.load_balancing = MegaApi.loadBalancing
-
-del MegaApi.getCurrentRequest
-del MegaApi.getCurrentTransfer
-del MegaApi.getCurrentError
-del MegaApi.getCurrentNodes
-del MegaApi.getCurrentUsers
-del MegaApi.getBase64PwKey
-del MegaApi.getStringHash
-del MegaApi.getSessionTransferURL
-del MegaApi.retryPendingConnections
-del MegaApi.loginToFolder
-del MegaApi.fastLogin
-del MegaApi.killSession
-del MegaApi.getUserData
-del MegaApi.dumpSession
-del MegaApi.dumpXMPPSession
-del MegaApi.getAccountDetails
-del MegaApi.createAccount
-del MegaApi.getMyEmail
-del MegaApi.fastCreateAccount
-del MegaApi.querySignupLink
-del MegaApi.confirmAccount
-del MegaApi.fastConfirmAccount
-del MegaApi.setProxySettings
-del MegaApi.getAutoProxySettings
-del MegaApi.isLoggedIn
-del MegaApi.getMyUserHandle
-del MegaApi.createFolder
-del MegaApi.moveNode
-del MegaApi.copyNode
-del MegaApi.renameNode
-del MegaApi.sendFileToUser
-del MegaApi.importFileLink
-del MegaApi.getPublicNode
-del MegaApi.getThumbnail
-del MegaApi.getPreview
-del MegaApi.getUserAvatar
-del MegaApi.getUserAttribute
-del MegaApi.cancelGetThumbnail
-del MegaApi.cancelGetPreview
-del MegaApi.setThumbnail
-del MegaApi.setPreview
-del MegaApi.setAvatar
-del MegaApi.setUserAttribute
-del MegaApi.exportNode
-del MegaApi.disableExport
-del MegaApi.fetchNodes
-del MegaApi.getExtendedAccountDetails
-del MegaApi.getPricing
-del MegaApi.getPaymentId
-del MegaApi.upgradeAccount
-del MegaApi.submitPurchaseReceipt
-del MegaApi.creditCardStore
-del MegaApi.creditCardQuerySubscriptions
-del MegaApi.creditCardCancelSubscriptions
-del MegaApi.getPaymentMethods
-del MegaApi.exportMasterKey
-del MegaApi.changePassword
-del MegaApi.addContact
-del MegaApi.inviteContact
-del MegaApi.replyContactRequest
-del MegaApi.removeContact
-del MegaApi.localLogout
-del MegaApi.submitFeedback
-del MegaApi.reportDebugEvent
-del MegaApi.startUpload
-del MegaApi.startDownload
-del MegaApi.startStreaming
-del MegaApi.cancelTransfer
-del MegaApi.cancelTransferByTag
-del MegaApi.cancelTransfers
-del MegaApi.pauseTransfers
-del MegaApi.areTransfersPaused
-del MegaApi.setUploadLimit
-del MegaApi.setDownloadMethod
-del MegaApi.setUploadMethod
-del MegaApi.getDownloadMethod
-del MegaApi.getUploadMethod
-del MegaApi.getTransferByTag
-del MegaApi.isWaiting
-del MegaApi.getNumPendingUploads
-del MegaApi.getNumPendingDownloads
-del MegaApi.getTotalUploads
-del MegaApi.getTotalDownloads
-del MegaApi.resetTotalDownloads
-del MegaApi.resetTotalUploads
-del MegaApi.getTotalDownloadedBytes
-del MegaApi.getTotalUploadedBytes
-del MegaApi. updateStats
-del MegaApi.getNumChildren
-del MegaApi.getNumChildFiles
-del MegaApi.getNumChildFolders
-del MegaApi.getIndex
-del MegaApi.getChildNode
-del MegaApi.getParentNode
-del MegaApi.getNodePath
-del MegaApi.getNodeByPath
-del MegaApi.getNodeByHandle
-del MegaApi.getContactRequestByHandle
-del MegaApi.getContact
-del MegaApi.isShared
-del MegaApi.getAccess
-del MegaApi.getSize
-del MegaApi.getFingerprint
-del MegaApi.getNodeByFingerprint
-del MegaApi.hasFingerprint
-del MegaApi.getCRC
-del MegaApi.getNodeByCRC
-del MegaApi.checkAccess
-del MegaApi.checkMove
-del MegaApi.getRootNode
-del MegaApi.getInboxNode
-del MegaApi.getRubbishNode
-del MegaApi.processMegaTree
-del MegaApi.createPublicFileNode
-del MegaApi.createPublicFolderNode
-del MegaApi.getVersion
-del MegaApi.getUserAgent
-del MegaApi.changeApiUrl
-del MegaApi.escapeFsIncompatible
-del MegaApi.unescapeFsIncompatible
-del MegaApi.createThumbnail
-del MegaApi.createPreview
-del MegaApi.loadBalancing
