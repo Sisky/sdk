@@ -5,7 +5,7 @@
 ## Created: 16 May 2015 Guy Kloss <gk@mega.co.nz>
 ##
 ## (c) 2015 by Mega Limited, Auckland, New Zealand
-##     https://mega.nz/   
+##     https://mega.nz/
 ##     Simplified (2-clause) BSD License.
 ##
 ## You should have received a copy of the license along with this
@@ -26,7 +26,7 @@ import time
 import json
 import getpass
 
-from mega import (MegaApi, MegaListener, MegaError, MegaRequest, MegaNode)
+from mega import (MegaListener, MegaApiPython, MegaError, MegaRequest, MegaNode)
 
 APP_KEY = 'ox8xnQZL'
 
@@ -39,7 +39,7 @@ class AppListener(MegaListener):
     from the asyncrhonous API. Only a certain number of usefuul
     callbacks are implemented.
     """
-    
+
     def __init__(self):
         """
         Constructor.
@@ -74,7 +74,9 @@ class AppListener(MegaListener):
 
         request_type = request.getType()
         if request_type == MegaRequest.TYPE_LOGIN:
-            api.fetchNodes()
+            api.fetch_nodes()
+        elif request_type == MegaRequest.TYPE_FETCH_NODES:
+            self.root_node = api.get_root_node()
         elif request_type == MegaRequest.TYPE_EXPORT:
             logging.info('Exported link: {}'.format(request.getLink()))
         elif request_type == MegaRequest.TYPE_ACCOUNT_DETAILS:
@@ -181,32 +183,32 @@ def worker(api, listener, credentials):
     """
     # Log in.
     logging.info('*** start: login ***')
-    api.login(str(credentials['user']),
+    api.login_email(str(credentials['user']),
               str(credentials['password']))
     cwd = listener.root_node
     logging.info('*** done: login ***')
 
     # Who am I.
     logging.info('*** start: whoami ***')
-    logging.info('My email: {}'.format(api.getMyEmail()))
-    api.getAccountDetails()
+    logging.info('My email: {}'.format(api.get_my_email()))
+    api.get_account_details()
     time.sleep(1)
     logging.info('*** done: whoami ***')
 
     # Make a directory.
     logging.info('*** start: mkdir ***')
-    check = api.getNodeByPath('sandbox', cwd)
+    check = api.get_node_by_path_base_folder('sandbox', cwd)
     if check == None:
-        api.createFolder('sandbox', cwd)
+        api.create_folder('sandbox', cwd)
         time.sleep(1)
     else:
         logging.warn('Path already exists: {}'
-                     .format(api.getNodePath(check)))
+                     .format(api.get_node_path(check)))
     logging.info('*** done: mkdir ***')
 
     # Now go and play in the sandbox.
     logging.info('*** start: cd ***')
-    node = api.getNodeByPath('sandbox', cwd)
+    node = api.get_node_by_path_base_folder('sandbox', cwd)
     if node == None:
         logging.warn('No such file or directory: sandbox')
     if node.getType() == MegaNode.TYPE_FOLDER:
@@ -217,15 +219,15 @@ def worker(api, listener, credentials):
 
     # Upload a file (create).
     logging.info('*** start: upload ***')
-    api.startUpload('README.md', cwd)
+    api.start_upload('README.md', cwd)
     time.sleep(1)
     logging.info('*** done: upload ***')
 
     # Download a file (read).
     logging.info('*** start: download ***')
-    node = api.getNodeByPath('README.md', cwd)
+    node = api.get_node_by_path_base_folder('README.md', cwd)
     if node != None:
-        api.startDownload(node, 'README_returned.md')
+        api.start_download(node, 'README_returned.md')
         time.sleep(1)
     else:
         logging.warn('Node not found: {}'.format('README.md'))
@@ -235,12 +237,12 @@ def worker(api, listener, credentials):
     # Note: A new upload won't overwrite, but create a new node with same
     #       name!
     logging.info('*** start: update ***')
-    old_node = api.getNodeByPath('README.md', cwd)
-    api.startUpload('README.md', cwd)
+    old_node = api.get_node_by_path_base_folder('README.md', cwd)
+    api.start_upload('README.md', cwd)
     time.sleep(1)
     if old_node != None:
         # Remove the old node with the same name.
-        api.remove(old_node)
+        api.remove_node(old_node)
         time.sleep(1)
     else:
         logging.info('No old file node needs removing')
@@ -248,9 +250,9 @@ def worker(api, listener, credentials):
 
     # Delete a file.
     logging.info('*** start: delete ***')
-    node = api.getNodeByPath('README.md', cwd)
+    node = api.get_node_by_path_base_folder('README.md', cwd)
     if node != None:
-        api.remove(node)
+        api.remove_node(node)
         time.sleep(1)
     else:
         logging.warn('Node not found: README.md')
@@ -277,12 +279,12 @@ def main():
     else:
         credentials['user'] = raw_input('User: ')
         credentials['password'] = getpass.getpass()
-    
-    # Create the required Mega API objects.
-    api = MegaApi(APP_KEY, None, None, 'Python CRUD example')
-    listener = AppListener()
-    api.addListener(listener)
 
+    # Create the required Mega API objects.
+    api = MegaApiPython(APP_KEY, None, None, 'Python CRUD example')
+    listener = AppListener()
+    api.add_listener(listener)
+    #api.add_mega_listener(listener)
     # Run the operations.
     start_time = time.time()
     worker(api, listener, credentials)

@@ -25,7 +25,7 @@ import cmd
 import logging
 import time
 
-from mega import (MegaApi, MegaListener, MegaError, MegaRequest,
+from mega import (MegaApiPython, MegaListener, MegaError, MegaRequest,
                   MegaUser, MegaNode)
 
 
@@ -119,7 +119,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             print(self.do_login.__doc__)
             return
 
-        self._api.login(args[0], args[1])
+        self._api.login_email(args[0], args[1])
 
 
     def do_logout(self, arg):
@@ -134,7 +134,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('INFO: Not logged in')
             return
 
-        self._api.logout()
+        self._api.logout_from_account()
         self.cwd = None
 
 
@@ -144,22 +144,19 @@ class MegaShell(cmd.Cmd, MegaListener):
         if len(args) != 0:
             print(self.do_mount.__doc__)
             return
-        if not self._api.isLoggedIn():
+        if not self._api.is_logged_in():
             print('INFO: Not logged in')
             return
 
         print('INFO: INSHARES:')
-        users = self._api.getContacts()
-        for i in range(users.size()):
-            user = users.get(i)
+        users = self._api.get_contacts()
+        for user in users:
             if user.getVisibility() == MegaUser.VISIBILITY_VISIBLE:
-                shares = self._api.getInShares(user)
-                for j in range(shares.size()):
-                    share = shares.get(j)
-                    print('INFO: INSHARE on {} {} Access level: {}'
-                          .format(users.get(i).getEmail(),
-                                  are.getName(),
-                                  self._api.getAccess(share)))
+                shares = self._api.get_in_shares(user)
+                for share in shares:
+                    print('INFO: The email: ' + str(user.getEmail()))
+                    print('INFO: Access level: ' + str(self._api.get_access(share)))
+                    print('INFO: Node name: ' + str(share.getName()))
 
 
     def do_ls(self, arg):
@@ -177,15 +174,14 @@ class MegaShell(cmd.Cmd, MegaListener):
         if len(args) == 0:
             path = self.cwd
         else:
-            path = self._api.getNodeByPath(args[0], self.cwd)
+            path = self._api.get_node_by_path_base_folder(args[0], self.cwd)
 
         print('    .')
-        if self._api.getParentNode(path) != None:
+        if self._api.get_parent_node(path) != None:
             print('    ..')
 
-        nodes = self._api.getChildren(path)
-        for i in range(nodes.size()):
-            node = nodes.get(i)
+        nodes = self._api.get_children(path, 1)
+        for node in nodes:
             output = '    {}'.format(node.getName())
             if node.getType() == MegaNode.TYPE_FILE:
                 output += '   ({} bytes)'.format(node.getSize())
@@ -208,7 +204,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             self.cwd = self._api.getRootNode()
             return
 
-        node = self._api.getNodeByPath(args[0], self.cwd)
+        node = self._api.get_node_by_path_base_folder(args[0], self.cwd)
         if node == None:
             print('{}: No such file or directory'.format(args[0]))
             return
@@ -228,7 +224,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('INFO: Not logged in')
             return
 
-        node = self._api.getNodeByPath(args[0], self.cwd)
+        node = self._api.get_node_by_path_base_folder(args[0], self.cwd)
         if node == None:
             print('Node not found: {}'.format(args[0]))
             return
@@ -246,7 +242,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('INFO: Not logged in')
             return
 
-        self._api.startUpload(args[0], self.cwd)
+        self._api.start_upload(args[0], self.cwd)
 
 
     def do_mkdir(self, arg):
@@ -270,7 +266,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             else:
                 index = index2
             path = name[:index + 1]
-            base = self._api.getNodeByPath(path, self.cwd)
+            base = self._api.get_node_by_path_base_folder(path, self.cwd)
             name = name[index + 1:]
 
             if not name:
@@ -280,13 +276,13 @@ class MegaShell(cmd.Cmd, MegaListener):
                 print('{}: Target path not found'.format(path))
                 return
 
-        check = self._api.getNodeByPath(name, base)
+        check = self._api.get_node_by_path_base_folder(name, base)
         if check != None:
             print('{}: Path already exists'
-                  .format(self._api.getNodePath(check)))
+                  .format(self._api.get_node_path(check)))
             return
 
-        self._api.createFolder(name, base)
+        self._api.create_folder(name, base)
 
 
     def do_rm(self, arg):
@@ -299,12 +295,12 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('INFO: Not logged in')
             return
 
-        node = self._api.getNodeByPath(args[0], self.cwd)
+        node = self._api.get_node_by_path_base_folder(args[0], self.cwd)
         if node == None:
             print('Node not found: {}'.format(args[0]))
             return
 
-        self._api.remove(node)
+        self._api.remove_node(node)
 
 
     def do_mv(self, arg):
@@ -317,13 +313,13 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('INFO: Not logged in')
             return
 
-        src_node = self._api.getNodeByPath(args[0], self.cwd)
+        src_node = self._api.get_node_by_path_base_folder(args[0], self.cwd)
         if src_node == None:
             print('{}: No such file or directory'.format(args[0]))
             return
 
         name = args[1]
-        dst_node = self._api.getNodeByPath(name, self.cwd)
+        dst_node = self._api.get_node_by_path_base_folder(name, self.cwd)
         if (dst_node != None) and (dst_node.getType() == MegaNode.TYPE_FILE):
             print('{}: Not a directory'.format(name))
             return
@@ -341,7 +337,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             else:
                 index = index2
             path = name[:index + 1]
-            base = self._api.getNodeByPath(path, self.cwd)
+            base = self._api.get_node_by_path_base_folder(path, self.cwd)
             name = name[index + 1:]
 
             if base == None:
@@ -352,13 +348,13 @@ class MegaShell(cmd.Cmd, MegaListener):
                 print('{}: Not a directory'.format(path))
                 return
 
-            self._api.moveNode(src_node, base)
+            self._api.move_node(src_node, base)
             if len(name) != 0:
-                self._api.renameNode(src_node, name)
+                self._api.rename_node(src_node, name)
             return
 
         if dst_node == None:
-            self._api.renameNode(src_node, name)
+            self._api.rename_node(src_node, name)
             return
 
 
@@ -373,7 +369,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             return
 
         print('{} INFO: Current working directory: {}'
-              .format(self.PROMPT, self._api.getNodePath(self.cwd)))
+              .format(self.PROMPT, self._api.get_node_path(self.cwd)))
 
 
     def do_export(self, arg):
@@ -386,7 +382,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('INFO: Not logged in')
             return
 
-        node = self._api.getNodeByPath(args[0], self.cwd)
+        node = self._api.get_node_by_path_base_folder(args[0], self.cwd)
         self._api.exportNode(node)
 
 
@@ -400,7 +396,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('INFO: Not logged in')
             return
 
-        self._api.importFileLink(args[0], self.cwd)
+        self._api.import_file_link(args[0], self.cwd)
 
 
     def do_whoami(self, arg):
@@ -409,11 +405,11 @@ class MegaShell(cmd.Cmd, MegaListener):
         if len(args) != 0:
             print(self.do_whoami.__doc__)
             return
-        if not self._api.isLoggedIn():
+        if not self._api.is_logged_in():
             print('INFO: Not logged in')
             return
-        print(self._api.getMyEmail())
-        self._api.getAccountDetails()
+        print(self._api.get_my_email())
+        self._api.get_account_details()
 
 
     def do_passwd(self, arg):
@@ -422,7 +418,7 @@ class MegaShell(cmd.Cmd, MegaListener):
         if len(args) != 3:
             print(self.do_passwd.__doc__)
             return
-        if not self._api.isLoggedIn():
+        if not self._api.is_logged_in():
             print('INFO: Not logged in')
             return
 
@@ -430,7 +426,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('Mismatch, please try again')
             return
 
-        self._api.changePassword(args[0], args[1])
+        self._api.change_password(args[0], args[1])
 
 
     def do_quit(self, arg):
@@ -453,10 +449,9 @@ if __name__ == '__main__':
                         #filename='runner.log',
                         format='%(levelname)s\t%(asctime)s %(message)s')
     # Do the work.
-    api = MegaApi('ox8xnQZL', None, None, 'Python megacli')
+    api = MegaApiPython('ox8xnQZL', None, None, 'Python megacli')
     shell = MegaShell(api)
     listener = AppListener(shell)
-    api.addListener(listener)
+    api.add_listener(listener)
     api = None
     shell.cmdloop()
-    

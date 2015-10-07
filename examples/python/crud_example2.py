@@ -27,7 +27,7 @@ import threading
 import json
 import getpass
 
-from mega import (MegaApi, Mega_Api_Python, Delegate_Mega_Listener, MegaListener, MegaError, MegaRequest, MegaNode)
+from mega import (MegaApiPython , MegaListener, MegaError, MegaRequest, MegaNode)
 
 # Mega SDK application key.
 # Generate one for free here: https://mega.nz/#sdk
@@ -84,9 +84,9 @@ class AppListener(MegaListener):
 
         request_type = request.getType()
         if request_type == MegaRequest.TYPE_LOGIN:
-            api.fetch_nodes()
+            api.fetchNodes()
         elif request_type == MegaRequest.TYPE_FETCH_NODES:
-            self.root_node = api.get_root_node()
+            self.root_node = api.getRootNode()
         elif request_type == MegaRequest.TYPE_ACCOUNT_DETAILS:
             account_details = request.getMegaAccountDetails()
             logging.info('Account details received')
@@ -224,7 +224,7 @@ def worker(api, listener, executor, credentials):
     """
     # Log in.
     logging.info('*** start: login ***')
-    executor.do(api.login, (str(credentials['user']),
+    executor.do(api.login_email, (str(credentials['user']),
                             str(credentials['password'])))
     cwd = listener.root_node
     logging.info('*** done: login ***')
@@ -235,12 +235,13 @@ def worker(api, listener, executor, credentials):
     executor.do(api.get_account_details, ())
     contacts = api.get_contacts()
     shares = api.get_in_shares(contacts[0])
-    children = api.get_children(api.get_node_by_path("sandbox", cwd), 1)
-    search_list = api.search(api.get_node_by_path("Test", cwd), "AHCI")
+    children = api.get_children(api.get_node_by_path_base_folder("sandbox", cwd), 1)
+    search_list = api.search_item(api.get_node_by_path_base_folder("Test", cwd), "AHCI")
     recursive_search_list = api.search_recursively(api.get_node_by_path("Test, cwd"),"AHCI", True)
     incoming_contacts = api.get_incoming_contact_requests()
     outgoing_contacts = api.get_outgoing_contact_requests()
     out_share_list = api.get_all_out_shares()
+    print 'The version of sdk is:' + str(api.get_version())
     for item in out_share_list:
         print "The outgoing share is: " + str(item)
     for item in incoming_contacts:
@@ -269,7 +270,7 @@ def worker(api, listener, executor, credentials):
     # Make a directory.
     logging.info('*** start: mkdir ***')
     print '###', cwd.getName()
-    check = api.get_node_by_path('sandbox', cwd)
+    check = api.get_node_by_path_base_folder('sandbox', cwd)
     if check == None:
         executor.do(api.create_folder, ('sandbox', cwd))
     else:
@@ -279,7 +280,7 @@ def worker(api, listener, executor, credentials):
 
     # Now go and play in the sandbox.
     logging.info('*** start: cd ***')
-    node = api.get_node_by_path('sandbox', cwd)
+    node = api.get_node_by_path_base_folder('sandbox', cwd)
     if node == None:
         logging.warn('No such file or directory: sandbox')
     if node.getType() == MegaNode.TYPE_FOLDER:
@@ -295,7 +296,7 @@ def worker(api, listener, executor, credentials):
 
     # Download a file (read).
     logging.info('*** start: download ***')
-    node = api.get_node_by_path('README.md', cwd)
+    node = api.get_node_by_path_base_folder('README.md', cwd)
     if node != None:
         executor.do(api.start_download, (node, 'README_returned.md'))
     else:
@@ -306,27 +307,27 @@ def worker(api, listener, executor, credentials):
     # Note: A new upload won't overwrite, but create a new node with same
     #       name!
     logging.info('*** start: update ***')
-    old_node = api.get_node_by_path('README.md', cwd)
+    old_node = api.get_node_by_path_base_folder('README.md', cwd)
     executor.do(api.start_upload, ('README.md', cwd))
     if old_node != None:
         # Remove the old node with the same name.
-        executor.do(api.remove, (old_node,))
+        executor.do(api.remove_node, (old_node,))
     else:
         logging.info('No old file node needs removing')
     logging.info('*** done: update ***')
 
     # Delete a file.
     logging.info('*** start: delete ***')
-    node = api.get_node_by_path('README.md', cwd)
+    node = api.get_node_by_path_base_folder('README.md', cwd)
     if node != None:
-        executor.do(api.remove, (node,))
+        executor.do(api.remove_node, (node,))
     else:
         logging.warn('Node not found: README.md')
     logging.info('*** done: delete ***')
 
     # Logout.
     logging.info('*** start: logout ***')
-    executor.do(api.logout, ())
+    executor.do(api.logout_from_account, ())
     listener.root_node = None
     logging.info('*** done: logout ***')
 
@@ -347,15 +348,13 @@ def main():
 
     # Create the required Mega API objects.
     executor = AsyncExecutor()
-    #api = MegaApi(APP_KEY, None, None, 'Python CRUD example')
-    wrapApi = Mega_Api_Python(APP_KEY, None, None, 'Python CRUD example')
+    api = MegaApiPython(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
-    wrapApi.addListener(listener)
-    new_listener = wrapApi.add_listener_test(listener)
+    api.add_listener(listener)
+    #api.add_mega_listener(listener)
     # Run the operations.
     start_time = time.time()
-    worker(wrapApi, listener, executor, credentials)
-    wrapApi.remove_listener(new_listener)
+    worker(api, listener, executor, credentials)
     logging.info('Total time taken: {} s'.format(time.time() - start_time))
 
 
