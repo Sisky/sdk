@@ -74,9 +74,7 @@ class AppListener(MegaListener):
 
         request_type = request.getType()
         if request_type == MegaRequest.TYPE_LOGIN:
-            api.fetch_nodes()
-        elif request_type == MegaRequest.TYPE_FETCH_NODES:
-            self.root_node = api.get_root_node()
+            api.fetchNodes()
         elif request_type == MegaRequest.TYPE_EXPORT:
             logging.info('Exported link: {}'.format(request.getLink()))
         elif request_type == MegaRequest.TYPE_ACCOUNT_DETAILS:
@@ -187,17 +185,17 @@ def worker(api, listener, credentials):
               str(credentials['password']))
     cwd = listener.root_node
     logging.info('*** done: login ***')
-
+    time.sleep(2)
     # Who am I.
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     api.get_account_details()
-    time.sleep(1)
+    time.sleep(2)
     logging.info('*** done: whoami ***')
-
     # Make a directory.
     logging.info('*** start: mkdir ***')
     check = api.get_node_by_path_base_folder('sandbox', cwd)
+    time.sleep(2)
     if check == None:
         api.create_folder('sandbox', cwd)
         time.sleep(1)
