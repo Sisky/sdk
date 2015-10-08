@@ -1,7 +1,7 @@
 from mega import *
 import threading
 
-class MegaApiPython(MegaApi):
+class MegaApiPython(object):
 
     '''Python Appilcation Programming Interface (API) to access MEGA SDK services on a MEGA account or shared
     public folder.
@@ -24,7 +24,7 @@ class MegaApiPython(MegaApi):
 
 
     def __init__(self, app_key, processor, base_path, user_agent):
-        super(MegaApiPython, self).__init__(app_key, processor, base_path, user_agent)
+        self.api = MegaApi(app_key, processor, base_path, user_agent);
         self.active_mega_listeners = []
         self.active_global_mega_listeners = []
         self.active_request_listeners = []
@@ -39,7 +39,7 @@ class MegaApiPython(MegaApi):
         This function is here while the dedicated listener function is being
         tested.
         '''
-        self.addListener(listener)
+        self.api.addListener(listener)
 
 
     # Listener management
@@ -49,28 +49,28 @@ class MegaApiPython(MegaApi):
         You can use MegaApiPython.remove_listener() to stop receiving events.
         :param listener Listener that will receive all events (requests, transfers, global, synchronization).
         '''
-        self.addListener(self.create_delegate_mega_listener(listener))
+        self.api.addListener(self.create_delegate_mega_listener(listener))
 
     def add_global_listener(self, listener):
         '''Register a listener to receive global events.
         You can use MegaApiPython.remove_global_listener() to stop receiving events.
         :param listener Listener that will receive global events.
         '''
-        self.addGlobalListener(self.create_delegate_mega_global_listener(listener))
+        self.api.addGlobalListener(self.create_delegate_mega_global_listener(listener))
 
     def add_request_listener(self, listener):
         '''Register a listener to receive all events about requests.
         You can use MegaApiPython.remove_request_listener() to stop receiving events.
         :param listener Listener that will receive all events about requests.
         '''
-        self.addRequestListener(self.create_delegate_request_listener(listener, False))
+        self.api.addRequestListener(self.create_delegate_request_listener(listener, False))
 
     def add_transfer_listener(self, listener):
         '''Register a listener to receive all events about transfers.
         You can use MegaApiPython.remove_transfer_listener() to stop receiving events.
         :param listener Listener that will receive all events about transfers.
         '''
-        self.addTransferListener(self.create_delegate_transfer_listener(listener, False))
+        self.api.addTransferListener(self.create_delegate_transfer_listener(listener, False))
 
     def remove_listener(self, listener):
         '''Unregister a listener.
@@ -136,7 +136,7 @@ class MegaApiPython(MegaApi):
         :Returns - Base64-encoded private key
         :Deprecated
         '''
-        return self.getBase64PwKey(password)
+        return self.api.getBase64PwKey(password)
 
     def base32_to_handle(self, base32_handle):
         '''Converts a Base32 - encoded user handle to a MegaHandle.
@@ -144,7 +144,7 @@ class MegaApiPython(MegaApi):
         :Returns Base64-encoded hash.
         :Deprecated
         '''
-        return self.base32ToHandle(base32_handle)
+        return self.api.base32ToHandle(base32_handle)
 
     def base64_to_handle(self, base64_handle):
         '''Converts a Base64-encoded node handle to a MegaHandle.
@@ -154,7 +154,7 @@ class MegaApiPython(MegaApi):
         :param base64_handle Base64-encoded node handle.
         :Returns Node handle.
         '''
-        return self.base64ToHandle(base64_handle)
+        return self.api.base64ToHandle(base64_handle)
 
     def handle_to_base64(self, handle):
         '''Converts a MegaHandle to a Base64-encoded string.
@@ -162,7 +162,7 @@ class MegaApiPython(MegaApi):
         :param handle handle to be converted
         :Returns Base64-encoded node handle.
         '''
-        return self.handleToBase64(handle)
+        return self.api.handleToBase64(handle)
 
     def user_handle_to_base64(self, handle):
         '''Converts a MegaHandle to a Base64-encoded string.
@@ -171,7 +171,7 @@ class MegaApiPython(MegaApi):
         :param handle handle to be converted
         :Returns Base64-encoded user handle.
         '''
-        return self.userHandleToBase64(handle)
+        return self.api.userHandleToBase64(handle)
 
     def add_entropy(self, data, size):
         '''Add entropy to internal random number generators.
@@ -180,7 +180,7 @@ class MegaApiPython(MegaApi):
         :param data Byte array with random data.
         :param size Size of the byte array (in bytes)
         '''
-        self.addEntropy(data, size)
+        self.api.addEntropy(data, size)
 
     def get_string_hash(self,base_64_pwkey, email):
     	'''Generates a hash based in the provided private key and email.
@@ -194,12 +194,12 @@ class MegaApiPython(MegaApi):
         :Returns - Base64-encoded hash
         :Deprecated
         '''
-        return self.getStringHash(base_64_pwkey, email)
+        return self.api.getStringHash(base_64_pwkey, email)
 
-    def reconnect(self):
+    def reconnect_to_account(self):
         '''Reconnect and retry all transfers
         '''
-        self.retryPendingConnections(True, True)
+        self.api.retryPendingConnections(True, True)
 
     def retry_pending_connections(self):
     	'''Retry all pending requests.
@@ -207,7 +207,7 @@ class MegaApiPython(MegaApi):
         For this reason, and since this request is very lightweight, it's recommended to call it with the default parameters on every
         user interaction with the application. This will prevent very big delays completing requests.
        	'''
-        self.retryPendingConnections()
+        self.api.retryPendingConnections()
 
     #REQUESTS
 
@@ -216,7 +216,7 @@ class MegaApiPython(MegaApi):
         :param email -Email of the user
         :param password - Password
         '''
-        self.login(email, password)
+        self.api.login(email, password)
 
     def login_email_with_listener(self, email, password, listener):
     	'''Log in to a MEGA account.
@@ -228,14 +228,14 @@ class MegaApiPython(MegaApi):
         :param password - Password
         :param listener - MegaRequestListener to track this request
         '''
-        self.login(email, password, self.create_delegate_request_listener(listener, True))
+        self.api.login(email, password, self.create_delegate_request_listener(listener, True))
 
     def login_to_folder(self, mega_folder_link):
     	'''Log in to a public folder using a folder link.
 		After a successful login, you should call MegaApi.fetch_nodes() to get filesystem and start working with the folder.
 		:param megaFolderLink - Public link to a folder in MEGA
         '''
-        self.loginToFolder(mega_folder_link)
+        self.api.loginToFolder(mega_folder_link)
 
     def login_to_folder_with_listener(self, mega_folder_link, listener):
     	'''Log in to a public folder using a folder link.
@@ -246,7 +246,7 @@ class MegaApiPython(MegaApi):
 		:param megaFolderLink - Public link to a folder in MEGA
         :param listener - MegaRequestListener to track this request
         '''
-        self.loginToFolder(mega_folder_link, self.create_delegate_request_listener(listener, True))
+        self.api.loginToFolder(mega_folder_link, self.create_delegate_request_listener(listener, True))
 
     def fast_login_with_listener(self, email, string_hash,base_64_pwkey, listener):
     	'''Login to a MEGA account with precomputed keys.
@@ -259,7 +259,7 @@ class MegaApiPython(MegaApi):
     	:param base_64_pwkey	- Private key calculated with MegaApi.get_base64_pw_key()
     	:param listener - MegaRequestListener to track this request
         '''
-        self.fastLogin(email, string_hash, base_64_pwkey, self.create_delegate_request_listener(listener, True))
+        self.api.fastLogin(email, string_hash, base_64_pwkey, self.create_delegate_request_listener(listener, True))
 
     def fast_login(self, email, string_hash, base_64_pwkey):
     	'''Login to a MEGA account with precomputed keys.
@@ -267,20 +267,20 @@ class MegaApiPython(MegaApi):
         :param string_hash -hash of the email returned by MegaApi.get_string_hash()
     	:param base_64_pwkey	- Private key calculated with MegaApi.get_base64_pw_key()
         '''
-        self.fastLogin(email, string_hash, base_64_pwkey)
+        self.api.fastLogin(email, string_hash, base_64_pwkey)
 
     def fast_login_with_session(self, session):
     	'''Login to a MEGA account with a session key.
     	:param session - Session key previously dumped with api.dump_session()
         '''
-        self.fastLogin(session)
+        self.api.fastLogin(session)
 
     def fast_login_with_session_listener(session, listener):
     	'''Login to a MEGA account with a session key.
     	:param session - Session key previously dumped with api.dump_session()
         param listener - MegaRequestListener to track this request
         '''
-        self.fastLogin(session, self.create_delegate_request_listener(listener, True))
+        self.api.fastLogin(session, self.create_delegate_request_listener(listener, True))
 
     def kill_session_listener(self, session_handle, listener):
     	'''Close a MEGA session. All clients using this session will be automatically logged out.
@@ -292,7 +292,7 @@ class MegaApiPython(MegaApi):
         :param session_handle of the session. Use mega.INVALID_HANDLE to cancel all sessions except the current one
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.killSession(session_handle, self.create_delegate_request_listener(listener, True))
+        self.api.killSession(session_handle, self.create_delegate_request_listener(listener, True))
 
     def kill_session(self, session_handle):
     	'''Close a MEGA session. All clients using this session will be automatically logged out.
@@ -304,7 +304,7 @@ class MegaApiPython(MegaApi):
         :param session_handle of the session. Use mega.INVALID_HANDLE to cancel all sessions except the current one
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.killSession(session_handle)
+        self.api.killSession(session_handle)
 
     def get_user_data_listener(self, listener):
     	'''Get data about the logged account.
@@ -315,12 +315,12 @@ class MegaApiPython(MegaApi):
             MegaRequest.getPrivateKey() - Returns the private RSA key of the account, Base64-encoded
         param:listener MegaRequestListener to track this request
         '''
-        self.getUserData(self.create_delegate_request_listener(listener, True))
+        self.api.getUserData(self.create_delegate_request_listener(listener, True))
 
     def get_user_data(self):
         '''Get data about the logged account.
         '''
-        self.getUserData()
+        self.api.getUserData()
 
     def get_user_data_with_mega_user_listener(self, user, listener):
         '''Get data about a contact.
@@ -334,13 +334,13 @@ class MegaApiPython(MegaApi):
         :param user  Contact to get the data
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.getUserData(user, self.create_delegate_request_listener(listener, True))
+        self.api.getUserData(user, self.create_delegate_request_listener(listener, True))
 
     def get_user_data_with_mega_user(self, user):
         '''Get data about a contact.
         :param user MegaUser contact to get the data
         '''
-        self.getUserData(user)
+        self.api.getUserData(user)
 
     def get_user_data_with_user_listener(self, user, listener):
         '''
@@ -355,13 +355,13 @@ class MegaApiPython(MegaApi):
         :param user Email or Base64 handle of the contact
         :param listener MegaRequestListener to track this request
         '''
-        self.getUserData(user, self.create_delegate_request_listener(listener, True))
+        self.api.getUserData(user, self.create_delegate_request_listener(listener, True))
 
     def get_user_data_with_user(self, user):
         '''Get data about a contact.
         :param user Email or Base64 handle of the contact
         '''
-        self.getUserData(user)
+        self.api.getUserData(user)
 
     def dump_session(self):
     	'''Returns the current session key.
@@ -369,7 +369,7 @@ class MegaApiPython(MegaApi):
         You take the ownership of the returned value.
         :Returns current session key
         '''
-        return self.dumpSession()
+        return self.api.dumpSession()
 
     def dump_XMPP_session(self):
     	'''Returns the current XMPP session key.
@@ -377,7 +377,7 @@ class MegaApiPython(MegaApi):
         You take the ownership of the returned value.
         :Returns current XMPP session key
         '''
-        return self.dumpXMPPSession()
+        return self.api.dumpXMPPSession()
 
     def create_account_with_listener(self, email, password, name, listener):
     	'''Initialize the creation of a new MEGA account.
@@ -392,7 +392,7 @@ class MegaApiPython(MegaApi):
         :param name - Name of the user
         :param listener - MegaRequestListener to track this request
         '''
-        self.createAccount(email, password, name, self.create_delegate_request_listener(listener, True))
+        self.api.createAccount(email, password, name, self.create_delegate_request_listener(listener, True))
 
     def create_account(self, email, password, name):
         '''Initialize a creation of the new MEGA account.
@@ -400,7 +400,7 @@ class MegaApiPython(MegaApi):
         :param password - Password for the account
         :param name - Name of the user
         '''
-        self.createAccount(email, password, name)
+        self.api.createAccount(email, password, name)
 
     def fast_create_account_listener(self, email, base_64_pwkey, name, listener):
     	'''Initialize the creation of a new MEGA account with precomputed keys.
@@ -414,7 +414,7 @@ class MegaApiPython(MegaApi):
         :param name - Name of the user
         :param listener - MegaRequestListener to track this request
         '''
-        self.fastCreateAccount(email, base_64_pwkey, name, self.create_delegate_request_listener(listener, True))
+        self.api.fastCreateAccount(email, base_64_pwkey, name, self.create_delegate_request_listener(listener, True))
 
     def fast_create_account(self, email, base_64_pwkey, name):
         '''Initialize the creation of a new MEGA account with precomputed keys.
@@ -422,7 +422,7 @@ class MegaApiPython(MegaApi):
         :param base_64_pwkey - Private key calculated with MegaApi.get_base64_pw_key()
         :param name - Name of the user
         '''
-        self.fastCreateAccount(email, base_64_pwkey, name)
+        self.api.fastCreateAccount(email, base_64_pwkey, name)
 
     def query_signup_link_listener(self, link, listener):
     	'''Get information about a confirmation link.
@@ -434,13 +434,13 @@ class MegaApiPython(MegaApi):
         :param link - Confirmation link
         :param listener - MegaRequestListener to track this request
         '''
-        self.querySignupLink(link, self.create_delegate_request_listener(listener, True))
+        self.api.querySignupLink(link, self.create_delegate_request_listener(listener, True))
 
     def query_signup_link(self, link):
         '''Get information about a confirmation link.
         :param link Confirmation link
         '''
-        self.querySignupLink(link)
+        self.api.querySignupLink(link)
 
     def confirm_account_listener(self, link, password, listener):
     	'''Confirm a MEGA account using a confirmation link and the user password.
@@ -454,14 +454,14 @@ class MegaApiPython(MegaApi):
         :param password - Password of the account
         :param listener - MegaRequestListener to track this request
         '''
-        self.confirmAccount(link, password, self.create_delegate_request_listener(listener, True))
+        self.api.confirmAccount(link, password, self.create_delegate_request_listener(listener, True))
 
     def confirm_account(self, link, password):
         '''Confirm a MEGA account using a confirmation link and the user password.
         :param link - Confirmation link
         :param password - Password of the account
         '''
-        self.confirmAccount(link, password)
+        self.api.confirmAccount(link, password)
 
     def fast_confirm_account_listener(self, link, base_64_pwkey, listener):
     	'''Confirm a MEGA account using a confirmation link and a precomputed key.
@@ -475,21 +475,21 @@ class MegaApiPython(MegaApi):
         :param base_64_pwkey - Private key precomputed with MegaApi.get_base64_pw_key()
         :param listener - MegaRequestListener to track this request
         '''
-        self.fastConfirmAccount(link, base_64_pwkey, self.create_delegate_request_listener(listener, True))
+        self.api.fastConfirmAccount(link, base_64_pwkey, self.create_delegate_request_listener(listener, True))
 
     def fast_confirm_account(self, link, base_64_pwkey):
         '''Confirm a MEGA account using a confirmation key and a precomputed key.
         :param link - Confirmation link
         :param base_64_pwkey - Private key precomputed with MegaApi.get_base64_pw_key()
         '''
-        self.fastConfirmAccount(link, base_64_pwkey)
+        self.api.fastConfirmAccount(link, base_64_pwkey)
 
     def set_proxy_settings(self, proxy_settings):
     	'''Set proxy settings.
         The SDK will start using the provided proxy settings as soon as this function returns.
         :param proxy_settings - Proxy settings
         '''
-        self.setProxySettings(proxy_settings)
+        self.api.setProxySettings(proxy_settings)
 
     def get_auto_proxy_settings(self):
     	'''Try to detect the system's proxy settings.
@@ -497,13 +497,13 @@ class MegaApiPython(MegaApi):
         You take the ownership of the returned value.
         :param Returns MegaProxy object with the detected proxy settings.
         '''
-        return self.getAutoProxySettings()
+        return self.api.getAutoProxySettings()
 
     def is_logged_in(self):
     	'''Check if the MegaApi object is logged in.
         :Returns 0 if not logged in, else a number >= 0
         '''
-        return self.isLoggedIn()
+        return self.api.isLoggedIn()
 
     def get_my_email(self):
     	'''Returns the email of the currently open account.
@@ -511,11 +511,11 @@ class MegaApiPython(MegaApi):
         You take the ownership of the returned value
         :Returns Email of the account
         '''
-        return self.getMyEmail()
+        return self.api.getMyEmail()
 
     def get_my_user_handle(self):
     	'''need clarification'''
-        return self.getMyUserHandle()
+        return self.api.getMyUserHandle()
 
     def set_logger_object(self, mega_logger):
         '''Set a MegaLogger implementation to receive SDK logs.
@@ -525,7 +525,7 @@ class MegaApiPython(MegaApi):
         :param mega_logger MegaLogger implementation
         '''
         new_logger = DelegateMegaLoggerListener(mega_logger)
-        self.setLoggerObject(new_logger)
+        self.api.setLoggerObject(new_logger)
         logger = new_logger
 
     def set_log_level(self, log_level):
@@ -541,7 +541,7 @@ class MegaApiPython(MegaApi):
              MegaApiJava.LOG_LEVEL_DEBUG = 4
              MegaApiJava.LOG_LEVEL_MAX = 5
         '''
-        self.setLogLevel(log_level)
+        self.api.setLogLevel(log_level)
 
     def log():
         pass
@@ -563,14 +563,14 @@ class MegaApiPython(MegaApi):
         :param parent - Parent folder
         :param listener - MegaRequestListener to track this request
         '''
-        self.createFolder(name, parent, self.create_delegate_request_listener(listener, True))
+        self.api.createFolder(name, parent, self.create_delegate_request_listener(listener, True))
 
     def create_folder(self, name, parent):
         '''Create a folder in the MEGA account.
         :param name - Name of the new folder
         :param parent - Parent folder
         '''
-        self.createFolder(name, parent)
+        self.api.createFolder(name, parent)
 
     def move_node_listener(self, node, new_parent, listener):
     	'''Move a node in the MEGA account.
@@ -581,14 +581,14 @@ class MegaApiPython(MegaApi):
         :param new_parent - New parent for the node
         :param listener - MegaRequestListener to track this request
         '''
-        self.moveNode(node, new_parent, self.create_delegate_request_listener(listener, True))
+        self.api.moveNode(node, new_parent, self.create_delegate_request_listener(listener, True))
 
     def move_node(self, node, new_parent):
         '''Move a node in the MEGA account.
         :param node - Node to move
         :param new_parent - New parent for the node
         '''
-        self.moveNode(node, new_parent)
+        self.api.moveNode(node, new_parent)
 
     def copy_node_listener(self, node, new_parent, listener):
     	'''Copy a node in the MEGA account.
@@ -602,14 +602,14 @@ class MegaApiPython(MegaApi):
         :param new_parent - Parent for the new node
         :param listener - MegaRequestListener to track this request
         '''
-        self.copyNode(node, new_parent, self.create_delegate_request_listener(listener, True))
+        self.api.copyNode(node, new_parent, self.create_delegate_request_listener(listener, True))
 
     def copy_node(self, node, new_parent):
         '''Copy a node in the MEGA account.
         :param node - Node to copy
         :param new_parent - Parent for the new node
         '''
-        self.copyNode(node, new_parent)
+        self.api.copyNode(node, new_parent)
 
     def copy_node_new_name_listener(self,node, new_parent, new_name, listener):
     	'''Copy a node in the MEGA account.
@@ -624,7 +624,7 @@ class MegaApiPython(MegaApi):
         :param new_name - Name for the new node
         :param listener - MegaRequestListener to track this request
         '''
-        self.copyNode(node, new_parent, new_name, self.create_delegate_request_listener(listener, True))
+        self.api.copyNode(node, new_parent, new_name, self.create_delegate_request_listener(listener, True))
 
     def copy_node_new_name(self, new_parent, new_name):
         '''Copy a node in the MEGA account
@@ -632,7 +632,7 @@ class MegaApiPython(MegaApi):
         :param new_parent - Parent for the new node
         :param new_name - Name for the new node
         '''
-        self.copyNode(node, new_parent, new_name)
+        self.api.copyNode(node, new_parent, new_name)
 
     def rename_node_listener(self, node, new_name, listener):
     	'''Rename a node in the MEGA account.
@@ -643,14 +643,14 @@ class MegaApiPython(MegaApi):
         :param new_name - New name for the node
         :param listener - MegaRequestListener to track this request
         '''
-        self.renameNode(node, new_name, self.create_delegate_request_listener(listener, True))
+        self.api.renameNode(node, new_name, self.create_delegate_request_listener(listener, True))
 
     def rename_node(self, node, new_name):
         '''Rename a node in the MEGA accoutn.
         :param node - Node to modify
         :param new_name - New name for the node
         '''
-        self.renameNode(node, new_name)
+        self.api.renameNode(node, new_name)
 
     def remove_with_listener(self, node, listener):
     	'''Remove a node from the MEGA account.
@@ -660,13 +660,13 @@ class MegaApiPython(MegaApi):
         :param node - Node to remove
         :param listener - MegaRequestListener to track this request
         '''
-        self.remove(node, self.create_delegate_request_listener(listener, True))
+        self.api.remove(node, self.create_delegate_request_listener(listener, True))
 
     def remove_node(self, node):
         '''Remove a node from the MEGA account.
         :param node - Node to remove
         '''
-        self.remove(node)
+        self.api.remove(node)
 
     def send_file_to_user_listener(self, node, user, listener):
     	'''Send a node to the Inbox of another MEGA user using a MegaUser.
@@ -677,14 +677,14 @@ class MegaApiPython(MegaApi):
         :param user - User that receives the node
         :param listener - MegaRequestListener to track this request
         '''
-        self.sendFileToUser(node, user, self.create_delegate_request_listener(listener, True))
+        self.api.sendFileToUser(node, user, self.create_delegate_request_listener(listener, True))
 
     def send_file_to_user(self, node, user):
         '''Send a node to the inbox of another MEGA user using a Megauser.
         :param node - Node to send
         :param user - User that receives the node
         '''
-        self.sendFileToUser(node, user)
+        self.api.sendFileToUser(node, user)
 
     def share_folder_with_listener(self, node, user, level, listener):
     	'''Share or stop sharing a folder in MEGA with another user using a MegaUser.
@@ -703,7 +703,7 @@ class MegaApiPython(MegaApi):
             MegaShare.ACCESS_OWNER = 3
         :param listener - MegaRequestListener to track this request
         '''
-        self.share(node, user, level, self.create_delegate_request_listener(listener, True))
+        self.api.share(node, user, level, self.create_delegate_request_listener(listener, True))
 
     def share_folder(self, node, user, level):
         '''Share or stop sharing a folder in MEGA with another user using a MegaUser.
@@ -716,7 +716,7 @@ class MegaApiPython(MegaApi):
             MegaShare.ACCESS_FULL = 2
             MegaShare.ACCESS_OWNER = 3
         '''
-        self.share(node, user, level)
+        self.api.share(node, user, level)
 
     def share_using_email_with_listener(self, node, email, level, listener):
         '''Share or stop sharing a folder in MEGA with another user using his/her email.
@@ -731,7 +731,7 @@ class MegaApiPython(MegaApi):
             MegaShare.ACCESS_OWNER = 3
         :param listener MegaRequestListener to track the request
         '''
-        self.share(node, email, level, self.create_delegate_request_listener(listener, True))
+        self.api.share(node, email, level, self.create_delegate_request_listener(listener, True))
 
     def share_using_email(self, node, email, level):
         '''Share or stop sharing a folder in MEGA with another user using his/her email.
@@ -745,7 +745,7 @@ class MegaApiPython(MegaApi):
             MegaShare.ACCESS_FULL = 2
             MegaShare.ACCESS_OWNER = 3
         '''
-        self.share(node, email, level)
+        self.api.share(node, email, level)
 
     def import_file_link_using_listener(self, mega_file_link, parent, listener):
     	'''Import a public link to the account.
@@ -758,14 +758,14 @@ class MegaApiPython(MegaApi):
         :param parent - Parent folder for the imported file
         :param listener - MegaRequestListener to track this request
         '''
-        self.importFileLink(mega_file_link, parent, self.create_delegate_request_listener(listener, True))
+        self.api.importFileLink(mega_file_link, parent, self.create_delegate_request_listener(listener, True))
 
     def import_file_link(self, mega_file_link, parent):
         '''Import a public link to the account.
         :param mega_file_link - Public link to a file in MEGA
         :param parent - Parent folder for the imported file
         '''
-        self.importFileLink(mega_file_link, parent)
+        self.api.importFileLink(mega_file_link, parent)
 
     def get_public_node_using_listener(self, mega_file_link, listener):
     	'''Get a MegaNode from a public link to a file.
@@ -777,14 +777,14 @@ class MegaApiPython(MegaApi):
         :param mega_file_link - Public link to a file in MEGA
         :param listener - MegaRequestListener to track this request
         '''
-        self.getPublicNode(mega_file_link, self.create_delegate_request_listener(listener, True))
+        self.api.getPublicNode(mega_file_link, self.create_delegate_request_listener(listener, True))
 
     def get_public_node(self, mega_file_link):
         '''Get a MegaNode from a public link to a file.
         A public node can be imported using MegaApi.copy_node() or downloaded using MegaApi.start_download()
         :param mega_file_link - Public link to a file in MEGA
         '''
-        self.getPublicNode(mega_file_link)
+        self.api.getPublicNode(mega_file_link)
 
     def get_thumbnail_using_listener(self, node, dst_file_path, listener):
     	'''Get the thumbnail of a node.
@@ -799,7 +799,7 @@ class MegaApiPython(MegaApi):
         If the path doesn't finish with one of these characters, the file will be downloaded to a file in that path.
         :param listener - MegaRequestListener to track this request
         '''
-        self.getThumbnail(node, dst_file_path, self.create_delegate_request_listener(listener, True))
+        self.api.getThumbnail(node, dst_file_path, self.create_delegate_request_listener(listener, True))
 
     def get_thumbnail(self, node, dst_file_path):
         '''Get the thumbnail of a node.
@@ -809,7 +809,7 @@ class MegaApiPython(MegaApi):
         it must end with a '\' or '/' character and (Base64-encoded handle + "0.jpg") will be used as the file name inside that folder.
         If the path doesn't finish with one of these characters, the file will be downloaded to a file in that path.
         '''
-        self.getThumbnail(node, dst_file_path)
+        self.api.getThumbnail(node, dst_file_path)
 
     def get_preview_using_listener(self, node, dst_file_path, listener):
     	'''Get the preview of a node.
@@ -825,7 +825,7 @@ class MegaApiPython(MegaApi):
         characters, the file will be downloaded to a file in that path.
         :param listener - MegaRequestListener to track this request
         '''
-        self.getPreview(node, dst_file_path, self.create_delegate_request_listener(listener, True))
+        self.api.getPreview(node, dst_file_path, self.create_delegate_request_listener(listener, True))
 
     def get_preview(self, node, dst_file_path):
     	'''Get the preview of a node.
@@ -836,7 +836,7 @@ class MegaApiPython(MegaApi):
         as the file name inside that folder. If the path doesn't finish with one of these
         characters, the file will be downloaded to a file in that path.
         '''
-        self.getPreview(node, dst_file_path)
+        self.api.getPreview(node, dst_file_path)
 
     def get_user_avatar_with_listener(self, user, dst_file_path, listener):
     	'''Get the avatar of a MegaUser.
@@ -850,7 +850,7 @@ class MegaApiPython(MegaApi):
         the file will be downloaded to a file in that path.
         :param listener - MegaRequestListener to track this request
         '''
-        self.getUserAvatar(user, dst_file_path, self.create_delegate_request_listener(listener, True))
+        self.api.getUserAvatar(user, dst_file_path, self.create_delegate_request_listener(listener, True))
 
     def get_user_avatar(self, user, dst_file_path):
         '''Get the avatar of a MegaUser.
@@ -860,7 +860,7 @@ class MegaApiPython(MegaApi):
         used as the file name inside that folder. If the path doesn't finish with one of these characters,
         the file will be downloaded to a file in that path.
         '''
-        self.getUserAvatar(user, dst_file_path)
+        self.api.getUserAvatar(user, dst_file_path)
 
     def get_user_attribute_with_listener(self, user, type, listener):
         '''Get an attribute of a MegaUser.
@@ -876,7 +876,7 @@ class MegaApiPython(MegaApi):
             MegaApi.USER_ATTR_LASTNAME = 2 Get the lastname of the user
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.getUserAttribute(user, type, self.create_delegate_request_listener(listener, True))
+        self.api.getUserAttribute(user, type, self.create_delegate_request_listener(listener, True))
 
     def get_user_attribute(self, user, type):
         '''Get an attribute of a MegaUser.
@@ -885,7 +885,7 @@ class MegaApiPython(MegaApi):
             MegaApi.USER_ATTR_FIRSTNAME = 1 Get the firstname of the user
             MegaApi.USER_ATTR_LASTNAME = 2 Get the lastname of the user
         '''
-        self.getUserAttribute(user, type)
+        self.api.getUserAttribute(user, type)
 
     def get_user_attribute_by_type_with_listener(self, type, listener):
         '''Get an attribute of the current account.
@@ -900,7 +900,7 @@ class MegaApiPython(MegaApi):
             MegaApi.USER_ATTR_LASTNAME = 2 Get the lastname of the user
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.getUserAttribute(type, self.create_delegate_request_listener(listener, True))
+        self.api.getUserAttribute(type, self.create_delegate_request_listener(listener, True))
 
     def get_user_attribute_by_type(self, type):
         '''Get an attribute of the current account.
@@ -908,7 +908,7 @@ class MegaApiPython(MegaApi):
             MegaApi.USER_ATTR_FIRSTNAME = 1 Get the firstname of the user.
             MegaApi.USER_ATTR_LASTNAME = 2 Get the lastname of the user
         '''
-        self.getUserAttribute(type)
+        self.api.getUserAttribute(type)
 
     def cancel_get_thumbnail_with_listener(self, node, listener):
     	'''Cancel the retrieval of a thumbnail.
@@ -918,13 +918,13 @@ class MegaApiPython(MegaApi):
         :param node - Node to cancel the retrieval of the preview
         :param listener - listener	MegaRequestListener to track this request
         '''
-        self.cancelGetThumbnail(node, self.create_delegate_request_listener(listener, True))
+        self.api.cancelGetThumbnail(node, self.create_delegate_request_listener(listener, True))
 
     def cancel_get_thumbnail(self, node):
     	'''Cancel the retrieval of a thumbnail.
         :param node - Node to cancel the retrieval of the preview
         '''
-        self.cancelGetThumbnail(node)
+        self.api.cancelGetThumbnail(node)
 
     def cancel_get_preview_with_listener(self, node, listener):
     	'''Cancel the retrieval of a preview.
@@ -934,13 +934,13 @@ class MegaApiPython(MegaApi):
         :param node - Node to cancel the retrieval of the preview
         :param listener - listener	MegaRequestListener to track this request
         '''
-        self.cancelGetPreview(node, self.create_delegate_request_listener(listener, True))
+        self.api.cancelGetPreview(node, self.create_delegate_request_listener(listener, True))
 
     def cancel_get_preview(self, node):
     	'''Cancel the retrieval of a preview.
         :param node - Node to cancel the retrieval of the preview
         '''
-        self.cancelGetPreview(node)
+        self.api.cancelGetPreview(node)
 
     def set_thumbnail_with_listener(self, node, src_file_path, listener):
     	'''Set the thumbnail of a MegaNode.
@@ -952,14 +952,14 @@ class MegaApiPython(MegaApi):
         :param src_file_path - Source path of the file that will be set as thumbnail
         :param listener - MegaRequestListener to track this request
         '''
-        self.setThumbnail(node, src_file_path, self.create_delegate_request_listener(listener, True))
+        self.api.setThumbnail(node, src_file_path, self.create_delegate_request_listener(listener, True))
 
     def set_thumbnail(self, node, src_file_path):
     	'''Set the thumbnail of a MegaNode.
         :param node - MegaNode to set the thumbnail
         :param src_file_path - Source path of the file that will be set as thumbnail
         '''
-        self.setThumbnail(node, src_file_path)
+        self.api.setThumbnail(node, src_file_path)
 
     def set_preview_with_listener(self, node, src_file_path, listener):
     	'''Set the preview of a MegaNode.
@@ -971,14 +971,14 @@ class MegaApiPython(MegaApi):
         :param src_file_path - Source path of the file that will be set as preview
         :param listener - MegaRequestListener to track this request
         '''
-        self.setPreview(node, src_file_path, self.create_delegate_mega_listener(listener))
+        self.api.setPreview(node, src_file_path, self.create_delegate_mega_listener(listener))
 
     def set_preview(self, node, src_file_path):
     	'''Set the preview of a MegaNode.
         :param node - MegaNode to set the preview
         :param src_file_path - Source path of the file that will be set as preview
         '''
-        self.setPreview(node, src_file_path)
+        self.api.setPreview(node, src_file_path)
 
     def set_avatar_with_listener(self, src_file_path, listener):
     	'''Set the avatar of the MEGA account.
@@ -987,13 +987,13 @@ class MegaApiPython(MegaApi):
         :param src_file_path - Source path of the file that will be set as avatar
         :param listener - MegaRequestListener to track this request
         '''
-        self.setAvatar(src_file_path, self.create_delegate_request_listener(listener, True))
+        self.api.setAvatar(src_file_path, self.create_delegate_request_listener(listener, True))
 
     def set_avatar(self, src_file_path):
     	'''Set the avatar of the MEGA account.
         :param src_file_path - Source path of the file that will be set as avatar
         '''
-        self.setAvatar(src_file_path)
+        self.api.setAvatar(src_file_path)
 
     def set_user_attribute_with_listener(self, type, value, listener):
         '''Set an attribute of the current user.
@@ -1009,7 +1009,7 @@ class MegaApiPython(MegaApi):
         :param value  New attribute value
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.setUserAttribute(type, value, self.create_delegate_request_listener(listener, True))
+        self.api.setUserAttribute(type, value, self.create_delegate_request_listener(listener, True))
 
     def set_user_attribute(self, type, value):
         '''Set an attribute of the current user.
@@ -1020,7 +1020,7 @@ class MegaApiPython(MegaApi):
                  Change the lastname of the user
         :param value  New attribute value
         '''
-        self.setUserAttribute(type, value)
+        self.api.setUserAttribute(type, value)
 
     def export_node_with_listener(self, node, listener):
     	'''Generate a public link of a file/folder in MEGA.
@@ -1032,13 +1032,13 @@ class MegaApiPython(MegaApi):
         :param node - MegaNode to get the public link
         :param listener - MegaRequestListener to track this request
         '''
-        self.exportNode(node, self.create_delegate_request_listener(listener, True))
+        self.api.exportNode(node, self.create_delegate_request_listener(listener, True))
 
     def export_node(self, node):
     	'''Generate a public link of a file/folder in MEGA.
         :param node - MegaNode to get the public link
         '''
-        self.exportNode(node)
+        self.api.exportNode(node)
 
     def disable_export_with_listener(self, node, listener):
     	'''Stop sharing a file/folder.
@@ -1048,13 +1048,13 @@ class MegaApiPython(MegaApi):
         :param node - MegaNode to stop sharing
         :param listener - MegaRequestListener to track this request
         '''
-        self.disableExport(node, self.create_delegate_request_listener(listener, True))
+        self.api.disableExport(node, self.create_delegate_request_listener(listener, True))
 
     def disable_export(self, node):
     	'''Stop sharing a file/folder.
         :param node - MegaNode to stop sharing
         '''
-        self.disableExport(node)
+        self.api.disableExport(node)
 
     def fetch_nodes_with_listener(self, listener):
     	'''Fetch the filesystem in MEGA.
@@ -1062,13 +1062,13 @@ class MegaApiPython(MegaApi):
         The associated request type with this request is MegaRequest.TYPE_FETCH_NODES
         :param listener - MegaRequestListener to track this request
         '''
-        self.fetchNodes(self.create_delegate_request_listener(listener, True))
+        self.api.fetchNodes(self.create_delegate_request_listener(listener, True))
 
     def fetch_nodes(self):
     	'''Fetch the filesystem in MEGA.
         The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
         '''
-        self.fetchNodes()
+        self.api.fetchNodes()
 
     def get_account_details_with_listener(self, listener):
     	'''Get details about the MEGA account.
@@ -1077,12 +1077,12 @@ class MegaApiPython(MegaApi):
             MegaRequest.getMegaAccountDetails - Details of the MEGA account
         :param listener - MegaRequestListener to track this request
         '''
-        self.getAccountDetails(self.create_delegate_request_listener(listener, True))
+        self.api.getAccountDetails(self.create_delegate_request_listener(listener, True))
 
     def get_account_details(self):
         '''Get details about the MEGA account.
         '''
-        self.getAccountDetails()
+        self.api.getAccountDetails()
 
     def get_extended_account_details_with_listener(self, sessions, purchases, transactions, listener):
         '''Get details about the MEGA account.
@@ -1096,7 +1096,7 @@ class MegaApiPython(MegaApi):
         :param transactions Boolean. Get transactions history if true. Do not get transactions history if false
         :param listener MegaRequestListener to track this request
         '''
-        self.getExtendedAccountDetails(sessions, purchases, transactions, self.create_delegate_request_listener(listener, True))
+        self.api.getExtendedAccountDetails(sessions, purchases, transactions, self.create_delegate_request_listener(listener, True))
 
     def get_extended_account_details(self, sessions, purchases, transactions):
         '''Get details about the MEGA account.
@@ -1105,7 +1105,7 @@ class MegaApiPython(MegaApi):
         :param purchases Boolean. Get purchase history if true. Do not get purchase history if false
         :param transactions Boolean. Get transactions history if true. Do not get transactions history if false
         '''
-        self.getExtendedAccountDetails(sessions, purchases, transactions)
+        self.api.getExtendedAccountDetails(sessions, purchases, transactions)
 
     def get_extended_account_details_no_transactions(self, sessions, purchases):
         '''Get details about the MEGA account.
@@ -1113,19 +1113,19 @@ class MegaApiPython(MegaApi):
         :param sessions Boolean. Get sessions history if true. Do not get sessions history if false
         :param purchases Boolean. Get purchase history if true. Do not get purchase history if false
         '''
-        self.getExtendedAccountDetails(sessions, purchases)
+        self.api.getExtendedAccountDetails(sessions, purchases)
 
     def get_extended_account_details_only_sessions(self, sessions):
         '''Get details about the MEGA account.
         This function allows to optionally get data about sessions, transactions and purchases related to the account.
         :param sessions Boolean. Get sessions history if true. Do not get sessions history if false
         '''
-        self.getExtendedAccountDetails(sessions)
+        self.api.getExtendedAccountDetails(sessions)
 
     def get_all_extended_account_details(self):
         '''Get details about the MEGA account.
         '''
-        self.getExtendedAccountDetails()
+        self.api.getExtendedAccountDetails()
 
     def get_pricing_with_listener(self, listener):
     	'''Get the available pricing plans to upgrade a MEGA account.
@@ -1135,12 +1135,12 @@ class MegaApiPython(MegaApi):
             MegaRequest.getPricing - MegaPricing object with all pricing plans
         :param listener - MegaRequestListener to track this request
         '''
-        self.getPricing(self.create_delegate_request_listener(listener, True))
+        self.api.getPricing(self.create_delegate_request_listener(listener, True))
 
     def get_pricing(self):
     	'''Get the available pricing plans to upgrade a MEGA account.
         '''
-        self.getPricing()
+        self.api.getPricing()
 
     def get_payment_id_with_listener(self, product_handle, listener):
     	'''Get the payment id for an upgrade.
@@ -1153,13 +1153,13 @@ class MegaApiPython(MegaApi):
         :param product_handle Handle of the product (see MegaApi.get_pricing())
         :param listener MegaRequestListener to track this request
         '''
-        self.getPaymentId(product_handle, self.create_delegate_request_listener(listener, True))
+        self.api.getPaymentId(product_handle, self.create_delegate_request_listener(listener, True))
 
     def get_payment_id(self, product_handle):
     	'''Get the payment id for an upgrade.
         :param product_handle Handle of the product (see MegaApi.get_pricing())
         '''
-        self.getPaymentId(product_handle)
+        self.api.getPaymentId(product_handle)
 
     def upgrade_account_with_listener(self, product_handle, payment_method, listener):
     	'''Upgrade an account.
@@ -1178,7 +1178,7 @@ class MegaApiPython(MegaApi):
         a credit card to your account
         :param listener MegaRequestListener to track this request
         '''
-        self.upgradeAccount(product_handle, payment_method, self.create_delegate_request_listener(listener, True))
+        self.api.upgradeAccount(product_handle, payment_method, self.create_delegate_request_listener(listener, True))
 
     def upgrade_account(self, product_handle, payment_method):
     	'''Upgrade an account.
@@ -1192,20 +1192,20 @@ class MegaApiPython(MegaApi):
         Complete the payment with your credit card. Use MegaApi.credit_card_store() to add
         a credit card to your account
         '''
-        self.upgradeAccount(product_handle, payment_method)
+        self.api.upgradeAccount(product_handle, payment_method)
 
     def submit_purchase_receipt_with_listener(self, receipt, listener):
     	'''Send the Google Play receipt after a correct purchase of subscription.
         :param receipt String the complete receipt from Google Play
         :param listener MegaRequestListener to track this request
         '''
-        self.submitPurchaseReceipt(receipt, self.create_delegate_request_listener(listener, True))
+        self.api.submitPurchaseReceipt(receipt, self.create_delegate_request_listener(listener, True))
 
     def submit_purchase_receipt(self, receipt):
     	'''Send the Google Play receipt after a correct purchase of subscription.
         :param receipt String the complete receipt from Google Play
         '''
-        self.submitPurchaseReceipt(receipt)
+        self.api.submitPurchaseReceipt(receipt)
 
     def credit_card_store_with_listener(self, address_1, address_2, city, province, country, postal_code,
         first_name, last_name, credit_card, expire_month, expire_year, cv_2, listener):
@@ -1225,7 +1225,7 @@ class MegaApiPython(MegaApi):
         :param cv_2 Security code of the credit card (3 digits)
         :param listener MegaRequestListener to track this request
         '''
-        self.creditCardStore(address_1, address_2, city, province, country, postal_code,
+        self.api.creditCardStore(address_1, address_2, city, province, country, postal_code,
             first_name, last_name, credit_card, expire_month, expire_year, cv_2,
             self.create_delegate_request_listener(listener, True))
 
@@ -1246,7 +1246,7 @@ class MegaApiPython(MegaApi):
         :param expire_year Expire year of the credit card. Must have four digits ("2010" for example)
         :param cv_2 Security code of the credit card (3 digits)
         '''
-        self.creditCardStore(address_1, address_2, city, province, country, postal_code,
+        self.api.creditCardStore(address_1, address_2, city, province, country, postal_code,
             first_name, last_name, credit_card, expire_month, expire_year, cv_2)
 
     def credit_card_query_subscriptions_with_listener(self, listener):
@@ -1257,12 +1257,12 @@ class MegaApiPython(MegaApi):
             MegaRequest.getNumber() - Number of credit card subscriptions
         :param listener MegaRequestListener to track this request
         '''
-        self.creditCardQuerySubscriptions(self.create_delegate_request_listener(listener, True))
+        self.api.creditCardQuerySubscriptions(self.create_delegate_request_listener(listener, True))
 
     def credit_card_query_subscriptions(self):
     	'''Get the credit card subscriptions of the account.
         '''
-        self.creditCardQuerySubscriptions()
+        self.api.creditCardQuerySubscriptions()
 
     def credit_card_cancel_subscriptions_with_listener(self, reason,  listener):
     	'''Cancel credit card subscriptions of the account.
@@ -1270,13 +1270,13 @@ class MegaApiPython(MegaApi):
         :param reason for cancellation it can be None
         :param listener MegaRequestListener to track this request
         '''
-        self.creditCardCancelSubscriptions(reason, self.create_delegate_request_listener(listener, True))
+        self.api.creditCardCancelSubscriptions(reason, self.create_delegate_request_listener(listener, True))
 
     def credit_card_cancel_subscriptions(self, reason):
     	'''Cancel credit card subscriptions of the account.
         :param reason for cancellation it can be None
         '''
-        self.creditCardCancelSubscriptions(reason)
+        self.api.creditCardCancelSubscriptions(reason)
 
     def get_payment_methods_with_listener(self, listener):
     	'''Get the available payment methods.
@@ -1288,12 +1288,12 @@ class MegaApiPython(MegaApi):
         request.getNumber() & (1 << MegaApi.PAYMENT_METHOD_CREDIT_CARD) != 0)
         :param listener MegaRequestListener to track this request
         '''
-        self.getPaymentMethods(self.create_delegate_request_listener(listener, True))
+        self.api.getPaymentMethods(self.create_delegate_request_listener(listener, True))
 
     def get_payment_methods(self):
     	'''Get the available payment methods.
         '''
-        self.getPaymentMethods()
+        self.api.getPaymentMethods()
 
     def export_master_key(self):
     	'''Export the master key of the account.
@@ -1303,7 +1303,7 @@ class MegaApiPython(MegaApi):
         You take the ownership of the returned value.
         :Returns Base64-encoded master key
         '''
-        return self.exportMasterKey()
+        return self.api.exportMasterKey()
 
     def change_password_with_listener(self, old_pass, new_pass, listener):
     	'''Change the password of the MEGA account.
@@ -1314,14 +1314,14 @@ class MegaApiPython(MegaApi):
         :param new_pass - new password
         :param listener - MegaRequestListener to track this request
         '''
-        self.changePassword(old_pass, new_pass, self.create_delegate_request_listener(listener, True))
+        self.api.changePassword(old_pass, new_pass, self.create_delegate_request_listener(listener, True))
 
     def change_password(self, old_pass, new_pass):
     	'''Change the password of the MEGA account.
         :param old_pass - old password
         :param new_pass - new password
         '''
-        self.changePassword(old_pass, new_pass)
+        self.api.changePassword(old_pass, new_pass)
 
     def add_contact_with_listener(self, email, listener):
     	'''Add a new contact to the MEGA account.
@@ -1331,13 +1331,13 @@ class MegaApiPython(MegaApi):
         :param listener - MegaRequestListener to track this request
         :deprecated
         '''
-        self.addContact(email, self.create_delegate_request_listener(listener, True))
+        self.api.addContact(email, self.create_delegate_request_listener(listener, True))
     def add_contact(self, email):
     	'''Add a new contact to the MEGA account.
         :param email - Email of the new contact
         :deprecated
         '''
-        self.addContact(email)
+        self.api.addContact(email)
 
     def invite_contact_with_listener(self, email, message, action, listener):
     	'''Invite another person to be your MEGA contact.
@@ -1355,7 +1355,7 @@ class MegaApiPython(MegaApi):
             MegaContactRequest.INVITE_ACTION_REMIND = 2
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.inviteContact(email, message, action, self.create_delegate_request_listener(listener, True))
+        self.api.inviteContact(email, message, action, self.create_delegate_request_listener(listener, True))
 
     def invite_contact(self, email, message, action):
     	'''Invite another person to be your MEGA contact.
@@ -1368,7 +1368,7 @@ class MegaApiPython(MegaApi):
             MegaContactRequest.INVITE_ACTION_DELETE = 1
             MegaContactRequest.INVITE_ACTION_REMIND = 2
         '''
-        self.inviteContact(email, message, action)
+        self.api.inviteContact(email, message, action)
 
     def reply_contact_request_with_listener(self, request, action, listener):
     	'''Reply to a contact request.
@@ -1384,7 +1384,7 @@ class MegaApiPython(MegaApi):
             MegaRequest.getNumber() - Returns the action
         :param listener MegaRequestListenerInterface to track this request
         '''
-        self.replyContactRequest(request, action, self.create_delegate_request_listener(listener, True))
+        self.api.replyContactRequest(request, action, self.create_delegate_request_listener(listener, True))
 
     def reply_contact_request_(self, request, action):
         '''Reply to a contact request
@@ -1395,7 +1395,7 @@ class MegaApiPython(MegaApi):
             MegaContactRequest.REPLY_ACTION_DENY = 1
             MegaContactRequest.REPLY_ACTION_IGNORE = 2
         '''
-        self.replyContactRequest(request, action)
+        self.api.replyContactRequest(request, action)
 
     def remove_contact(self, user, listener):
     	'''Remove a contact to the MEGA account.
@@ -1404,31 +1404,31 @@ class MegaApiPython(MegaApi):
         :param user - 	MegaUser of the contact (see MegaApi.getContact)
         :param listener - MegaRequestListener to track this request
         '''
-        self.removeContact(user, self.create_delegate_request_listener(listener, True))
+        self.api.removeContact(user, self.create_delegate_request_listener(listener, True))
 
     def logout_from_account_with_listener(self, listener):
     	'''Logout of the MEGA account.
         The associated request type with this request is MegaRequest.TYPE_LOGOUT
         :param listener - MegaRequestListener to track this request
         '''
-        self.logout(self.create_delegate_request_listener(listener, True))
+        self.api.logout(self.create_delegate_request_listener(listener, True))
 
     def logout_from_account(self):
         '''Logout of the MEGA account.
         '''
-        self.logout()
+        self.api.logout()
 
     def local_logout_with_listener(self, listener):
     	'''Logout of the MEGA account without invalidating the session.
         The associated request type with this request is MegaRequest.TYPE_LOGOUT.
         :param listener MegaRequestListener to track this request
         '''
-        self.localLogout(self.create_delegate_request_listener(listener, True))
+        self.api.localLogout(self.create_delegate_request_listener(listener, True))
 
     def local_logout():
         '''Logout of the MEGA account without invalidating the session.
         '''
-        self.localLogout()
+        self.api.localLogout()
 
     def submit_feedback_with_listener(self, rating, comment, listener):
     	'''Submit feedback about the app.
@@ -1443,7 +1443,7 @@ class MegaApiPython(MegaApi):
         :param listener MegaRequestListener to track this request
         :Deprecated for internal usage
         '''
-        self.submitFeedback(rating, comment, self.create_delegate_request_listener(listener, True))
+        self.api.submitFeedback(rating, comment, self.create_delegate_request_listener(listener, True))
 
     def submit_feedback(self, rating, comment):
     	'''Submit feedback about the app.
@@ -1452,7 +1452,7 @@ class MegaApiPython(MegaApi):
         :param comment Comment about the app.
         :Deprecated for internal usage
         '''
-        self.submitFeedback(rating, comment)
+        self.api.submitFeedback(rating, comment)
 
     def report_debug_event_with_listener(self, text, listener):
     	'''Send a debug report.
@@ -1465,7 +1465,7 @@ class MegaApiPython(MegaApi):
         :param listener MegaRequestListener to track this request
         :Deprecated for internal usage
         '''
-        self.reportDebugEvent(text, self.create_delegate_request_listener(listener, True))
+        self.api.reportDebugEvent(text, self.create_delegate_request_listener(listener, True))
 
     def report_debug_event(self, text):
     	'''Send a debug report.
@@ -1477,7 +1477,7 @@ class MegaApiPython(MegaApi):
         :param text Debug message.
         :Deprecated for internal usage
         '''
-        self.reportDebugEvent(text)
+        self.api.reportDebugEvent(text)
 
     # TRANSFERS
 
@@ -1487,14 +1487,14 @@ class MegaApiPython(MegaApi):
         :param parent - Parent node for the file in the MEGA account
         :param listener - MegaTransferListener to track this transfer
         '''
-        self.startUpload(local_path, parent, self.create_delegate_transfer_listener(listener, True))
+        self.api.startUpload(local_path, parent, self.create_delegate_transfer_listener(listener, True))
 
     def start_upload(self, local_path, parent):
     	'''Upload a file.
         :param local_path - Local path of the file
         :param parent - Parent node for the file in the MEGA account
         '''
-        self.startUpload(local_path, parent)
+        self.api.startUpload(local_path, parent)
 
     def start_upload_custom_modification_time_with_listener(self, local_path, parent, mtime, listener):
     	'''Upload a file with custom modification time.
@@ -1504,7 +1504,7 @@ class MegaApiPython(MegaApi):
         epoch)
         :param listener - MegaTransferListener to track this transfer
         '''
-        self.startUpload(local_path, parent, mtime, self.create_delegate_transfer_listener(listener, True))
+        self.api.startUpload(local_path, parent, mtime, self.create_delegate_transfer_listener(listener, True))
 
     def start_upload_custom_modification_time(self, local_path, parent, mtime):
     	'''Upload a file with custom modification time.
@@ -1513,7 +1513,7 @@ class MegaApiPython(MegaApi):
         :param mtime Custom modification time for the file in MEGA (in seconds since the
         epoch)
         '''
-        self.startUpload(local_path, parent, mtime)
+        self.api.startUpload(local_path, parent, mtime)
 
     def start_upload_custom_name_with_listener(self, local_path, parent, name, listener):
     	'''Upload a file with custom name.
@@ -1522,7 +1522,7 @@ class MegaApiPython(MegaApi):
         :param name Custom file name for the file in MEGA
         :param listener MegaTransferListener to track this transfer
         '''
-        self.startUpload(local_path, parent, name, self.create_delegate_transfer_listener(listener, True))
+        self.api.startUpload(local_path, parent, name, self.create_delegate_transfer_listener(listener, True))
 
     def start_upload_custom_name(self, local_path, parent, name):
     	'''Upload a file with custom name.
@@ -1530,7 +1530,7 @@ class MegaApiPython(MegaApi):
         :param parent - Parent node for the file in the MEGA account
         :param name Custom file name for the file in MEGA
         '''
-        self.startUpload(local_path, parent, name)
+        self.api.startUpload(local_path, parent, name)
 
     def start_upload_custom_name_modification_time_with_listener(self, local_path, parent,
         name, mtime, listener):
@@ -1542,7 +1542,7 @@ class MegaApiPython(MegaApi):
         epoch)
         :param listener MegaTransferListener to track this transfer
         '''
-        self.startUpload(local_path, parent, name, mtime, self.create_delegate_transfer_listener(listener, True))
+        self.api.startUpload(local_path, parent, name, mtime, self.create_delegate_transfer_listener(listener, True))
 
     def start_upload_custom_name_modification_time(self, local_path, parent,
         name, mtime):
@@ -1553,7 +1553,7 @@ class MegaApiPython(MegaApi):
         :param mtime Custom modification time for the file in MEGA (in seconds since the
         epoch)
         '''
-        self.startUpload(local_path, parent, name, mtime)
+        self.api.startUpload(local_path, parent, name, mtime)
 
     def start_download_with_listener(self, node, local_path, listener):
     	'''Download a file from MEGA.
@@ -1564,7 +1564,7 @@ class MegaApiPython(MegaApi):
         the file will be downloaded to a file in that path.
         :param listener - MegaTransferListener to track this transfer
         '''
-        self.startDownload(node, local_path, self.create_delegate_transfer_listener(listener, True))
+        self.api.startDownload(node, local_path, self.create_delegate_transfer_listener(listener, True))
 
     def start_download(self, node, local_path):
     	'''Download a file from MEGA.
@@ -1574,7 +1574,7 @@ class MegaApiPython(MegaApi):
         store a file inside that folder. If the path doesn't finish with one of these characters,
         the file will be downloaded to a file in that path.
         '''
-        self.startDownload(node, local_path)
+        self.api.startDownload(node, local_path)
 
     def start_streaming(self, node, start_pos, size, listener):
     	'''Start a streaming download.
@@ -1586,7 +1586,7 @@ class MegaApiPython(MegaApi):
         :param size - Size of the data to download
         :param listener - MegaTransferListener to track this transfer
         '''
-        self.startStreaming(node, start_pos, size, self.create_delegate_transfer_listener(listener, True))
+        self.api.startStreaming(node, start_pos, size, self.create_delegate_transfer_listener(listener, True))
 
     def cancel_transfer_with_listener(self, transfer, listener):
     	'''Cancel a transfer.
@@ -1598,14 +1598,14 @@ class MegaApiPython(MegaApi):
         in any MegaTransferListener callback or any MegaListener callback related to transfers.
         :param listener - MegaRequestListener to track this request
         '''
-        self.cancelTransfer(transfer, self.create_delegate_request_listener(listener, True))
+        self.api.cancelTransfer(transfer, self.create_delegate_request_listener(listener, True))
 
     def cancel_transfer(self, transfer):
     	'''Cancel a transfer.
         :param transfer - MegaTransfer object that identifies the transfer You can get this object
         in any MegaTransferListener callback or any MegaListener callback related to transfers.
         '''
-        self.cancelTransfer(transfer)
+        self.api.cancelTransfer(transfer)
 
     def cancel_transfer_by_tag_with_listener(self, transfer_tag, listener):
     	'''Cancel the transfer with a specific tag.
@@ -1620,14 +1620,14 @@ class MegaApiPython(MegaApi):
         using MegaTransfer.getTag().
         :param listener MegaRequestListener to track this request
         '''
-        self.cancelTransferByTag(transfer_tag, self.create_delegate_request_listener(listener, True))
+        self.api.cancelTransferByTag(transfer_tag, self.create_delegate_request_listener(listener, True))
 
     def cancel_transfer_by_tag(self, transfer_tag):
         '''Cancel transfer with a specific tag.
         :param transfer_tag tag that identifies the transfer. You can get this
         tag using MegaTransfer.getTag()
         '''
-        self.cancelTransferByTag(transfer_tag)
+        self.api.cancelTransferByTag(transfer_tag)
 
     def cancel_transfers_with_listener(self, type, listener):
     	'''Cancel all transfers of the same type.
@@ -1638,7 +1638,7 @@ class MegaApiPython(MegaApi):
             MegaTransfer.TYPE_UPLOAD = 1
         :param listener - MegaRequestListener to track this request
         '''
-        self.cancelTransfers(type, self.create_delegate_request_listener(listener, True))
+        self.api.cancelTransfers(type, self.create_delegate_request_listener(listener, True))
 
     def cancel_transfers(self, type):
         '''Cancel all transfers of the same type.
@@ -1646,7 +1646,7 @@ class MegaApiPython(MegaApi):
             MegaTransfer.TYPE_DOWNLOAD = 0
             MegaTransfer.TYPE_UPLOAD = 1
         '''
-        self.cancel_transfers(type)
+        self.api.cancel_transfers(type)
 
     def pause_transfers_with_listener(self, pause, listener):
     	'''Pause/resume all transfers.
@@ -1655,13 +1655,13 @@ class MegaApiPython(MegaApi):
         :param pause - True to pause all transfers or False to resume all transfers
         :param listener - MegaRequestListener to track this request
         '''
-        self.pauseTransfers(pause, self.create_delegate_request_listener(listener, True))
+        self.api.pauseTransfers(pause, self.create_delegate_request_listener(listener, True))
 
     def pause_transfers(self, pause):
     	'''Pause/resume all transfers.
         :param pause - True to pause all transfers or False to resume all transfers
         '''
-        self.pauseTransfers(pause)
+        self.api.pauseTransfers(pause)
 
     def set_upload_limit(self, bps_limit):
     	'''Set the upload speed limit.
@@ -1670,7 +1670,7 @@ class MegaApiPython(MegaApi):
         :param bps_limit - -1 to automatically select the limit, 0 for no limit,
         otherwise the speed limit in bytes per second
         '''
-        self.setUploadLimit(bps_limit)
+        self.api.setUploadLimit(bps_limit)
 
     def get_transfer_by_tag(self, transfer_tag):
     	'''Get the transfer with a transfer tag.
@@ -1679,91 +1679,91 @@ class MegaApiPython(MegaApi):
         :Returns MegaTransfer object with the tag, or null if there is not any
         active transfers with it.
         '''
-        return self.getTransferByTag(self.api, args)
+        return self.api.getTransferByTag(self.api, args)
 
     def do_update(self):
     	'''Force a loop of the SDK thread.
         :Deprecated
         '''
-        self.update()
+        self.api.update()
 
     def is_waiting(self):
     	'''Check if the SDK is waiting for the server.
 		:Returns True if the SDK is waiting for the server to complete a request
 		'''
-        return self.isWaiting()
+        return self.api.isWaiting()
 
     def get_num_pending_uploads(self):
     	'''Get the number of pending uploads.
 		:Returns the number of pending uploads.
         :Deprecated
 		'''
-        return self.getNumPendingUploads()
+        return self.api.getNumPendingUploads()
 
     def get_num_pending_downloads(self):
     	'''Get the number of pending downloads.
 		:Returns the number of pending downloads.
         :Deprecated
 		'''
-        return self.getNumPendingDownloads()
+        return self.api.getNumPendingDownloads()
 
     def get_total_uploads(self):
     	'''Get the number of queued uploads since the last call to MegaApi.resetTotalUploads.
 		:Returns number of queued uploads since the last call to MegaApi.resetTotalUploads
         :Deprecated
 		'''
-        return self.getTotalUploads()
+        return self.api.getTotalUploads()
 
     def get_total_downloads(self):
     	'''Get the number of queued uploads since the last call to MegaApi.resetTotalDownloads.
 		:Returns number of queued uploads since the last call to MegaApi.resetTotalDownloads
         :Deprecated
 		'''
-        return self.getTotalDownloads()
+        return self.api.getTotalDownloads()
 
     def reset_total_downloads(self):
     	'''Reset the number of total downloads This function resets the number returned by MegaApi.get_total_downloads().
         :Deprecated
 		'''
-        self.resetTotalDownloads()
+        self.api.resetTotalDownloads()
 
     def reset_total_uploads(self):
     	'''Reset the number of total uploads This function resets the number returned by MegaApi.get_total_uploads().
         :Deprecated
 		'''
-        self.resetTotalUploads()
+        self.api.resetTotalUploads()
 
     def get_total_downloaded_bytes(self):
     	'''Get the total downloaded bytes since the creation of the MegaApi object.
 		:Returns total downloaded bytes since the creation of the MegaApi object
         :Deprecated
 		'''
-        return self.getTotalDownloadedBytes()
+        return self.api.getTotalDownloadedBytes()
 
     def get_total_uploaded_bytes(self):
     	'''Get the total uploaded bytes since the creation of the MegaApi object.
 		:Returns total uploaded bytes since the creation of the MegaApi object
         :Deprecated
 		'''
-        return self.getTotalUploadedBytes()
+        return self.api.getTotalUploadedBytes()
 
     def update_stats(self):
     	'''Force a loop of the SDK thread. '''
-        self.updateStats()
+        self.api.updateStats()
 
     def get_transfers(self):
     	'''Get all active transfers.
 		You take the ownership of the returned value
 		:Returns list with all active downloads or uploads
 		'''
-        return self.transfer_list_to_array(self.getTransfers())
+        return self.api.transfer_list_to_array(self.getTransfers())
 
     def get_transfers_based_on_type(self, type):
     	'''Get all active transfers based on type.
 		You take the ownership of the returned value
 		:Returns list with all active downloads or uploads
 		'''
-        return self.transfer_list_to_array(self.getTransfers(type))
+        return self.api.transfer_list_to_array(self.getTransfers(type))
 
     # FILESYSTEM METHODS
 
@@ -1774,7 +1774,7 @@ class MegaApiPython(MegaApi):
         :param parent - Parent node
         :Returns Number of child nodes
         '''
-        return self.getNumChildren(parent)
+        return self.api.getNumChildren(parent)
 
     def get_num_child_files(self, args):
     	'''Get the number of child files of a node.
@@ -1783,7 +1783,7 @@ class MegaApiPython(MegaApi):
         :parent parent - Parent node
         :Returns Number of child files
         '''
-        return self.getNumChildFiles(self.api, args)
+        return self.api.getNumChildFiles(self.api, args)
 
     def get_num_child_folders(self, parent):
     	'''Get the number of child folders of a node.
@@ -1792,7 +1792,7 @@ class MegaApiPython(MegaApi):
         :param parent - Parent node
         :Returns Number of child folders
         '''
-        return self.getNumChildFolders(parent)
+        return self.api.getNumChildFolders(parent)
 
     def get_index_with_order(self, node, order):
     	'''Get the current index of the node in the parent folder for a specific sorting order.
@@ -1801,7 +1801,7 @@ class MegaApiPython(MegaApi):
         :param order - Sorting order to use
         :Returns index of the node in its parent folder
         '''
-        return self.getIndex(node, order)
+        return self.api.getIndex(node, order)
 
     def get_index(self, node):
     	'''Get the current index of the node in the parent folder.
@@ -1809,7 +1809,7 @@ class MegaApiPython(MegaApi):
         :param node - Node to check
         :Returns index of the node in its parent folder
         '''
-        return self.getIndex(node)
+        return self.api.getIndex(node)
 
     def get_child_node(self, parent, name):
     	'''Get the child node with the provided name.
@@ -1819,7 +1819,7 @@ class MegaApiPython(MegaApi):
         :param name - name of the node
         :Returns The MegaNode that has the selected parent and name
         '''
-        return self.getChildNode(parent, name)
+        return self.api.getChildNode(parent, name)
 
     def get_parent_node(self, node):
     	'''Get the parent node of a MegaNode.
@@ -1828,7 +1828,7 @@ class MegaApiPython(MegaApi):
         :param node - MegaNode to get the parent
         :Returns the parent of the provided node
         '''
-        return self.getParentNode(node)
+        return self.api.getParentNode(node)
 
     def get_node_path(self, node):
     	'''Get the path of a MegaNode.
@@ -1837,7 +1837,7 @@ class MegaApiPython(MegaApi):
         :param node - MegaNode for which the path will be returned
         :Returns the path of the node
         '''
-        return self.getNodePath(node)
+        return self.api.getNodePath(node)
 
     def get_node_by_path_base_folder(self, path, base_folder):
     	'''Get the MegaNode in a specific path in the MEGA account.
@@ -1847,7 +1847,7 @@ class MegaApiPython(MegaApi):
         :param base_node Base node if the path is relative
         :Returns The MegaNode object in the path, otherwise None
         '''
-        return self.getNodeByPath(path, base_folder)
+        return self.api.getNodeByPath(path, base_folder)
 
     def get_node_by_path(self, path):
     	'''Get the MegaNode in a specific path in the MEGA account.
@@ -1856,7 +1856,7 @@ class MegaApiPython(MegaApi):
         :param path - Path to check
         :Returns The MegaNode object in the path, otherwise None
         '''
-        return self.getNodeByPath(path)
+        return self.api.getNodeByPath(path)
 
     def get_node_by_handle(self, handle):
     	'''Get the MegaNode that has a specific handle.
@@ -1866,7 +1866,7 @@ class MegaApiPython(MegaApi):
         :param handle - Node handle to check
         :Returns MegaNode object with the handle, otherwise None
         '''
-        return self.getNodeByHandle(handle)
+        return self.api.getNodeByHandle(handle)
 
     def get_contact_request_by_handle(self, handle):
     	'''Get the MegaContactRequest that has a specific handle.
@@ -1875,7 +1875,7 @@ class MegaApiPython(MegaApi):
         :param handle Contact request handle to check.
         :Returns MegaContactRequest object with handle, otherwise None
         '''
-        return self.getContactRequestByHandle(handle)
+        return self.api.getContactRequestByHandle(handle)
 
 
     def get_contact(self, email):
@@ -1885,7 +1885,7 @@ class MegaApiPython(MegaApi):
         :param email - Email address to check
         :Returns MegaUser that has the email address, otherwise None
         '''
-        return self.getContact(email)
+        return self.api.getContact(email)
 
 
 
@@ -1895,7 +1895,7 @@ class MegaApiPython(MegaApi):
         :param node - Node to check
         :Returns True if the MegaNode is being shared, otherwise False
         '''
-        return self.isShared(node)
+        return self.api.isShared(node)
 
 
     def get_access(self, node):
@@ -1908,7 +1908,7 @@ class MegaApiPython(MegaApi):
             MegaShare.ACCESS_READ
             MegaShare.ACCESS_UNKNOWN
         '''
-        return self.getAccess(node)
+        return self.api.getAccess(node)
 
     def get_size(self, node):
     	'''Get the size of a node tree.
@@ -1916,7 +1916,7 @@ class MegaApiPython(MegaApi):
         :param node - Parent node
         :Returns size of the node tree
         '''
-        return self.getSize(node)
+        return self.api.getSize(node)
 
     def get_fingerprint(self, node):
     	'''Get a Base64-encoded fingerprint for a node.
@@ -1925,7 +1925,7 @@ class MegaApiPython(MegaApi):
         :param node - Node for which we want to get the fingerprint
         :Returns Base64-encoded fingerprint for the file
         '''
-        return self.getFingerprint(node)
+        return self.api.getFingerprint(node)
 
     def get_fingerprint(self, file_path):
     	'''Get a Base64-encoded fingerprint for a local file.
@@ -1937,7 +1937,7 @@ class MegaApiPython(MegaApi):
         :param file_path - Local file path
         :Returns Base64-encoded fingerprint for the file
         '''
-        return self.getFingerprint(node)
+        return self.api.getFingerprint(node)
 
     def get_node_by_fingerprint(self, fingerprint):
     	'''Returns a node with the provided fingerprint.
@@ -1946,10 +1946,10 @@ class MegaApiPython(MegaApi):
         :param fingerprint - Fingerprint to check
         :Returns MegaNode object with the provided fingerprint
         '''
-        return self.getNodeByFingerprint(fingerprint)
+        return self.api.getNodeByFingerprint(fingerprint)
 
     def get_node_by_fingerprint_preferred_parent(self, fingerprint, preferred_parent):
-        return self.getNodeByFingerprint(fingerprint, preferred_parent)
+        return self.api.getNodeByFingerprint(fingerprint, preferred_parent)
 
     def has_fingerprint(self, fingerprint):
     	'''Check if the account already has a node with the provided fingerprint.
@@ -1957,7 +1957,7 @@ class MegaApiPython(MegaApi):
         :param fingerprint - Fingerprint to check
         :Returns True if the account contains a node with the same fingerprint
         '''
-        return self.hasFingerprint(fingerprint)
+        return self.api.hasFingerprint(fingerprint)
 
     def check_access(self, node, level):
     	'''Check if a node has an access level.
@@ -1974,7 +1974,7 @@ class MegaApiPython(MegaApi):
             MegaError.API_ENOENT - The node or the target doesn't exist in the account
             MegaError.API_EARGS - Invalid parameters
         '''
-        return self.checkAccess(node, level)
+        return self.api.checkAccess(node, level)
 
     def check_move(self, node, target):
     	'''Check if a node can be moved to a target node.
@@ -1987,7 +1987,7 @@ class MegaApiPython(MegaApi):
             MegaError.API_ENOENT - The node or the target doesn't exist in the account
             MegaError.API_EARGS - Invalid parameters
         '''
-        return self.checkMove(node, target)
+        return self.api.checkMove(node, target)
 
     def get_root_node(self):
     	'''Returns the root node of the account.
@@ -1995,7 +1995,7 @@ class MegaApiPython(MegaApi):
         If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
         :Returns Root node of the account
         '''
-        return self.getRootNode()
+        return self.api.getRootNode()
 
     def get_inbox_node(self):
     	'''Returns the inbox node of the account.
@@ -2003,7 +2003,7 @@ class MegaApiPython(MegaApi):
         If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
         :Returns Inbox node of the account
         '''
-        return self.getInboxNode()
+        return self.api.getInboxNode()
 
     def get_rubbish_node(self):
     	'''Returns the rubbish node of the account.
@@ -2011,26 +2011,26 @@ class MegaApiPython(MegaApi):
         If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
         :Returns Rubbish node of the account
         '''
-        return self.getRubbishNode()
+        return self.api.getRubbishNode()
 
     def get_version(self):
     	'''Get the SDK version.
         :Returns the SDK version
         '''
-        return self.getVersion()
+        return self.api.getVersion()
 
     def get_user_agent(self):
     	'''Get the User-Agent header used by the SDK.
         :Returns User-Agent used by the SDK.
         '''
-        return self.getUserAgent()
+        return self.api.getUserAgent()
 
     def change_api_url(self, api_url):
     	'''Changed the API URL.
         Please note, this method does not disable public key pinning.
         :param api_url The API URL to change
         '''
-        self.changeApiUrl(api_url)
+        self.api.changeApiUrl(api_url)
 
     def change_api_url_disable_pkp(self, api_url, disable_pkp):
     	'''Changed the API URL.
@@ -2039,7 +2039,7 @@ class MegaApiPython(MegaApi):
         :param disable_pkp boolean. Disable public key pinning if True. Do not
         disable public key binning if False.
         '''
-        self.changeApiUrl(api_url, disable_pkp)
+        self.api.changeApiUrl(api_url, disable_pkp)
 
     def escape_fs_incompatible(self, name):
     	'''Make a name suitable for a file name in the local filesystem.
@@ -2049,14 +2049,14 @@ class MegaApiPython(MegaApi):
         :param name Name to convert
         :Returns Converted name
         '''
-        return self.escapeFsIncompatible(name)
+        return self.api.escapeFsIncompatible(name)
 
     def unescape_fs_incompatible(self, local_name):
     	'''Unescape a file name escaped with MegaApi.unescape_fs_incompatible().
         :param local_name Escape name to convert
         :Returns Converted name
         '''
-        return self.unescapeFsIncompatible(local_name)
+        return self.api.unescapeFsIncompatible(local_name)
 
     def create_thumbnail(self, image_path, dst_path):
     	'''Create a thumbnail for an image.
@@ -2064,7 +2064,7 @@ class MegaApiPython(MegaApi):
         :param dst_path Destination path for the thumbnail (including the file name).
         :Returns True if the thumbnail was successfully created, otherwise False.
         '''
-        return self.createThumbnail(image_path, dst_path)
+        return self.api.createThumbnail(image_path, dst_path)
 
     def create_preview(self, image_path, dst_path):
     	'''Create a preview for an image.
@@ -2072,7 +2072,7 @@ class MegaApiPython(MegaApi):
         :param dst_path Destination path for the preview (including the file name).
         :Returns True if the preview was successfully created, otherwise False.
         '''
-        return self.createPreview(image_path, dst_path)
+        return self.api.createPreview(image_path, dst_path)
 
     def base64_to_base32(self, base64):
         '''Convert a Base64 string to Base32.
@@ -2082,7 +2082,7 @@ class MegaApiPython(MegaApi):
         :param base64 null-terminated base64 character array.
         :Returns null-terminated base32 character array.
         '''
-        return self.base64ToBase32(base64)
+        return self.api.base64ToBase32(base64)
 
     def base32_to_base64(base32):
         '''Convert a Base32 string to Base64.
@@ -2092,20 +2092,20 @@ class MegaApiPython(MegaApi):
         :param base32 null-terminated base64 character array.
         :Returns null-terminated base64 character array.
         '''
-        return self.base32ToBase64(base32)
+        return self.api.base32ToBase64(base32)
 
     def remove_recursively(self, local_path):
         '''Recursively removes a file
         :param local_path path to file
         '''
-        self.removeRecursively(local_path)
+        self.api.removeRecursively(local_path)
 
     def get_contacts(self):
     	'''Get all contacts of this MEGA account.
         You take the ownership of the returned value
         :Returns List of MegaUser object with all contacts of this account
         '''
-        return self.user_list_to_array(self.getContacts())
+        return self.user_list_to_array(self.api.getContacts())
 
     def get_in_shares(self, user):
     	'''Get a list with all inbound sharings from one MegaUser.
@@ -2113,14 +2113,14 @@ class MegaApiPython(MegaApi):
         :param user - MegaUser sharing folders with this account
         :Returns List of MegaNode objects that this user is sharing with this account
         '''
-        return self.node_list_to_array(self.getInShares(user))
+        return self.node_list_to_array(self.api.getInShares(user))
 
     def get_all_in_shares(self):
     	'''Get a list with all inbound sharings.
         You take the ownership of the returned value
         :Returns List of MegaNode objects that this user is sharing with this account
         '''
-        return self.node_list_to_array(self.getInShares())
+        return self.node_list_to_array(self.api.getInShares())
 
     def get_children(self, parent, order):
     	'''Get all children of a MegaNode.
@@ -2141,7 +2141,7 @@ class MegaApiPython(MegaApi):
             MegaApi.ORDER_ALPHABETICAL_DESC = 10 Sort in alphabetical order, descending
         :Returns list of MegaNode object that are children of the given parent object
         '''
-        return self.node_list_to_array(self.getChildren(parent, order))
+        return self.node_list_to_array(self.api.getChildren(parent, order))
 
     def get_out_shares(self, node):
     	'''Get a list with the active outbound sharings for a MegaNode.
@@ -2150,7 +2150,7 @@ class MegaApiPython(MegaApi):
         :param node - MegaNode to check
         :Returns List of MegaShare objects
         '''
-        return self.share_list_to_array(self.getOutShares(node))
+        return self.share_list_to_array(self.api.getOutShares(node))
 
     def get_all_out_shares(self):
     	'''Get a list with the active outbound sharings for the current account.
@@ -2158,7 +2158,7 @@ class MegaApiPython(MegaApi):
         You take the ownership of the returned value
         :Returns List of MegaShare objects
         '''
-        return self.share_list_to_array(self.getOutShares())
+        return self.share_list_to_array(self.api.getOutShares())
 
     def get_pending_out_shares(self, node):
     	'''Get a list with the pending outbound sharings for a MegaNode.
@@ -2167,7 +2167,7 @@ class MegaApiPython(MegaApi):
         :param node - MegaNode to check
         :Returns List of MegaShare objects
         '''
-        return self.share_list_to_array(self.getPendingOutShares(node))
+        return self.share_list_to_array(self.api.getPendingOutShares(node))
 
     def get_all_pending_out_shares(self):
     	'''Get a list with the pending outbound sharings for the current account.
@@ -2175,19 +2175,19 @@ class MegaApiPython(MegaApi):
         You take the ownership of the returned value
         :Returns List of MegaShare objects
         '''
-        return self.share_list_to_array(self.getPendingOutShares())
+        return self.share_list_to_array(self.api.getPendingOutShares())
 
     def get_incoming_contact_requests(self):
         '''Get a list with all incoming contact requests
         :Returns list of MegaContactRequest objects
         '''
-        return self.contact_request_list_to_array(self.getIncomingContactRequests())
+        return self.contact_request_list_to_array(self.api.getIncomingContactRequests())
 
     def get_outgoing_contact_requests(self):
         '''Get a list with all outgoing contact requests
         :Returns list of MegaContactRequest objects
         '''
-        return self.contact_request_list_to_array(self.getOutgoingContactRequests())
+        return self.contact_request_list_to_array(self.api.getOutgoingContactRequests())
 
     def search_item(self, parent, search_string):
     	'''Search nodes containing a search string in their name.
@@ -2196,7 +2196,7 @@ class MegaApiPython(MegaApi):
     	:param searchString	Search string. The search is case-insensitive
 		:Returns list of nodes that contain the desired string in their name
     	'''
-        return self.node_list_to_array(self.search(parent, search_string))
+        return self.node_list_to_array(self.api.search(parent, search_string))
 
     def search_recursively(self, parent, search_string, recursive):
     	'''Search nodes containing a search string in their name.
@@ -2206,7 +2206,7 @@ class MegaApiPython(MegaApi):
     	:param recursive	True if you want to seach recursively in the node tree. False if you want to seach in the children of the node only
 		:Returns list of nodes that contain the desired string in their name
     	'''
-        return self.node_list_to_array(self.search(parent, search_string, recursive))
+        return self.node_list_to_array(self.api.search(parent, search_string, recursive))
 
     # PRIVATE METHODS
 
