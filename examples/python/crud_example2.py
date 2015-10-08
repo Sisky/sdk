@@ -84,7 +84,7 @@ class AppListener(MegaListener):
 
         request_type = request.getType()
         if request_type == MegaRequest.TYPE_LOGIN:
-            api.fetchNodes()
+                api.fetchNodes()
         elif request_type == MegaRequest.TYPE_FETCH_NODES:
             self.root_node = api.getRootNode()
         elif request_type == MegaRequest.TYPE_ACCOUNT_DETAILS:
@@ -233,6 +233,7 @@ def worker(api, listener, executor, credentials):
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
+    # Checking the various account parameters
     contacts = api.get_contacts()
     shares = api.get_in_shares(contacts[0])
     children = api.get_children(api.get_node_by_path_base_folder("sandbox", cwd), 1)
@@ -351,7 +352,6 @@ def main():
     api = MegaApiPython(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
     api.add_listener(listener)
-    #api.add_mega_listener(listener)
     # Run the operations.
     start_time = time.time()
     worker(api, listener, executor, credentials)

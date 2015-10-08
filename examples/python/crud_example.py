@@ -185,7 +185,7 @@ def worker(api, listener, credentials):
               str(credentials['password']))
     cwd = listener.root_node
     logging.info('*** done: login ***')
-    time.sleep(2)
+    time.sleep(3)
     # Who am I.
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
@@ -258,7 +258,7 @@ def worker(api, listener, credentials):
 
     # Logout.
     logging.info('*** start: logout ***')
-    api.logout()
+    api.logout_from_account()
     time.sleep(1)
     listener.root_node = None
     logging.info('*** done: logout ***')
@@ -282,7 +282,6 @@ def main():
     api = MegaApiPython(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener()
     api.add_listener(listener)
-    #api.add_mega_listener(listener)
     # Run the operations.
     start_time = time.time()
     worker(api, listener, credentials)

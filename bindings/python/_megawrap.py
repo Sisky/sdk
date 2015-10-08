@@ -25,6 +25,7 @@ class MegaApiPython(object):
 
     def __init__(self, app_key, processor, base_path, user_agent):
         self.api = MegaApi(app_key, processor, base_path, user_agent);
+        self.logger = None
         self.active_mega_listeners = []
         self.active_global_mega_listeners = []
         self.active_request_listeners = []
@@ -35,7 +36,7 @@ class MegaApiPython(object):
 
 
     def add_listener(self, listener):
-        '''Registes a listener.
+        '''Registers a listener.
         This function is here while the dedicated listener function is being
         tested.
         '''
@@ -526,7 +527,7 @@ class MegaApiPython(object):
         '''
         new_logger = DelegateMegaLoggerListener(mega_logger)
         self.api.setLoggerObject(new_logger)
-        logger = new_logger
+        self.logger = new_logger
 
     def set_log_level(self, log_level):
         '''Set the active log level.
@@ -543,14 +544,41 @@ class MegaApiPython(object):
         '''
         self.api.setLogLevel(log_level)
 
-    def log():
-        pass
+    def do_log(self, log_level, message, filename, line):
+        '''Send a log to the logging system.
+        This log will be received by the active logger object, the one in
+        MegaApi.set_logger_object() if the log is the same or lower than the
+        actual active log level in MegaApi.set_log_level().
+        :param log_level Log level for this message
+        :param message Message for the logging system
+        :param filename Origin of the log message
+        :param line Line of code where this message was generated
+        '''
+        self.api.log(log_level, message, filename, line)
 
-    def log():
-        pass
+    def do_log_no_line(self, log_level, message, filename):
+        '''Send a log to the logging system.
+        This log will be received by the active logger object, the one in
+        MegaApi.set_logger_object() if the log is the same or lower than the
+        actual active log level in MegaApi.set_log_level().
+        :param log_level Log level for this message
+        :param message Message for the logging system
+        :param filename Origin of the log message
+        :param line Line of code where this message was generated
+        '''
+        self.api.log(log_level, message, filename)
 
-    def log():
-        pass
+    def do_log_no_line_filename(self, log_level, message):
+        '''Send a log to the logging system.
+        This log will be received by the active logger object, the one in
+        MegaApi.set_logger_object() if the log is the same or lower than the
+        actual active log level in MegaApi.set_log_level().
+        :param log_level Log level for this message
+        :param message Message for the logging system
+        :param filename Origin of the log message
+        :param line Line of code where this message was generated
+        '''
+        self.api.log(log_level, message)
 
     def create_folder_listener(self, name, parent, listener):
     	'''Create a folder in the MEGA account.

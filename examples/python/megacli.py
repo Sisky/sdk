@@ -325,7 +325,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             return
 
         if dst_node != None:
-            self._api.moveNode(src_node, dst_node)
+            self._api.move_node(src_node, dst_node)
             return
 
         if '/' in name or '\\' in name:
