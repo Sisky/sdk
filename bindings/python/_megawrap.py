@@ -42,7 +42,7 @@ class MegaApiPython(object):
     def add_listener(self, listener):
         '''Registers a listener.
         This function is here while the dedicated listener function is being
-        tested.
+        implemented.
         '''
         self.api.addListener(listener)
 
@@ -1084,13 +1084,13 @@ class MegaApiPython(object):
         '''
         self.api.disableExport(node)
 
-    def fetch_nodes_with_listener(self, listener):
-    	'''Fetch the filesystem in MEGA.
-        The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
-        The associated request type with this request is MegaRequest.TYPE_FETCH_NODES
-        :param listener - MegaRequestListener to track this request
-        '''
-        self.api.fetchNodes(self.create_delegate_request_listener(listener, True))
+    #def fetch_nodes_with_listener(self, listener):
+	 #  '''Fetch the filesystem in MEGA.
+    #    The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
+    #    The associated request type with this request is MegaRequest.TYPE_FETCH_NODES
+    #    :param listener - MegaRequestListener to track this request
+    #    '''
+    #    self.api.fetchNodes(self.create_delegate_request_listener(listener, True))
 
     #def fetch_nodes(self):
     #	'''Fetch the filesystem in MEGA.

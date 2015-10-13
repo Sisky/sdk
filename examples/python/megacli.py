@@ -47,7 +47,7 @@ class AppListener(MegaListener):
 
         request_type = request.getType()
         if request_type == MegaRequest.TYPE_LOGIN:
-            api.fetchNodes()
+            api.fetch_nodes()
         elif request_type == MegaRequest.TYPE_EXPORT:
             logging.info('Exported link: {}'.format(request.getLink()))
         elif request_type == MegaRequest.TYPE_ACCOUNT_DETAILS:
@@ -95,7 +95,7 @@ class AppListener(MegaListener):
         if nodes != None:
             logging.info('Nodes updated ({})'.format(nodes.size()))
         else:
-            self._shell.cwd = api.getRootNode()
+            self._shell.cwd = api.get_root_node()
 
 
 class MegaShell(cmd.Cmd, MegaListener):
@@ -229,7 +229,7 @@ class MegaShell(cmd.Cmd, MegaListener):
             print('Node not found: {}'.format(args[0]))
             return
 
-        self._api.startDownload(node, './')
+        self._api.start_download(node, './')
 
 
     def do_put(self, arg):

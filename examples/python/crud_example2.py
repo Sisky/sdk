@@ -84,9 +84,9 @@ class AppListener(MegaListener):
 
         request_type = request.getType()
         if request_type == MegaRequest.TYPE_LOGIN:
-                api.fetchNodes()
+            api.fetch_nodes()
         elif request_type == MegaRequest.TYPE_FETCH_NODES:
-            self.root_node = api.getRootNode()
+            self.root_node = api.get_root_node()
         elif request_type == MegaRequest.TYPE_ACCOUNT_DETAILS:
             account_details = request.getMegaAccountDetails()
             logging.info('Account details received')
@@ -234,7 +234,6 @@ def worker(api, listener, executor, credentials):
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
     # Checking the various account parameters
-    contacts = api.get_contacts()
     shares = api.get_in_shares(contacts[0])
     children = api.get_children(api.get_node_by_path_base_folder("sandbox", cwd), 1)
     search_list = api.search_item(api.get_node_by_path_base_folder("Test", cwd), "AHCI")

@@ -74,7 +74,7 @@ class AppListener(MegaListener):
 
         request_type = request.getType()
         if request_type == MegaRequest.TYPE_LOGIN:
-            api.fetchNodes()
+            api.fetch_nodes()
         elif request_type == MegaRequest.TYPE_EXPORT:
             logging.info('Exported link: {}'.format(request.getLink()))
         elif request_type == MegaRequest.TYPE_ACCOUNT_DETAILS:
@@ -164,7 +164,7 @@ class AppListener(MegaListener):
         if nodes != None:
             logging.info('Nodes updated ({})'.format(nodes.size()))
         else:
-            self.root_node = api.getRootNode()
+            self.root_node = api.get_root_node()
 
 
 def worker(api, listener, credentials):
