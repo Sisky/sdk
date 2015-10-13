@@ -24,16 +24,20 @@ class MegaApiPython(object):
 
 
     def __init__(self, app_key, processor, base_path, user_agent):
-        self.api = MegaApi(app_key, processor, base_path, user_agent);
+        self.api = MegaApi(app_key, processor, base_path, user_agent)
         self.logger = None
         self.active_mega_listeners = []
         self.active_global_mega_listeners = []
         self.active_request_listeners = []
         self.active_transfer_listeners = []
         self.lock = threading.Lock()
+        MegaApi.fetch_nodes = MegaApi.fetchNodes
+        MegaApi.get_root_node = MegaApi.getRootNode
+        MegaApi.get_inbox_node = MegaApi.getInboxNode
+        MegaApi.get_rubbish_node = MegaApi.getRubbishNode
+        del MegaApi.fetchNodes, MegaApi.getRootNode, MegaApi.getInboxNode,MegaApi.getRubbishNode
 
     # API METHODS
-
 
     def add_listener(self, listener):
         '''Registers a listener.
@@ -41,7 +45,6 @@ class MegaApiPython(object):
         tested.
         '''
         self.api.addListener(listener)
-
 
     # Listener management
 
@@ -564,7 +567,6 @@ class MegaApiPython(object):
         :param log_level Log level for this message
         :param message Message for the logging system
         :param filename Origin of the log message
-        :param line Line of code where this message was generated
         '''
         self.api.log(log_level, message, filename)
 
@@ -575,8 +577,6 @@ class MegaApiPython(object):
         actual active log level in MegaApi.set_log_level().
         :param log_level Log level for this message
         :param message Message for the logging system
-        :param filename Origin of the log message
-        :param line Line of code where this message was generated
         '''
         self.api.log(log_level, message)
 
@@ -1092,11 +1092,11 @@ class MegaApiPython(object):
         '''
         self.api.fetchNodes(self.create_delegate_request_listener(listener, True))
 
-    def fetch_nodes(self):
-    	'''Fetch the filesystem in MEGA.
-        The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
-        '''
-        self.api.fetchNodes()
+    #def fetch_nodes(self):
+    #	'''Fetch the filesystem in MEGA.
+    #    The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
+    #    '''
+    #    self.api.fetchNodes()
 
     def get_account_details_with_listener(self, listener):
     	'''Get details about the MEGA account.
@@ -2017,29 +2017,29 @@ class MegaApiPython(object):
         '''
         return self.api.checkMove(node, target)
 
-    def get_root_node(self):
-    	'''Returns the root node of the account.
-        You take the ownership of the returned value
-        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
-        :Returns Root node of the account
-        '''
-        return self.api.getRootNode()
+    #def get_root_node(self):
+    #	'''Returns the root node of the account.
+    #    You take the ownership of the returned value
+    #    If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
+    #    :Returns Root node of the account
+    #    '''
+    #    return self.api.getRootNode()
 
-    def get_inbox_node(self):
-    	'''Returns the inbox node of the account.
-        You take the ownership of the returned value
-        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
-        :Returns Inbox node of the account
-        '''
-        return self.api.getInboxNode()
+    #def get_inbox_node(self):
+    #	'''Returns the inbox node of the account.
+    #    You take the ownership of the returned value
+    #    If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
+    #    :Returns Inbox node of the account
+    #    '''
+    #    return self.api.getInboxNode()
 
-    def get_rubbish_node(self):
-    	'''Returns the rubbish node of the account.
-        You take the ownership of the returned value
-        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
-        :Returns Rubbish node of the account
-        '''
-        return self.api.getRubbishNode()
+    #def get_rubbish_node(self):
+    #	'''Returns the rubbish node of the account.
+    #    You take the ownership of the returned value
+    #    If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
+    #    :Returns Rubbish node of the account
+    #    '''
+    #    return self.api.getRubbishNode()
 
     def get_version(self):
     	'''Get the SDK version.
