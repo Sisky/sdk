@@ -1414,7 +1414,7 @@ class MegaApiPython(object):
         '''
         self.api.replyContactRequest(request, action, self.create_delegate_request_listener(listener, True))
 
-    def reply_contact_request_(self, request, action):
+    def reply_contact_request(self, request, action):
         '''Reply to a contact request
         :param request Contact request. You can get your pending contact requests using
         MegaApi.get_incoming_contact_requests()
@@ -1795,7 +1795,7 @@ class MegaApiPython(object):
 
     # FILESYSTEM METHODS
 
-    def get_num_children(parent):
+    def get_num_children(self, parent):
     	'''Get the number of child nodes.
         If the node doesn't exist in MEGA or isn't a folder, this function returns 0
         This function doesn't search recursively, only returns the direct child nodes.
@@ -1804,14 +1804,14 @@ class MegaApiPython(object):
         '''
         return self.api.getNumChildren(parent)
 
-    def get_num_child_files(self, args):
+    def get_num_child_files(self, parent):
     	'''Get the number of child files of a node.
         If the node doesn't exist in MEGA or isn't a folder, this function returns 0
         This function doesn't search recursively, only returns the direct child files.
         :parent parent - Parent node
         :Returns Number of child files
         '''
-        return self.api.getNumChildFiles(self.api, args)
+        return self.api.getNumChildFiles(parent)
 
     def get_num_child_folders(self, parent):
     	'''Get the number of child folders of a node.
@@ -1946,7 +1946,7 @@ class MegaApiPython(object):
         '''
         return self.api.getSize(node)
 
-    def get_fingerprint(self, node):
+    def get_fingerprint_node(self, node):
     	'''Get a Base64-encoded fingerprint for a node.
         If the node doesn't exist or doesn't have a fingerprint, this function returns None.
         You take the ownership of the returned value
@@ -1955,7 +1955,7 @@ class MegaApiPython(object):
         '''
         return self.api.getFingerprint(node)
 
-    def get_fingerprint(self, file_path):
+    def get_fingerprint_filepath(self, file_path):
     	'''Get a Base64-encoded fingerprint for a local file.
         The fingerprint is created taking into account the modification time of
         the file and file contents. This fingerprint can be used to get a
@@ -1965,7 +1965,7 @@ class MegaApiPython(object):
         :param file_path - Local file path
         :Returns Base64-encoded fingerprint for the file
         '''
-        return self.api.getFingerprint(node)
+        return self.api.getFingerprint(file_path)
 
     def get_node_by_fingerprint(self, fingerprint):
     	'''Returns a node with the provided fingerprint.
