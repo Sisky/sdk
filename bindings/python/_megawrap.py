@@ -2633,10 +2633,10 @@ class DelegateMegaListener(MegaListener):
         :param request Information about the request.
         '''
         if self.listener is not None:
-            print "Starting request onRequestStart"
+            print 'onRequestStart started'
             mega_request = request.copy()
-            print "requiest copied!" + str(mega_request)
             self.listener.onRequestStart(self.mega_api, mega_request)
+            print 'onRequest started done'
 
     def onRequestFinish(self, api, request, error):
         '''This function is called when a request has finished.
@@ -2649,12 +2649,11 @@ class DelegateMegaListener(MegaListener):
         :param error Information about error.
         '''
         if self.listener is not None:
-            print "Starting request onRequestFinish"
+            print 'onRequestFinish started'
             mega_request = request.copy()
             mega_error = error.copy()
-            print "requiest copied!" + str(mega_request)
-            print "error is: " + str(mega_error)
             self.listener.onRequestFinish(self.mega_api, mega_request, mega_error)
+            print 'onRequestFinish done'
 
     def onRequestTemporaryError(self, api, request, error):
         '''This function is called when there is a temporary error processing a request.

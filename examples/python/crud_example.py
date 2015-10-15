@@ -281,7 +281,8 @@ def main():
     # Create the required Mega API objects.
     api = MegaApiPython(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener()
-    api.add_listener(listener)
+    #api.add_listener(listener)
+    api.add_mega_listener(listener)
     # Run the operations.
     start_time = time.time()
     worker(api, listener, credentials)

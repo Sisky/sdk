@@ -233,7 +233,8 @@ def worker(api, listener, executor, credentials):
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
-    # Checking the various account parameters
+    # Thesting the various account parameters and functions
+    contacts = api.get_contacts()
     shares = api.get_in_shares(contacts[0])
     children = api.get_children(api.get_node_by_path_base_folder("sandbox", cwd), 1)
     search_list = api.search_item(api.get_node_by_path_base_folder("Test", cwd), "AHCI")
@@ -350,7 +351,10 @@ def main():
     executor = AsyncExecutor()
     api = MegaApiPython(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
-    api.add_listener(listener)
+    api.add_mega_listener(listener) # usage of listener this way breaks the delegate, it also doesnt work if
+    # I try to use a function with a listener ie login_email_with_listener(user, password, listener)
+
+    #api.add_listener(listener) # Original addition of listener, please uncomment for a functional version
     # Run the operations.
     start_time = time.time()
     worker(api, listener, executor, credentials)
