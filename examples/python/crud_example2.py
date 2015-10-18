@@ -114,6 +114,9 @@ class AppListener(MegaListener):
         logging.info('Request temporary error ({}); Error: {}'
                      .format(request, error))
 
+    def onTransferStart(self, api, transfer):
+        logging.info('Transfer start')
+
 
     def onTransferFinish(self, api, transfer, error):
         """
@@ -166,7 +169,7 @@ class AppListener(MegaListener):
         :param api: Reference to the API object.
         :param users: List that contains the new or updated contacts.
         """
-        logging.info('Users updated ({})'.format(users.size()))
+        logging.info('Users updated ({})'.format(len(users)))
 
 
     def onNodesUpdate(self, api, nodes):
@@ -177,7 +180,7 @@ class AppListener(MegaListener):
         :param nodes: List that contains the new or updated nodes.
         """
         if nodes != None:
-            logging.info('Nodes updated ({})'.format(nodes.size()))
+            logging.info('Nodes updated ({})'.format(len(nodes)))
         self.continue_event.set()
 
 

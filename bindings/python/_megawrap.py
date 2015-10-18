@@ -31,11 +31,6 @@ class MegaApiPython(object):
         self.active_request_listeners = []
         self.active_transfer_listeners = []
         self.lock = threading.Lock()
-        MegaApi.fetch_nodes = MegaApi.fetchNodes
-        MegaApi.get_root_node = MegaApi.getRootNode
-        MegaApi.get_inbox_node = MegaApi.getInboxNode
-        MegaApi.get_rubbish_node = MegaApi.getRubbishNode
-        del MegaApi.fetchNodes, MegaApi.getRootNode, MegaApi.getInboxNode,MegaApi.getRubbishNode
 
     # API METHODS
 
@@ -1084,19 +1079,19 @@ class MegaApiPython(object):
         '''
         self.api.disableExport(node)
 
-    #def fetch_nodes_with_listener(self, listener):
-	 #  '''Fetch the filesystem in MEGA.
-    #    The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
-    #    The associated request type with this request is MegaRequest.TYPE_FETCH_NODES
-    #    :param listener - MegaRequestListener to track this request
-    #    '''
-    #    self.api.fetchNodes(self.create_delegate_request_listener(listener, True))
+    def fetch_nodes_with_listener(self, listener):
+        '''Fetch the filesystem in MEGA.
+        The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
+        The associated request type with this request is MegaRequest.TYPE_FETCH_NODES
+        :param listener - MegaRequestListener to track this request
+        '''
+        self.api.fetchNodes(self.create_delegate_request_listener(listener, True))
 
-    #def fetch_nodes(self):
-    #	'''Fetch the filesystem in MEGA.
-    #    The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
-    #    '''
-    #    self.api.fetchNodes()
+    def fetch_nodes(self):
+    	'''Fetch the filesystem in MEGA.
+        The MegaApi object must be logged in in an account or a public folder to successfully complete this request.
+        '''
+        self.api.fetchNodes()
 
     def get_account_details_with_listener(self, listener):
     	'''Get details about the MEGA account.
@@ -2017,29 +2012,29 @@ class MegaApiPython(object):
         '''
         return self.api.checkMove(node, target)
 
-    #def get_root_node(self):
-    #	'''Returns the root node of the account.
-    #    You take the ownership of the returned value
-    #    If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
-    #    :Returns Root node of the account
-    #    '''
-    #    return self.api.getRootNode()
+    def get_root_node(self):
+    	'''Returns the root node of the account.
+        You take the ownership of the returned value
+        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
+        :Returns Root node of the account
+        '''
+        return self.api.getRootNode()
 
-    #def get_inbox_node(self):
-    #	'''Returns the inbox node of the account.
-    #    You take the ownership of the returned value
-    #    If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
-    #    :Returns Inbox node of the account
-    #    '''
-    #    return self.api.getInboxNode()
+    def get_inbox_node(self):
+    	'''Returns the inbox node of the account.
+        You take the ownership of the returned value
+        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
+        :Returns Inbox node of the account
+        '''
+        return self.api.getInboxNode()
 
-    #def get_rubbish_node(self):
-    #	'''Returns the rubbish node of the account.
-    #    You take the ownership of the returned value
-    #    If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
-    #    :Returns Rubbish node of the account
-    #    '''
-    #    return self.api.getRubbishNode()
+    def get_rubbish_node(self):
+    	'''Returns the rubbish node of the account.
+        You take the ownership of the returned value
+        If you haven't successfully called MegaApi.fetch_nodes before, this function returns None
+        :Returns Rubbish node of the account
+        '''
+        return self.api.getRubbishNode()
 
     def get_version(self):
     	'''Get the SDK version.
@@ -2633,10 +2628,8 @@ class DelegateMegaListener(MegaListener):
         :param request Information about the request.
         '''
         if self.listener is not None:
-            print 'onRequestStart started'
             mega_request = request.copy()
             self.listener.onRequestStart(self.mega_api, mega_request)
-            print 'onRequest started done'
 
     def onRequestFinish(self, api, request, error):
         '''This function is called when a request has finished.
@@ -2649,11 +2642,9 @@ class DelegateMegaListener(MegaListener):
         :param error Information about error.
         '''
         if self.listener is not None:
-            print 'onRequestFinish started'
             mega_request = request.copy()
             mega_error = error.copy()
             self.listener.onRequestFinish(self.mega_api, mega_request, mega_error)
-            print 'onRequestFinish done'
 
     def onRequestTemporaryError(self, api, request, error):
         '''This function is called when there is a temporary error processing a request.
@@ -2741,7 +2732,7 @@ class DelegateMegaListener(MegaListener):
         :param user_list List that contains the new or updated contacts.
         '''
         if self.listener is not None:
-            updated_user_list =  api.user_list_to_array(user_list)
+            updated_user_list =  self.mega_api.user_list_to_array(user_list)
             self.listener.onUsersUpdate(self.mega_api, updated_user_list)
 
 
@@ -2758,7 +2749,7 @@ class DelegateMegaListener(MegaListener):
         :param node_list List that contains the new or updated nodes.
         '''
         if self.listener is not None:
-            updated_node_list = api.node_list_to_array(node_list)
+            updated_node_list = self.mega_api.node_list_to_array(node_list)
             self.listener.onNodesUpdate(self.mega_api, updated_node_list)
 
 
@@ -2787,7 +2778,7 @@ class DelegateMegaListener(MegaListener):
         :param contact_request_list List that contains new contact requests
         '''
         if self.listener is not None:
-            contact_list = api.contact_request_list_to_array(contact_list)
+            contact_list = self.mega_api.contact_request_list_to_array(contact_list)
             self.listener.onContactRequestsUpdate(self.mega_api, contact_list)
 
 
@@ -2818,7 +2809,7 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         :param user_list List that contains the new or updated contacts.
         '''
         if self.listener is not None:
-            updated_user_list =  api.user_list_to_array(user_list)
+            updated_user_list =  self.mega_api.user_list_to_array(user_list)
             self.listener.onUsersUpdate(self.mega_api, updated_user_list)
 
 
@@ -2835,7 +2826,7 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         :param node_list List that contains the new or updated nodes.
         '''
         if self.listener is not None:
-            updated_node_list = api.node_list_to_array(node_list)
+            updated_node_list = self.mega_api.node_list_to_array(node_list)
             self.listener.onNodesUpdate(self.mega_api, updated_node_list)
 
 
@@ -2861,5 +2852,5 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         :param contact_request_list List that contains new contact requests
         '''
         if self.listener is not None:
-            contact_list = api.contact_request_list_to_array(contact_list)
+            contact_list = self.mega_api.contact_request_list_to_array(contact_list)
             self.listener.onContactRequestsUpdate(self.mega_api, contact_list)
