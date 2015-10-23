@@ -185,17 +185,15 @@ def worker(api, listener, credentials):
               str(credentials['password']))
     cwd = listener.root_node
     logging.info('*** done: login ***')
-    time.sleep(3)
     # Who am I.
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     api.get_account_details()
-    time.sleep(2)
+    time.sleep(1)
     logging.info('*** done: whoami ***')
     # Make a directory.
     logging.info('*** start: mkdir ***')
     check = api.get_node_by_path_base_folder('sandbox', cwd)
-    time.sleep(2)
     if check == None:
         api.create_folder('sandbox', cwd)
         time.sleep(1)
@@ -281,7 +279,6 @@ def main():
     # Create the required Mega API objects.
     api = MegaApiPython(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener()
-    #api.add_listener(listener)
     api.add_mega_listener(listener)
     # Run the operations.
     start_time = time.time()

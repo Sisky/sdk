@@ -17,7 +17,7 @@ class MegaApiPython(object):
     of the MegaApiPython.login() options used to log into a MEGA account or a public folder. If the login request succeeds,
     call MegaApiPython.fetch_nodes() to get the account's file system from MEGA. Once the file system is retrieved, all other requests
     including file management and transfers can be used.
-    After using MegaApiPython.logout() you can reuse the same MegaApi object to log in to another MEGA
+    After using MegaApiPython.logout_from_account() you can reuse the same MegaApi object to log in to another MEGA
     account or a public folder.
     '''
 
@@ -32,14 +32,7 @@ class MegaApiPython(object):
         self.active_transfer_listeners = []
         self.lock = threading.Lock()
 
-    # API METHODS
-
-    def add_listener(self, listener):
-        '''Registers a listener.
-        This function is here while the dedicated listener function is being
-        implemented.
-        '''
-        self.api.addListener(listener)
+    ### API METHODS ###
 
     # Listener management
 
@@ -1355,6 +1348,7 @@ class MegaApiPython(object):
         :deprecated
         '''
         self.api.addContact(email, self.create_delegate_request_listener(listener, True))
+
     def add_contact(self, email):
     	'''Add a new contact to the MEGA account.
         :param email - Email of the new contact
@@ -2231,7 +2225,7 @@ class MegaApiPython(object):
     	'''
         return self.node_list_to_array(self.api.search(parent, search_string, recursive))
 
-    # PRIVATE METHODS
+    ### PRIVATE METHODS ###
 
     # Listener creation
 
@@ -2662,8 +2656,6 @@ class DelegateMegaListener(MegaListener):
             mega_error = error.copy()
             self.listener.onRequestTemporaryError(self.mega_api, mega_request, mega_error)
 
-
-
     def onTransferStart(self, api, transfer):
         '''This function is called when a transfer is about to start being processed.
         The SDK retains the ownership of the transfer parameter. Do not it use after this function returns.
@@ -2674,8 +2666,6 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             mega_transfer = transfer.copy()
             self.listener.onTransferStart(self.mega_api, mega_transfer)
-
-
 
     def onTransferFinish(self, api, transfer, error):
         '''This function is called when a transfer has finished.
@@ -2692,7 +2682,6 @@ class DelegateMegaListener(MegaListener):
             mega_error = error.copy()
             self.listener.onTransferFinish(self.mega_api, mega_transfer, mega_error)
 
-
     def onTransferUpdate(self, api, transfer):
         '''This function is called to get details about the progress of a transfer.
         The SDK retains the ownership of the transfer parameter. Do not use it after this function returns.
@@ -2703,7 +2692,6 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             mega_transfer = transfer.copy()
             self.listener.onTransferUpdate(self.mega_api, mega_transfer)
-
 
     def onTransferTemporaryError(self, api, transfer, error):
         '''This function is called when there is a temporary error processing a transfer.
@@ -2720,8 +2708,6 @@ class DelegateMegaListener(MegaListener):
             mega_error = error.copy()
             self.listener.onTransferTemporaryError(self.mega_api, mega_transfer, mega_error)
 
-
-
     def onUsersUpdate(self, api, user_list):
         '''This function is called when there are new or updated contacts in the account.
         The SDK retains the ownership of the user_list in the second parameter.
@@ -2734,8 +2720,6 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             updated_user_list =  self.mega_api.user_list_to_array(user_list)
             self.listener.onUsersUpdate(self.mega_api, updated_user_list)
-
-
 
     def onNodesUpdate(self, api, node_list):
         '''This function is called when there are new or updated nodes in the account.
@@ -2752,8 +2736,6 @@ class DelegateMegaListener(MegaListener):
             updated_node_list = self.mega_api.node_list_to_array(node_list)
             self.listener.onNodesUpdate(self.mega_api, updated_node_list)
 
-
-
     def onReloadNeeded(self, api):
         '''This function is called when an inconsistency is detected in the local cache.
         You should call MegaApiPython.fetch_nodes() when this callback is received.
@@ -2762,13 +2744,9 @@ class DelegateMegaListener(MegaListener):
         if self.listener is not None:
             self.listener.onReloadNeeded(self.mega_api)
 
-
-
     def onAccountUpdate(self, api):
         if self.listener is not None:
             self.listener.onAccountUpdate(self.mega_api)
-
-
 
     def onContactRequestsUpdate(self, api, contact_request_list):
         '''This function is called when there are new contact requests in the account.
@@ -2781,8 +2759,6 @@ class DelegateMegaListener(MegaListener):
             contact_list = self.mega_api.contact_request_list_to_array(contact_list)
             self.listener.onContactRequestsUpdate(self.mega_api, contact_list)
 
-
-
 class DelegateMegaGlobalListener(MegaGlobalListener):
     '''Listener to receive and send global events to the app.
     '''
@@ -2791,13 +2767,11 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         self.listener = listener
         super(DelegateMegaGlobalListener, self).__init__()
 
-
     def get_user_listener(self):
         '''Get the listener
         :Returns the listener object associated with the delegate
         '''
         return self.listener
-
 
     def onUsersUpdate(self, api, user_list):
         '''This function is called when there are new or updated contacts in the account.
@@ -2811,8 +2785,6 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         if self.listener is not None:
             updated_user_list =  self.mega_api.user_list_to_array(user_list)
             self.listener.onUsersUpdate(self.mega_api, updated_user_list)
-
-
 
     def onNodesUpdate(self, api, node_list):
         '''This function is called when there are new or updated nodes in the account.
@@ -2829,7 +2801,6 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
             updated_node_list = self.mega_api.node_list_to_array(node_list)
             self.listener.onNodesUpdate(self.mega_api, updated_node_list)
 
-
     def onReloadNeeded(self, api):
         '''This function is called when an inconsistency is detected in the local cache.
         You should call MegaApiPython.fetch_nodes() when this callback is received.
@@ -2838,11 +2809,9 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         if self.listener is not None:
             self.istener.onReloadNeeded(self.mega_api)
 
-
     def onAccountUpdate(self, api):
         if self.listener is not None:
             self.listener.onAccountUpdate(self.mega_api)
-
 
     def onContactRequestsUpdate(self, api, contact_request_list):
         '''This function is called when there are new contact requests in the account.

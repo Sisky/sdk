@@ -238,38 +238,9 @@ def worker(api, listener, executor, credentials):
     executor.do(api.get_account_details, ())
     # Thesting the various account parameters and functions
     contacts = api.get_contacts()
-    shares = api.get_in_shares(contacts[0])
-    children = api.get_children(api.get_node_by_path_base_folder("sandbox", cwd), 1)
-    search_list = api.search_item(api.get_node_by_path_base_folder("Test", cwd), "AHCI")
-    recursive_search_list = api.search_recursively(api.get_node_by_path("Test, cwd"),"AHCI", True)
-    incoming_contacts = api.get_incoming_contact_requests()
-    outgoing_contacts = api.get_outgoing_contact_requests()
-    out_share_list = api.get_all_out_shares()
     print 'The version of sdk is:' + str(api.get_version())
-    for item in out_share_list:
-        print "The outgoing share is: " + str(item)
-    for item in incoming_contacts:
-        print "The incoming contact is: " + str(item)
-    for item in outgoing_contacts:
-        print "The outgoing contact is: " + str(item)
-    for search_item in search_list:
-        print "The found item is: " + str(search_item.getType())
-    for item in recursive_search_list:
-        print "The recursively found item is: " + str(item.getType())
-    for child in children:
-        print "The child node type is: " + str(child.getType())
-    if len(shares) > 0:
-        for share in shares:
-            print "The share object's and its address is: " + str(share)
-            print "The type of the object is: " + str(share.getType())
-    else:
-        print 'There are no shares'
-    if len(contacts) > 0:
-        for contact in contacts:
-            print "The user object and its address is: " + str(contact)
+    for contact in contacts:
             print "The contact's email is: " + str(contact.getEmail())
-            print "The contact's timestamp is " + str(contact.getTimestamp())
-            print "The contact's visibility code is: " + str(contact.getVisibility())
     logging.info('*** done: whoami ***')
     # Make a directory.
     logging.info('*** start: mkdir ***')
@@ -354,10 +325,7 @@ def main():
     executor = AsyncExecutor()
     api = MegaApiPython(APP_KEY, None, None, 'Python CRUD example')
     listener = AppListener(executor.continue_event)
-    api.add_mega_listener(listener) # usage of listener this way breaks the delegate, it also doesnt work if
-    # I try to use a function with a listener ie login_email_with_listener(user, password, listener)
-
-    #api.add_listener(listener) # Original addition of listener, please uncomment for a functional version
+    api.add_mega_listener(listener)
     # Run the operations.
     start_time = time.time()
     worker(api, listener, executor, credentials)
