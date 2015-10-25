@@ -82,7 +82,7 @@ An appKey must be specified to start a session and use the MEGA SDK in your own 
 API object
 ^^^^^^^^
 
-To login and access MEGA services it is necessary to instantatiate an MegaApiPython object first. After the proper API object is created, it can then be used to login and access other MEGA services. In order to create MegaApiPython object it is necessary to specify an APP_KEY, processor, base and user_agent parameters.  
+To login and access MEGA services it is necessary to instantatiate a MegaApiPython object first. After the proper API object is created, it can then be used to login into user account and access other MEGA services. In order to create MegaApiPython object it is necessary to specify an APP_KEY, processor, base and user_agent parameters.  
 
 .. code:: python
  
@@ -110,6 +110,7 @@ Listener
 ^^^^^^^^^
 
 You can implement your own listener class ``AppListener``(Example name). Here you are able to implement the actual functionality and operations that will be performed when certain requests are sent to the MEGA server from your application. It is important to note that user created listener class has to extend the actual Listener class depending on the needs of application. Available Mega Listeners are:
+
  * MegaListener (This particular type can be used for all operations)
  * MegaRequestListener
  * MegaTransferListener
@@ -134,7 +135,7 @@ The listener should then be added to the MegaApiPython object.
     # or
     api.add_transfer_listener(listener) # For MegaTransferListener type
     # or
-    api.add_global_listener(listener) # For MegaGlobalListenerType
+    api.add_global_listener(listener) # For MegaGlobalListener type
     
 In this way you can, for example, check that a request was carried out successfully:
 
@@ -287,7 +288,7 @@ Call ``logout_from_account()`` to close the MEGA session.
     
     api.logout_from_account()
 
-Ensure the ``logout_from_account()`` request has completed to guarantee that the session has been invalidated. This can be confirmed by waiting for a ``MegaRequest.TYPE_LOGOUT`` to trigger the ``onRequestFinish()`` listener method as demonstrated in Listener_.
+Ensure the ``logout_from_account()`` request has completed to guarantee that the session has been invalidated. This can be confirmed by waiting for a ``MegaRequest.TYPE_LOGOUT`` to trigger the ``onRequestFinish()`` listener method.
 
 After using ``api.logout_from_account()`` you can reuse the same ``MegaApiPython`` object to log in to another MEGA account.
 
