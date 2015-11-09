@@ -100,6 +100,8 @@ class AppListener(MegaListener):
         logging.info('Request temporary error ({}); Error: {}'
                      .format(request, error))
 
+    def onTransferStart(self, api, transfer):
+        logging.info('Transfer start')
 
     def onTransferFinish(self, api, transfer, error):
         """
@@ -151,8 +153,12 @@ class AppListener(MegaListener):
         :param api: Reference to the API object.
         :param users: List that contains the new or updated contacts.
         """
-        logging.info('Users updated ({})'.format(users.size()))
+        if users != None:
+            logging.info('Users updated ({})'.format(len(users)))
 
+    def onContactRequestsUpdate(self, api, contacts):
+        if contacts != None:
+            logging.info('Contacts updated ({})'.format(len(contacts)))
 
     def onNodesUpdate(self, api, nodes):
         """
@@ -162,7 +168,7 @@ class AppListener(MegaListener):
         :param nodes: List that contains the new or updated nodes.
         """
         if nodes != None:
-            logging.info('Nodes updated ({})'.format(nodes.size()))
+            logging.info('Nodes updated ({})'.format(len(nodes)))
         else:
             self.root_node = api.get_root_node()
 
@@ -170,7 +176,8 @@ class AppListener(MegaListener):
 def worker(api, listener, credentials):
     """
     Sequential collection of (CRUD) operations on the Mega API.
-
+    NOTE:This is not robust due to time.sleep() being used instead of
+    proper waiting operations
     :param api: Reference to the Mega API object.
     :param listener: Listener to receie callbacks and results from the
         Mega API.
@@ -183,6 +190,7 @@ def worker(api, listener, credentials):
     logging.info('*** start: login ***')
     api.login_email(str(credentials['user']),
               str(credentials['password']))
+    time.sleep(3) # Application of different time here will have a different chance of success of login
     cwd = listener.root_node
     logging.info('*** done: login ***')
     # Who am I.

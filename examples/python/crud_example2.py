@@ -169,8 +169,12 @@ class AppListener(MegaListener):
         :param api: Reference to the API object.
         :param users: List that contains the new or updated contacts.
         """
-        logging.info('Users updated ({})'.format(len(users)))
+        if users != None:
+            logging.info('Users updated ({})'.format(len(users)))
 
+    def onContactRequestsUpdate(self, api, contacts):
+        if contacts != None:
+            logging.info('Contacts updated ({})'.format(len(contacts)))
 
     def onNodesUpdate(self, api, nodes):
         """
@@ -236,11 +240,6 @@ def worker(api, listener, executor, credentials):
     logging.info('*** start: whoami ***')
     logging.info('My email: {}'.format(api.get_my_email()))
     executor.do(api.get_account_details, ())
-    # Thesting the various account parameters and functions
-    contacts = api.get_contacts()
-    print 'The version of sdk is:' + str(api.get_version())
-    for contact in contacts:
-            print "The contact's email is: " + str(contact.getEmail())
     logging.info('*** done: whoami ***')
     # Make a directory.
     logging.info('*** start: mkdir ***')

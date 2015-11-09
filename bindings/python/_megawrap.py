@@ -2756,7 +2756,7 @@ class DelegateMegaListener(MegaListener):
         :param contact_request_list List that contains new contact requests
         '''
         if self.listener is not None:
-            contact_list = self.mega_api.contact_request_list_to_array(contact_list)
+            contact_list = self.mega_api.contact_request_list_to_array(contact_request_list)
             self.listener.onContactRequestsUpdate(self.mega_api, contact_list)
 
 class DelegateMegaGlobalListener(MegaGlobalListener):
@@ -2821,5 +2821,5 @@ class DelegateMegaGlobalListener(MegaGlobalListener):
         :param contact_request_list List that contains new contact requests
         '''
         if self.listener is not None:
-            contact_list = self.mega_api.contact_request_list_to_array(contact_list)
+            contact_list = self.mega_api.contact_request_list_to_array(contact_request_list)
             self.listener.onContactRequestsUpdate(self.mega_api, contact_list)

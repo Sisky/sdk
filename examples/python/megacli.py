@@ -66,6 +66,8 @@ class AppListener(MegaListener):
         logging.info('Request temporary error ({}); Error: {}'
                 .format(request, error))
 
+    def onTransferStart(self, api, transfer):
+        logging.info('Transfer start')
 
     def onTransferFinish(self, api, transfer, error):
         logging.info('Transfer finished ({}); Result: {}'
@@ -88,12 +90,17 @@ class AppListener(MegaListener):
 
 
     def onUsersUpdate(self, api, users):
-        logging.info('Users updated ({})'.format(users.size()))
+        if users != None:
+            logging.info('Users updated ({})'.format(len(users)))
+
+    def onContactRequestsUpdate(self, api, contacts):
+        if contacts != None:
+            logging.info('Contacts updated ({})'.format(len(contacts)))
 
 
     def onNodesUpdate(self, api, nodes):
         if nodes != None:
-            logging.info('Nodes updated ({})'.format(nodes.size()))
+            logging.info('Nodes updated ({})'.format(len(nodes)))
         else:
             self._shell.cwd = api.get_root_node()
 
@@ -452,6 +459,6 @@ if __name__ == '__main__':
     api = MegaApiPython('ox8xnQZL', None, None, 'Python megacli')
     shell = MegaShell(api)
     listener = AppListener(shell)
-    api.add_listener(listener)
+    api.add_mega_listener(listener)
     api = None
     shell.cmdloop()
